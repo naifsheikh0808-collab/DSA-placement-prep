@@ -189,13 +189,13 @@ export default function QuestionsPage() {
       {/* ── Header ─────────────────────────────────────────────── */}
       <div>
         <div className="flex items-center gap-2 text-violet-400 text-xs font-bold uppercase tracking-wider mb-1">
-          <Code2 className="w-4 h-4" /> Question Bank · Recency Engine
+          <Code2 className="w-4 h-4" /> LeetPrime Question Bank · Recency Engine
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           Question Explorer
         </h1>
         <p className="text-slate-400 text-xs sm:text-sm mt-1">
-          Filter by{" "}
+          The complete LeetCode Pro library filtered by{" "}
           <span className="text-violet-300 font-semibold">interview recency</span>,
           difficulty, and pattern — all in one place.
         </p>

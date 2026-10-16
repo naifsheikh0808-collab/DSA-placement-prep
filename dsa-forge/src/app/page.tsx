@@ -20,28 +20,51 @@ export default function HomePage() {
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-3xl space-y-4">
+        <div className="relative z-10 max-w-3xl space-y-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-violet-400" /> Dynamic Interview Recency Engine
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>LeetPrime · Beyond LeetCode Pro</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            Crack Technical Interviews by <span className="gradient-accent-text">Pattern + Recency</span>
+            All LeetCode Pro Problems.{" "}
+            <span className="gradient-accent-text block mt-1">Company-Wise & Supercharged.</span>
           </h1>
 
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-normal">
-            Stop solving thousands of random questions. Follow pattern-based problem clusters, company recency weights, and tailored study timelines.
+            <strong>LeetPrime</strong> brings together all LeetCode Pro DSA problems mapped company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Packed with extra intelligence you won't find on LeetCode Pro—including real-time 30-day interview recency filters, 15 pattern-first mastery roadmaps, and priority scoring.
           </p>
 
+          {/* Value comparison pills */}
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-300">
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
+              <span className="text-emerald-400 font-bold">✓</span> 100% LeetCode Pro Bank
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
+              <span className="text-emerald-400 font-bold">✓</span> 30-Day Interview Recency
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
+              <span className="text-emerald-400 font-bold">✓</span> Tier 1, 2 & 3 Company Tiers
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
+              <span className="text-emerald-400 font-bold">✓</span> 15 Pattern Frameworks
+            </span>
+          </div>
+
           <div className="pt-2 flex flex-wrap items-center gap-3">
-            <Link href="/dsa/patterns">
+            <Link href="/dsa/companies">
               <Button size="lg" className="shadow-violet-600/30">
-                Explore 15 DSA Patterns <ArrowRight className="w-4 h-4 ml-1" />
+                <Dumbbell className="w-4 h-4 mr-1 text-white" /> Explore Company Wise DSA
               </Button>
             </Link>
-            <Link href="/dsa/companies">
+            <Link href="/dsa/questions">
               <Button variant="glass" size="lg">
-                <Dumbbell className="w-4 h-4 text-violet-400" /> Company Wise DSA
+                <Sparkles className="w-4 h-4 text-violet-400 mr-1" /> Question Bank + Recency
+              </Button>
+            </Link>
+            <Link href="/dsa/patterns">
+              <Button variant="ghost" size="lg" className="text-slate-300 hover:text-white">
+                15 DSA Patterns <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>

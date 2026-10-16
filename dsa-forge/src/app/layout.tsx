@@ -5,15 +5,15 @@ import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: {
-    default: "DSAForge — Crack DSA Interviews by Pattern + Company",
-    template: "%s | DSAForge",
+    default: "LeetPrime — Beyond LeetCode Pro | Company-Wise DSA & Recency Engine",
+    template: "%s | LeetPrime",
   },
   description:
-    "Stop solving random questions. Follow a roadmap based on your time, target companies, and the DSA patterns that repeatedly appear in interviews. 659 companies · 3,399 problems.",
-  keywords: ["DSA", "interview prep", "LeetCode", "placement preparation", "coding interview", "data structures", "algorithms"],
+    "LeetPrime includes the complete collection of LeetCode Pro DSA problems organized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Supercharged with extra features that go beyond LeetCode Pro: real-time interview recency (30d/3m/6m), 15 pattern-first mastery roadmaps, and priority scoring.",
+  keywords: ["LeetPrime", "LeetCode Pro", "DSA", "interview prep", "LeetCode", "company wise dsa", "placement preparation", "coding interview", "data structures", "algorithms"],
   openGraph: {
-    title: "DSAForge — Crack DSA Interviews by Pattern + Company",
-    description: "Pattern-first DSA preparation with company-specific roadmaps.",
+    title: "LeetPrime — Beyond LeetCode Pro | Company-Wise DSA & Recency Engine",
+    description: "All LeetCode Pro company DSA questions supercharged with real-time recency, patterns & company tiers.",
     type: "website",
   },
 };

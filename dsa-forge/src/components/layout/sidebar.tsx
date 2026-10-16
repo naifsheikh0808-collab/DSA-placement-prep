@@ -32,7 +32,9 @@ export function Sidebar() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg shadow-violet-500/25">
             <Code2 className="w-4 h-4" />
           </div>
-          <span className="font-extrabold text-base tracking-tight text-white">DSAForge</span>
+          <span className="font-extrabold text-base tracking-tight text-white">
+            Leet<span className="text-violet-400">Prime</span>
+          </span>
         </Link>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -57,9 +59,12 @@ export function Sidebar() {
             </div>
             <div>
               <div className="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
-                DSAForge <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">PRO</span>
+                Leet<span className="text-violet-400">Prime</span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500/20 to-violet-500/20 text-amber-300 border border-amber-500/30">
+                  PRO+
+                </span>
               </div>
-              <div className="text-[11px] text-slate-400 font-medium">Interview Preparation</div>
+              <div className="text-[11px] text-slate-400 font-medium">Beyond LeetCode Pro</div>
             </div>
           </Link>
 
@@ -128,10 +133,10 @@ export function Sidebar() {
           <div className="mt-auto pt-6">
             <div className="p-3.5 rounded-xl bg-gradient-to-br from-violet-950/40 to-slate-900 border border-violet-500/20 text-xs">
               <div className="flex items-center gap-1.5 text-violet-300 font-bold mb-1">
-                <Sparkles className="w-3.5 h-3.5" /> Company Recency
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> LeetCode Pro ++
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Problems are continuously sorted by 30-day interview report frequency.
+                All LeetCode Pro company DSA questions with 30d recency weights & pattern roadmaps.
               </p>
             </div>
           </div>
