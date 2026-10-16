@@ -15,7 +15,6 @@ const NAVIGATION = [
   { name: "Patterns Explorer", href: "/dsa/patterns", icon: GitBranch },
   { name: "Target Companies", href: "/dsa/companies", icon: Building2 },
   { name: "Question Bank", href: "/dsa/questions", icon: Code2 },
-  { name: "Recency / Timeframes", href: "/dsa/timeframes", icon: Clock },
   { name: "Smart Practice", href: "/dsa/practice", icon: Dumbbell },
   { name: "Roadmaps", href: "/dsa/roadmaps", icon: Map },
   { name: "My Progress", href: "/dsa/progress", icon: TrendingUp },

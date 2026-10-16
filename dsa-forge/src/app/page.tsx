@@ -39,9 +39,9 @@ export default function HomePage() {
                 Explore 15 DSA Patterns <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
-            <Link href="/dsa/practice">
+            <Link href="/dsa/companies">
               <Button variant="glass" size="lg">
-                <Dumbbell className="w-4 h-4 text-violet-400" /> Start Smart Practice
+                <Dumbbell className="w-4 h-4 text-violet-400" /> Company Wise DSA
               </Button>
             </Link>
           </div>
