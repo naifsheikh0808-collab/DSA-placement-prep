@@ -2,6 +2,9 @@
 
 > **The Ultimate Company-Wise DSA Preparation Platform & Real-Time Interview Recency Engine**
 
+🔗 **Live Website:** [https://dsa-placement-prep.vercel.app](https://dsa-placement-prep.vercel.app/)  
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://dsa-placement-prep.vercel.app/)
+
 **LeetPrime** contains the complete library of **LeetCode Pro / Premium DSA problems** organized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. On top of that, it introduces a suite of intelligent features engineered to make technical interview preparation faster, smarter, and significantly higher ROI than standard LeetCode Pro.
 
 ---
