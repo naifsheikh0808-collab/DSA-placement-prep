@@ -19,6 +19,7 @@ import {
   Layers,
   X,
   Cloud,
+  Heart,
 } from "lucide-react";
 import { getLocalProgress, resetProgress, TOP_PROBLEMS, PATTERNS } from "@/lib/db";
 import { DifficultyBadge } from "@/components/ui/badge";
@@ -493,6 +494,38 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
                   <span>Follow on GitHub</span>
                 </div>
                 <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+              </a>
+            </div>
+
+            {/* Special Thanks to Contributor */}
+            <div className="pt-2 border-t border-white/5 space-y-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-400 uppercase tracking-wider">
+                <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                <span>Special Thanks to Contributor</span>
+              </div>
+              <a
+                href="https://github.com/Mohana1008"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full p-3 rounded-2xl bg-gradient-to-r from-rose-500/10 via-purple-500/10 to-indigo-500/10 border border-rose-500/20 hover:border-rose-500/40 text-xs flex items-center justify-between transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-300 font-bold text-xs shrink-0">
+                    MC
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className="font-bold text-white group-hover:text-rose-300 transition-colors truncate">
+                      Mohana Dhar Chowdhury
+                    </p>
+                    <p className="text-[11px] text-slate-400 leading-tight">
+                      For providing the LeetCode Premium company-wise data
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-rose-400 group-hover:text-rose-300 font-semibold pl-2 shrink-0">
+                  <GitHubIcon className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </div>
               </a>
             </div>
 

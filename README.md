@@ -73,3 +73,19 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 👨‍💻 Creator & Developer
+
+- **SK NAIF ALAM** — *Creator & Full Stack Developer*
+  - 💼 LinkedIn: [sk-naif-alam-553901406](https://www.linkedin.com/in/sk-naif-alam-553901406/)
+  - 🐙 GitHub: [@naifsheikh0808-collab](https://github.com/naifsheikh0808-collab)
+
+---
+
+## ❤️ Special Thanks & Contributor Acknowledgment
+
+A heartfelt special thanks to:
+- **Mohana Dhar Chowdhury** ([@Mohana1008](https://github.com/Mohana1008)) for curating and providing the comprehensive LeetCode Premium company-wise dataset that powers LeetPrime's problem archives.
+
