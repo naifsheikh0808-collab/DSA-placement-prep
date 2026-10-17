@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AuthProvider } from "@/context/auth-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,18 +32,19 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-zinc-950 text-zinc-100 antialiased">
-        <div className="flex min-h-dvh">
-          <Suspense fallback={<div className="w-64 bg-zinc-950 border-r border-zinc-800" />}>
-            <Sidebar />
-          </Suspense>
-          {/* Main content — offset by sidebar on desktop */}
-          <main className="flex-1 lg:pl-64 min-w-0">
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 lg:pt-8">
-              {children}
-            </div>
-          </main>
-        </div>
+        <AuthProvider>
+          <div className="flex min-h-dvh">
+            <Suspense fallback={<div className="w-64 bg-zinc-950 border-r border-zinc-800" />}>
+              <Sidebar />
+            </Suspense>
+            {/* Main content — offset by sidebar on desktop */}
+            <main className="flex-1 lg:pl-64 min-w-0">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 lg:pt-8">
+                {children}
+              </div>
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
