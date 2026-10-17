@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Code2, LayoutDashboard, GitBranch, Building2,
-  Clock, Dumbbell, Map, TrendingUp, Menu, X, ChevronRight, Sparkles, Layers
+  Clock, Dumbbell, Map, TrendingUp, Menu, X, ChevronRight, Sparkles, Layers, Compass
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -15,8 +15,7 @@ const NAVIGATION = [
   { name: "Patterns Explorer", href: "/dsa/patterns", icon: GitBranch },
   { name: "Target Companies", href: "/dsa/companies", icon: Building2 },
   { name: "Question Bank", href: "/dsa/questions", icon: Code2 },
-  { name: "Smart Practice", href: "/dsa/practice", icon: Dumbbell },
-  { name: "Roadmaps", href: "/dsa/roadmaps", icon: Map },
+  { name: "Smart Planner", href: "/dsa/planner", icon: Compass, badge: "AI" },
   { name: "My Progress", href: "/dsa/progress", icon: TrendingUp },
 ];
 
@@ -101,6 +100,11 @@ export function Sidebar() {
                           )}
                         />
                         <span>{item.name}</span>
+                        {item.badge && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white tracking-wider">
+                            {item.badge}
+                          </span>
+                        )}
                       </div>
                       {isActive && <div className="w-1.5 h-1.5 rounded-full bg-violet-400 shadow-[0_0_8px_#a78bfa]" />}
                     </Link>

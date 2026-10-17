@@ -46,6 +46,11 @@ Stop memorizing thousands of solutions. Master the 15 algorithmic templates that
 - Topological Sort & Graph BFS/DFS
 - Binary Search & Interval Merging
 
+### 4. 🧭 AI-Driven Smart Prep Planner (Personalized Roadmaps + Today's Practice)
+- **Interactive Intake Wizard**: Provide your target role (Intern, SDE-1, SDE-2, Quant), career year, current DSA baseline (Beginner to Advanced), target companies, and daily time commitment.
+- **Dynamic 4-Phase Roadmap**: Automatically balances problem difficulty, recency weighting, and pattern sequencing across your preparation window (15, 30, 60, or 90 days).
+- **Today's Smart Practice Focus**: Pushes the highest-signal 2–3 questions recommended for today with live solve tracking, status updates, and LeetCode direct links.
+
 ---
 
 ## 🛠️ Tech Stack
