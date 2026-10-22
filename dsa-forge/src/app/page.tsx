@@ -16,8 +16,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto pb-12">
-      {/* ── Top Bar: account / profile ─────────────────────────── */}
-      <div className="flex items-center justify-between gap-4">
+      {/* ── Top Bar: account / profile (desktop only) ─────────── */}
+      <div className="hidden lg:flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 text-xs text-slate-400 min-w-0">
           <Compass className="w-4 h-4 text-violet-400 shrink-0" />
           <span className="truncate">

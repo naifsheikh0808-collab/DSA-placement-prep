@@ -28,10 +28,13 @@ export function Sidebar() {
     <>
       {/* Mobile Menu Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#090a0f]/90 backdrop-blur-md border-b border-white/10 px-4 flex items-center justify-between z-40">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
           <UserAvatar size="sm" />
-          <Link href="/" className="font-extrabold text-base tracking-tight text-white">
+          <Link href="/" className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5 min-w-0">
             Leet<span className="text-violet-400">Prime</span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500/20 to-violet-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+              PRO+
+            </span>
           </Link>
         </div>
         <button
