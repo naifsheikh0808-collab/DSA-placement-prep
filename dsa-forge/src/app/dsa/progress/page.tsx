@@ -21,10 +21,18 @@ import {
   Cloud,
   Heart,
 } from "lucide-react";
-import { getLocalProgress, resetProgress, TOP_PROBLEMS, PATTERNS } from "@/lib/db";
+import {
+  resetProgress,
+  getPatternMastery,
+  getSolvedProblems,
+  TOP_PROBLEMS,
+  PATTERNS,
+} from "@/lib/db";
 import { DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
+import { useProgressStore } from "@/hooks/use-progress";
+import type { Difficulty, Problem } from "@/lib/types";
 
 /* ─── Custom Social Brand Icons ──────────────────────────────── */
 function LinkedInIcon({ className }: { className?: string }) {
@@ -48,85 +56,113 @@ function GitHubIcon({ className }: { className?: string }) {
 }
 
 export default function ProgressPage() {
-  const [progress, setProgress] = useState<Record<string, any>>({});
   const [showPatternBreakdown, setShowPatternBreakdown] = useState<boolean>(false);
   const [showDevModal, setShowDevModal] = useState<boolean>(false);
   const [showFirebaseGuide, setShowFirebaseGuide] = useState<boolean>(false);
+  const [solvedPanel, setSolvedPanel] = useState<Difficulty | "ALL" | null>(null);
+  const [panelDifficulty, setPanelDifficulty] = useState<Difficulty | "ALL">("ALL");
 
   const { user, isConfigured, signInWithGoogle, logout } = useAuth();
+  const { progress, refresh } = useProgressStore();
 
-  const reloadProgress = () => {
-    setProgress(getLocalProgress());
-  };
-
+  // Close the solved-problems panel with Escape.
   useEffect(() => {
-    reloadProgress();
-  }, [user]);
+    if (solvedPanel === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSolvedPanel(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [solvedPanel]);
 
   const handleReset = () => {
     if (confirm("Are you sure you want to reset your practice progress? This will reset all solved marks in this browser.")) {
       resetProgress();
-      reloadProgress();
+      refresh();
     }
   };
 
-  const solvedSlugs = Object.keys(progress).filter(
-    (key) => progress[key]?.status === "solved" || progress[key]?.status === "mastered"
-  );
+  // Solved problems, derived from the canonical progress store.
+  const solvedProblems = getSolvedProblems(progress);
+  const solvedCount = solvedProblems.length;
 
-  const easySolved = TOP_PROBLEMS.filter(
-    (p) =>
-      p.difficulty === "Easy" &&
-      (progress[p.slug]?.status === "solved" ||
-        progress[p.slug]?.status === "mastered" ||
-        progress[p.id]?.status === "solved")
-  ).length;
+  const solvedByDifficulty = (difficulty: Difficulty) =>
+    solvedProblems.filter((p) => p.difficulty === difficulty).length;
 
-  const mediumSolved = TOP_PROBLEMS.filter(
-    (p) =>
-      p.difficulty === "Medium" &&
-      (progress[p.slug]?.status === "solved" ||
-        progress[p.slug]?.status === "mastered" ||
-        progress[p.id]?.status === "solved")
-  ).length;
+  const easySolved = solvedByDifficulty("Easy");
+  const mediumSolved = solvedByDifficulty("Medium");
+  const hardSolved = solvedByDifficulty("Hard");
 
-  const hardSolved = TOP_PROBLEMS.filter(
-    (p) =>
-      p.difficulty === "Hard" &&
-      (progress[p.slug]?.status === "solved" ||
-        progress[p.slug]?.status === "mastered" ||
-        progress[p.id]?.status === "solved")
-  ).length;
+  const totalEasy = TOP_PROBLEMS.filter((p) => p.difficulty === "Easy").length;
+  const totalMedium = TOP_PROBLEMS.filter((p) => p.difficulty === "Medium").length;
+  const totalHard = TOP_PROBLEMS.filter((p) => p.difficulty === "Hard").length;
 
   // Rank / Title based on solved count
   const solverRank =
-    solvedSlugs.length >= 50
+    solvedCount >= 50
       ? { title: "Master Solver", color: "text-amber-300", badge: "bg-amber-500/20 border-amber-500/40" }
-      : solvedSlugs.length >= 25
+      : solvedCount >= 25
       ? { title: "Knight Solver", color: "text-violet-300", badge: "bg-violet-500/20 border-violet-500/40" }
-      : solvedSlugs.length >= 10
+      : solvedCount >= 10
       ? { title: "Apprentice Solver", color: "text-indigo-300", badge: "bg-indigo-500/20 border-indigo-500/40" }
       : { title: "Novice Solver", color: "text-slate-300", badge: "bg-slate-500/20 border-slate-500/40" };
 
-  // Calculate mastered patterns (where at least 50% problems are solved)
-  const patternMasteryStats = PATTERNS.map((pattern) => {
-    const patternProbs = TOP_PROBLEMS.filter(
-      (p) =>
-        p.primaryPattern?.toLowerCase() === pattern.name.toLowerCase() ||
-        p.primaryPattern?.toLowerCase() === pattern.slug.toLowerCase()
-    );
-    const patternSolved = patternProbs.filter(
-      (p) =>
-        progress[p.slug]?.status === "solved" ||
-        progress[p.slug]?.status === "mastered" ||
-        progress[p.id]?.status === "solved"
-    ).length;
-    const pct = patternProbs.length > 0 ? Math.round((patternSolved / patternProbs.length) * 100) : 0;
-    return { ...pattern, patternSolved, total: patternProbs.length, pct };
-  });
+  // Per-pattern mastery, using the canonical pattern registry.
+  const patternMasteryStats = getPatternMastery(progress);
 
-  const patternsInProgress = patternMasteryStats.filter((p) => p.patternSolved > 0).length;
+  const patternsInProgress = patternMasteryStats.filter((p) => p.solved > 0).length;
   const patternsMastered = patternMasteryStats.filter((p) => p.pct >= 50).length;
+
+  const openSolvedPanel = (difficulty: Difficulty | "ALL") => {
+    setPanelDifficulty(difficulty);
+    setSolvedPanel(difficulty);
+  };
+
+  const panelProblems: Problem[] =
+    solvedPanel === null
+      ? []
+      : panelDifficulty === "ALL"
+      ? solvedProblems
+      : solvedProblems.filter((p) => p.difficulty === panelDifficulty);
+
+  const statCards = [
+    {
+      key: "ALL" as const,
+      label: "Total Solved",
+      value: solvedCount,
+      total: TOP_PROBLEMS.length,
+      accent: "from-violet-500 to-indigo-500",
+      text: "text-violet-400",
+      note: "% of curated benchmark",
+    },
+    {
+      key: "Easy" as const,
+      label: "Easy Solved",
+      value: easySolved,
+      total: totalEasy,
+      accent: "from-emerald-500 to-emerald-400",
+      text: "text-emerald-400",
+      note: "Foundational speed",
+    },
+    {
+      key: "Medium" as const,
+      label: "Medium Solved",
+      value: mediumSolved,
+      total: totalMedium,
+      accent: "from-amber-500 to-amber-400",
+      text: "text-amber-400",
+      note: "Core interview clearing zone",
+    },
+    {
+      key: "Hard" as const,
+      label: "Hard Solved",
+      value: hardSolved,
+      total: totalHard,
+      accent: "from-rose-500 to-rose-400",
+      text: "text-rose-400",
+      note: "Tier-1 & MAANG differentiator",
+    },
+  ];
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-20">
@@ -300,79 +336,50 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
         )}
       </div>
 
-      {/* ── Summary Problem Metrics ────────────────────────────── */}
+      {/* ── Summary Problem Metrics (clickable) ─────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Solved */}
-        <div className="p-5 bg-[#10131f]/70 border border-white/10 rounded-2xl backdrop-blur-md">
-          <div className="text-[11px] text-slate-400 uppercase font-bold tracking-wider mb-1">Total Solved</div>
-          <div className="text-3xl font-extrabold text-white">
-            {solvedSlugs.length}{" "}
-            <span className="text-sm font-normal text-slate-500">/ {TOP_PROBLEMS.length}</span>
-          </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-violet-500 to-indigo-500 h-full transition-all duration-500"
-              style={{ width: `${Math.min(100, (solvedSlugs.length / TOP_PROBLEMS.length) * 100)}%` }}
-            />
-          </div>
-          <div className="text-[11px] text-slate-400 mt-2">
-            {Math.round((solvedSlugs.length / TOP_PROBLEMS.length) * 100)}% of curated benchmark
-          </div>
-        </div>
-
-        {/* Easy */}
-        <div className="p-5 bg-[#10131f]/70 border border-white/10 rounded-2xl backdrop-blur-md">
-          <div className="text-[11px] text-emerald-400 uppercase font-bold tracking-wider mb-1">Easy Solved</div>
-          <div className="text-3xl font-extrabold text-white">
-            {easySolved}{" "}
-            <span className="text-sm font-normal text-slate-500">
-              / {TOP_PROBLEMS.filter((p) => p.difficulty === "Easy").length}
-            </span>
-          </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div
-              className="bg-emerald-500 h-full transition-all duration-500"
-              style={{ width: `${(easySolved / TOP_PROBLEMS.filter((p) => p.difficulty === "Easy").length) * 100}%` }}
-            />
-          </div>
-          <div className="text-[11px] text-slate-400 mt-2">Foundational speed</div>
-        </div>
-
-        {/* Medium */}
-        <div className="p-5 bg-[#10131f]/70 border border-white/10 rounded-2xl backdrop-blur-md">
-          <div className="text-[11px] text-amber-400 uppercase font-bold tracking-wider mb-1">Medium Solved</div>
-          <div className="text-3xl font-extrabold text-white">
-            {mediumSolved}{" "}
-            <span className="text-sm font-normal text-slate-500">
-              / {TOP_PROBLEMS.filter((p) => p.difficulty === "Medium").length}
-            </span>
-          </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div
-              className="bg-amber-500 h-full transition-all duration-500"
-              style={{ width: `${(mediumSolved / TOP_PROBLEMS.filter((p) => p.difficulty === "Medium").length) * 100}%` }}
-            />
-          </div>
-          <div className="text-[11px] text-slate-400 mt-2">Core interview clearing zone</div>
-        </div>
-
-        {/* Hard */}
-        <div className="p-5 bg-[#10131f]/70 border border-white/10 rounded-2xl backdrop-blur-md">
-          <div className="text-[11px] text-rose-400 uppercase font-bold tracking-wider mb-1">Hard Solved</div>
-          <div className="text-3xl font-extrabold text-white">
-            {hardSolved}{" "}
-            <span className="text-sm font-normal text-slate-500">
-              / {TOP_PROBLEMS.filter((p) => p.difficulty === "Hard").length}
-            </span>
-          </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div
-              className="bg-rose-500 h-full transition-all duration-500"
-              style={{ width: `${(hardSolved / TOP_PROBLEMS.filter((p) => p.difficulty === "Hard").length) * 100}%` }}
-            />
-          </div>
-          <div className="text-[11px] text-slate-400 mt-2">Tier-1 & MAANG differentiator</div>
-        </div>
+        {statCards.map((card) => {
+          const pct = card.total > 0 ? (card.value / card.total) * 100 : 0;
+          const isActive = solvedPanel === card.key;
+          return (
+            <button
+              key={card.key}
+              type="button"
+              id={`stat-card-${card.key.toLowerCase()}`}
+              onClick={() => openSolvedPanel(card.key)}
+              aria-expanded={isActive}
+              className={`text-left p-5 bg-[#10131f]/70 border rounded-2xl backdrop-blur-md transition-all duration-200 group hover:-translate-y-0.5 ${
+                isActive
+                  ? "border-violet-500/60 bg-violet-500/[0.06] shadow-[0_8px_28px_-6px_rgba(124,58,237,0.35)]"
+                  : "border-white/10 hover:border-violet-500/40"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className={`text-[11px] ${card.text} uppercase font-bold tracking-wider mb-1`}>
+                  {card.label}
+                </div>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  View
+                </span>
+              </div>
+              <div className="text-3xl font-extrabold text-white">
+                {card.value}{" "}
+                <span className="text-sm font-normal text-slate-500">/ {card.total}</span>
+              </div>
+              <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                <div
+                  className={`bg-gradient-to-r ${card.accent} h-full transition-all duration-500`}
+                  style={{ width: `${Math.min(100, pct)}%` }}
+                />
+              </div>
+              <div className="text-[11px] text-slate-400 mt-2">
+                {card.key === "ALL"
+                  ? `${Math.round(pct)}% ${card.note}`
+                  : card.note}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* ── COLLAPSIBLE Pattern Mastery Breakdown (Hidden by default) ── */}
@@ -390,11 +397,11 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold text-white">Pattern Mastery Breakdown</h2>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/[0.05] text-slate-400 border border-white/10 font-mono">
-                  15 Patterns
+                  {PATTERNS.length} Patterns
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                {patternsMastered} of 15 Mastered (50%+ solved) · {patternsInProgress} in progress · Click to {showPatternBreakdown ? "collapse" : "expand"}
+                {patternsMastered} of {PATTERNS.length} Mastered (50%+ solved) · {patternsInProgress} in progress · Click to {showPatternBreakdown ? "collapse" : "expand"}
               </p>
             </div>
           </div>
@@ -408,7 +415,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
         {/* Collapsed Grid Content */}
         {showPatternBreakdown && (
           <div className="p-5 sm:p-6 pt-0 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            {patternMasteryStats.map((pattern) => (
+            {patternMasteryStats.map(({ pattern, solved, total, pct }) => (
               <Link
                 key={pattern.id}
                 href={`/dsa/patterns/${pattern.slug}`}
@@ -418,18 +425,18 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
                   <span className="text-slate-200 group-hover:text-violet-300 transition-colors font-bold">
                     {pattern.name}
                   </span>
-                  <span className="text-violet-400 font-mono">{pattern.pct}%</span>
+                  <span className="text-violet-400 font-mono">{pct}%</span>
                 </div>
 
                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                   <div
                     className="bg-gradient-to-r from-violet-500 to-indigo-500 h-full transition-all duration-300"
-                    style={{ width: `${pattern.pct}%` }}
+                    style={{ width: `${pct}%` }}
                   />
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-slate-500">
-                  <span>{pattern.patternSolved} of {pattern.total} solved</span>
+                  <span>{solved} of {total} solved</span>
                   <span className="text-violet-400/80 group-hover:translate-x-0.5 transition-transform">→</span>
                 </div>
               </Link>
@@ -437,6 +444,111 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
           </div>
         )}
       </div>
+
+      {/* ── SOLVED PROBLEMS PANEL ─────────────────────────────── */}
+      {solvedPanel !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setSolvedPanel(null)}
+        >
+          <div
+            className="relative w-full max-w-3xl max-h-[85vh] flex flex-col rounded-3xl bg-[#10131f] border border-violet-500/30 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4 p-5 sm:p-6 border-b border-white/10">
+              <div>
+                <div className="flex items-center gap-2 text-violet-400 text-xs font-bold uppercase tracking-wider mb-1">
+                  <CheckCircle2 className="w-4 h-4" /> Solved Problems
+                </div>
+                <h2 className="text-xl font-extrabold text-white">
+                  {solvedPanel === "ALL"
+                    ? "All Solved Questions"
+                    : `${solvedPanel} Questions Solved`}
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  {panelProblems.length} question
+                  {panelProblems.length === 1 ? "" : "s"} shown
+                  {panelDifficulty !== "ALL" && ` · filtered by ${panelDifficulty}`}
+                </p>
+              </div>
+              <button
+                onClick={() => setSolvedPanel(null)}
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors shrink-0"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Difficulty filter */}
+            <div className="px-5 sm:px-6 py-3 border-b border-white/10 flex items-center gap-2 flex-wrap bg-white/[0.02]">
+              {(["ALL", "Easy", "Medium", "Hard"] as const).map((d) => {
+                const active = panelDifficulty === d;
+                return (
+                  <button
+                    key={d}
+                    onClick={() => setPanelDifficulty(d)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                      active
+                        ? "bg-violet-500/20 text-violet-300 border-violet-500/40"
+                        : "bg-white/[0.03] text-slate-400 hover:bg-white/[0.07] hover:text-slate-200 border-white/[0.06]"
+                    }`}
+                  >
+                    {d === "ALL" ? "All Difficulty" : d}
+                    <span className="ml-1.5 font-mono text-[10px] opacity-70">
+                      {d === "ALL"
+                        ? solvedCount
+                        : solvedByDifficulty(d)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* List */}
+            <div className="overflow-y-auto p-3 sm:p-4 space-y-1.5">
+              {panelProblems.length === 0 ? (
+                <div className="py-14 text-center text-slate-500 text-sm">
+                  No solved questions in this bucket yet.
+                  <br />
+                  <span className="text-xs text-slate-600">
+                    Mark a question as solved and it will show up here.
+                  </span>
+                </div>
+              ) : (
+                panelProblems.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-violet-500/30 transition-colors group"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <Link
+                      href={`/dsa/questions/${p.slug}`}
+                      className="text-sm font-semibold text-white hover:text-violet-300 transition-colors truncate min-w-0 flex-1"
+                    >
+                      {p.title}
+                    </Link>
+                    <span className="hidden sm:block text-[11px] text-slate-400 bg-white/[0.04] px-2 py-0.5 rounded border border-white/5 truncate max-w-[180px]">
+                      {p.primaryPattern || "Uncategorized"}
+                    </span>
+                    <DifficultyBadge difficulty={p.difficulty} />
+                    <a
+                      href={p.canonicalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 text-slate-500 hover:text-white transition-colors shrink-0"
+                      title="Open on LeetCode"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── DEVELOPER CONTACT MODAL (Only GitHub & LinkedIn) ───── */}
       {showDevModal && (

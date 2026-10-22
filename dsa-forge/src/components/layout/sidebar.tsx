@@ -9,6 +9,7 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { MODULES } from "@/lib/constants";
+import { UserAvatar } from "@/components/layout/user-avatar";
 
 const NAVIGATION = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
@@ -27,17 +28,16 @@ export function Sidebar() {
     <>
       {/* Mobile Menu Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#090a0f]/90 backdrop-blur-md border-b border-white/10 px-4 flex items-center justify-between z-40">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg shadow-violet-500/25">
-            <Code2 className="w-4 h-4" />
-          </div>
-          <span className="font-extrabold text-base tracking-tight text-white">
+        <div className="flex items-center gap-2.5">
+          <UserAvatar size="sm" />
+          <Link href="/" className="font-extrabold text-base tracking-tight text-white">
             Leet<span className="text-violet-400">Prime</span>
-          </span>
-        </Link>
+          </Link>
+        </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="p-2 text-slate-300 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+          aria-label="Toggle navigation menu"
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -51,12 +51,10 @@ export function Sidebar() {
         )}
       >
         <div className="flex flex-col h-full overflow-y-auto px-4 py-6">
-          {/* Brand Header */}
-          <Link href="/" className="flex items-center gap-3 px-2 mb-8 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-extrabold shadow-lg shadow-violet-500/30 group-hover:scale-105 transition-transform">
-              <Code2 className="w-5 h-5" />
-            </div>
-            <div>
+          {/* Brand Header — profile avatar replaces the logo mark */}
+          <div className="flex items-center gap-3 px-2 mb-8">
+            <UserAvatar size="md" />
+            <Link href="/" className="group min-w-0">
               <div className="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
                 Leet<span className="text-violet-400">Prime</span>
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500/20 to-violet-500/20 text-amber-300 border border-amber-500/30">
@@ -64,8 +62,8 @@ export function Sidebar() {
                 </span>
               </div>
               <div className="text-[11px] text-slate-400 font-medium">Beyond LeetCode Pro</div>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Navigation Items */}
           <div className="space-y-6">

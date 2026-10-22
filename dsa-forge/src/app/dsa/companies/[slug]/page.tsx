@@ -5,6 +5,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Building2, ArrowLeft, ExternalLink, Calendar, Target, Search, ArrowUpDown, Filter } from "lucide-react";
 import { getCompanyBySlug, getCompanyProblems, getAllPatterns } from "@/lib/db";
+import {
+  getExtraDatasetPatterns,
+  matchesPatternValue,
+} from "@/lib/pattern-map";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
 import type { Difficulty, Timeframe } from "@/lib/types";
 
@@ -19,6 +23,7 @@ function CompanyContent({ slug }: { slug: string }) {
 
   const rawProblems = getCompanyProblems(company.id);
   const patterns = getAllPatterns();
+  const extraPatterns = getExtraDatasetPatterns();
 
   const [search, setSearch] = useState("");
   const [selectedPattern, setSelectedPattern] = useState("");
@@ -27,13 +32,11 @@ function CompanyContent({ slug }: { slug: string }) {
   const [sortBy, setSortBy] = useState<SortOption>("most_asked");
 
   // Filter problems
-  let filtered = rawProblems.filter(({ problem, companyData }) => {
+  const filtered = rawProblems.filter(({ problem }) => {
     const matchesSearch = problem.title.toLowerCase().includes(search.toLowerCase());
 
     const matchesPattern =
-      !selectedPattern ||
-      problem.primaryPattern?.toLowerCase().includes(selectedPattern.toLowerCase()) ||
-      problem.secondaryPatterns.some((s) => s.toLowerCase().includes(selectedPattern.toLowerCase()));
+      !selectedPattern || matchesPatternValue(problem, selectedPattern);
 
     const matchesDiff =
       selectedDifficulty === "ALL" || problem.difficulty.toLowerCase() === selectedDifficulty.toLowerCase();
@@ -132,11 +135,22 @@ function CompanyContent({ slug }: { slug: string }) {
             className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 font-medium"
           >
             <option value="">Pattern: All Patterns</option>
-            {patterns.map((p) => (
-              <option key={p.id} value={p.name}>
-                {p.name}
-              </option>
-            ))}
+            <optgroup label="Pattern Roadmaps">
+              {patterns.map((p) => (
+                <option key={p.id} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </optgroup>
+            {extraPatterns.length > 0 && (
+              <optgroup label="Other Categories">
+                {extraPatterns.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
 
           {/* Difficulty Filter */}

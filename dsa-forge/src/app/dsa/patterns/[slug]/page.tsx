@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { use, Suspense } from "react";
 import { ExternalLink, GitBranch, Building2, CheckCircle2, Circle, Clock, RefreshCw } from "lucide-react";
-import { getPatternBySlug } from "@/lib/db";
+import { getPatternBySlug, isSolvedStatus } from "@/lib/db";
+import { getPatternProblems, resolveProblemId } from "@/lib/pattern-map";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useProgressStore } from "@/hooks/use-progress";
@@ -23,9 +24,19 @@ function PatternContent({ slug }: { slug: string }) {
 
   const { progress, updateStatus } = useProgressStore();
 
+  // Curated roadmap questions and dataset problems are the same LeetCode
+  // problems, so progress must be read/written under the canonical dataset id.
+  const canonicalId = (qId: string) => resolveProblemId(qId);
+  const statusOf = (qId: string) => progress[canonicalId(qId)]?.status;
 
-  const solvedCount = pattern.questions.filter((q) => progress[q.id]?.status === "solved").length;
-  const progressPct = Math.round((solvedCount / pattern.questions.length) * 100);
+  const memberIds = new Set(getPatternProblems(pattern).map((p) => p.id));
+
+  const solvedCount = pattern.questions.filter((q) =>
+    isSolvedStatus(statusOf(q.id))
+  ).length;
+  const progressPct = pattern.questions.length
+    ? Math.round((solvedCount / pattern.questions.length) * 100)
+    : 0;
 
   const groups = {
     beginner: pattern.questions.filter((q) => q.levelTag === "beginner"),
@@ -35,7 +46,7 @@ function PatternContent({ slug }: { slug: string }) {
   };
 
   const statusIcon = (qId: string) => {
-    const s = progress[qId]?.status;
+    const s = statusOf(qId);
     if (s === "solved") return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
     if (s === "attempted") return <Clock className="w-4 h-4 text-amber-400" />;
     if (s === "revise") return <RefreshCw className="w-4 h-4 text-blue-400" />;
@@ -79,6 +90,7 @@ function PatternContent({ slug }: { slug: string }) {
             </p>
             <div className="flex flex-wrap gap-3">
               <Badge variant="default">{pattern.questions.length} curated questions</Badge>
+              <Badge variant="outline">{memberIds.size} in question bank</Badge>
               <Badge variant="default">
                 <Building2 className="w-3 h-3 mr-1" />
                 {pattern.companyCoverage} companies
@@ -124,7 +136,7 @@ function PatternContent({ slug }: { slug: string }) {
 
             <div className="space-y-2">
               {questions.map((q, i) => {
-                const status = progress[q.id]?.status;
+                const status = statusOf(q.id);
                 return (
                   <div
                     key={q.id}

@@ -6,10 +6,16 @@
 
 import { PATTERNS, TOP_COMPANIES, TOP_PROBLEMS, PLATFORM_STATS } from "./data/seed";
 import { TIMEFRAME_LABELS } from "./constants";
-import type { Pattern, PatternQuestion, Company, Problem, UserProgress, Timeframe, Difficulty } from "./types";
+import type { Pattern, PatternQuestion, Company, Problem, UserProgress, Timeframe, Difficulty, ProgressStatus } from "./types";
 import { slugify } from "./utils";
+import {
+  getPatternProblems,
+  matchesPatternValue,
+  resolveProblemId,
+} from "./pattern-map";
 
 export { PATTERNS, TOP_COMPANIES, TOP_PROBLEMS, PLATFORM_STATS, TIMEFRAME_LABELS };
+export { getPatternProblems, matchesPatternValue, resolveProblemId };
 export type { UserProgress, Pattern, Company, Problem, Timeframe, Difficulty };
 
 // ─── Patterns ─────────────────────────────────────────────────────────────────
@@ -78,11 +84,7 @@ export function filterProblems(opts: {
     problems = problems.filter((p) => opts.difficulty!.includes(p.difficulty));
   }
   if (opts.pattern) {
-    problems = problems.filter(
-      (p) =>
-        p.primaryPattern?.toLowerCase().includes(opts.pattern!.toLowerCase()) ||
-        p.secondaryPatterns.some((s) => s.toLowerCase().includes(opts.pattern!.toLowerCase()))
-    );
+    problems = problems.filter((p) => matchesPatternValue(p, opts.pattern!));
   }
   if (opts.companySlug) {
     problems = problems.filter((p) =>
@@ -107,11 +109,92 @@ export function filterProblems(opts: {
 
 const PROGRESS_KEY = "dsaforge_progress";
 
+/** Fired whenever persisted progress changes so every store can re-render. */
+export const PROGRESS_UPDATED_EVENT = "dsaforge:progress-updated";
+
+const STATUS_RANK: Record<ProgressStatus, number> = {
+  todo: 0,
+  attempted: 1,
+  revise: 2,
+  solved: 3,
+};
+
+export function isSolvedStatus(status?: string): boolean {
+  return status === "solved" || status === "mastered";
+}
+
+/**
+ * Rewrite legacy progress keys to the canonical dataset problem id.
+ *
+ * The pattern pages used to store progress under curated roadmap ids
+ * ("tp-1", "sw-1") while the question pages used dataset ids ("167"), so the
+ * same problem lived under two keys and the mastery breakdown never updated.
+ */
+function canonicalizeProgress(
+  progress: Record<string, UserProgress>
+): Record<string, UserProgress> {
+  const out: Record<string, UserProgress> = {};
+
+  for (const [key, entry] of Object.entries(progress)) {
+    if (!entry || typeof entry !== "object") continue;
+
+    const canonicalKey = resolveProblemId(key);
+    const status = (entry.status ?? "todo") as ProgressStatus;
+    const normalized: UserProgress = {
+      ...entry,
+      problemId: canonicalKey,
+      status,
+      revisionCount: entry.revisionCount ?? 0,
+    };
+
+    const existing = out[canonicalKey];
+    if (!existing) {
+      out[canonicalKey] = normalized;
+      continue;
+    }
+
+    // Two keys collapsed into one — keep the strongest status and the latest data.
+    const keepNew =
+      STATUS_RANK[status] >= STATUS_RANK[existing.status ?? "todo"];
+    const winner = keepNew ? normalized : existing;
+    const loser = keepNew ? existing : normalized;
+
+    out[canonicalKey] = {
+      ...loser,
+      ...winner,
+      status:
+        STATUS_RANK[status] > STATUS_RANK[existing.status ?? "todo"]
+          ? status
+          : existing.status ?? "todo",
+      revisionCount: Math.max(
+        existing.revisionCount ?? 0,
+        normalized.revisionCount ?? 0
+      ),
+      notes: winner.notes ?? loser.notes,
+      solvedAt: winner.solvedAt ?? loser.solvedAt,
+      lastAttemptedAt:
+        winner.lastAttemptedAt && loser.lastAttemptedAt
+          ? winner.lastAttemptedAt > loser.lastAttemptedAt
+            ? winner.lastAttemptedAt
+            : loser.lastAttemptedAt
+          : winner.lastAttemptedAt ?? loser.lastAttemptedAt,
+    };
+  }
+
+  return out;
+}
+
 export function loadProgress(): Record<string, UserProgress> {
   if (typeof window === "undefined") return {};
   try {
     const raw = localStorage.getItem(PROGRESS_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, UserProgress>;
+    const canonical = canonicalizeProgress(parsed);
+    if (JSON.stringify(parsed) !== JSON.stringify(canonical)) {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(canonical));
+    }
+    return canonical;
   } catch {
     return {};
   }
@@ -119,14 +202,39 @@ export function loadProgress(): Record<string, UserProgress> {
 
 export const getLocalProgress = loadProgress;
 
+/**
+ * Cached snapshot for `useSyncExternalStore`.
+ * The reference must stay stable between reads, otherwise React re-renders forever.
+ */
+let progressCache: Record<string, UserProgress> | null = null;
+
+export const EMPTY_PROGRESS: Record<string, UserProgress> = {};
+
+export function getProgressSnapshot(): Record<string, UserProgress> {
+  if (typeof window === "undefined") return EMPTY_PROGRESS;
+  if (!progressCache) progressCache = loadProgress();
+  return progressCache;
+}
+
+/** Drop the cached snapshot so the next read comes from storage. */
+export function invalidateProgressCache(): void {
+  progressCache = null;
+}
+
 export function saveProgress(progress: Record<string, UserProgress>): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+  const canonical = canonicalizeProgress(progress);
+  progressCache = canonical;
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify(canonical));
+  // Notify every mounted progress store so counts update without a reload.
+  window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
 }
 
 export function resetProgress(): void {
   if (typeof window === "undefined") return;
+  progressCache = {};
   localStorage.removeItem(PROGRESS_KEY);
+  window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
 }
 
 export function updateProblemStatus(
@@ -135,9 +243,10 @@ export function updateProblemStatus(
   notes?: string
 ): UserProgress {
   const all = loadProgress();
-  const existing = all[problemId];
+  const canonicalId = resolveProblemId(problemId);
+  const existing = all[canonicalId];
   const updated: UserProgress = {
-    problemId,
+    problemId: canonicalId,
     status,
     revisionCount: existing?.revisionCount ?? 0,
     notes: notes ?? existing?.notes,
@@ -145,7 +254,7 @@ export function updateProblemStatus(
     solvedAt: status === "solved" ? (existing?.solvedAt ?? new Date().toISOString()) : existing?.solvedAt,
   };
   if (status === "revise") updated.revisionCount = (existing?.revisionCount ?? 0) + 1;
-  all[problemId] = updated;
+  all[canonicalId] = updated;
   saveProgress(all);
   return updated;
 }
@@ -153,11 +262,49 @@ export function updateProblemStatus(
 export function getProgressStats(progress: Record<string, UserProgress>) {
   const statuses = Object.values(progress);
   return {
-    solved: statuses.filter((s) => s.status === "solved").length,
+    solved: statuses.filter((s) => isSolvedStatus(s.status)).length,
     attempted: statuses.filter((s) => s.status === "attempted").length,
     revise: statuses.filter((s) => s.status === "revise").length,
     todo: statuses.filter((s) => s.status === "todo").length,
   };
+}
+
+/* ─── Solved problem helpers ──────────────────────────────────────────────── */
+
+/** Every problem the user has marked solved, in dataset order. */
+export function getSolvedProblems(
+  progress: Record<string, UserProgress>
+): Problem[] {
+  return TOP_PROBLEMS.filter((p) => isSolvedStatus(progress[p.id]?.status));
+}
+
+/** Solved problems for one difficulty ("Easy" | "Medium" | "Hard"). */
+export function getSolvedProblemsByDifficulty(
+  progress: Record<string, UserProgress>,
+  difficulty: Difficulty
+): Problem[] {
+  return getSolvedProblems(progress).filter((p) => p.difficulty === difficulty);
+}
+
+export interface PatternMastery {
+  pattern: Pattern;
+  solved: number;
+  total: number;
+  pct: number;
+}
+
+/** Per-pattern solved/total, used by the mastery breakdown on the progress page. */
+export function getPatternMastery(
+  progress: Record<string, UserProgress>
+): PatternMastery[] {
+  return PATTERNS.map((pattern) => {
+    const problems = getPatternProblems(pattern);
+    const solved = problems.filter((p) =>
+      isSolvedStatus(progress[p.id]?.status)
+    ).length;
+    const pct = problems.length ? Math.round((solved / problems.length) * 100) : 0;
+    return { pattern, solved, total: problems.length, pct };
+  });
 }
 
 // ─── Platform Stats ───────────────────────────────────────────────────────────

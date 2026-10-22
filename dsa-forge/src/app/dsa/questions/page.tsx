@@ -12,6 +12,10 @@ import {
   CalendarRange,
 } from "lucide-react";
 import { getAllPatterns, TOP_PROBLEMS } from "@/lib/db";
+import {
+  getExtraDatasetPatterns,
+  matchesPatternValue,
+} from "@/lib/pattern-map";
 import { DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useProgressStore } from "@/hooks/use-progress";
@@ -138,6 +142,7 @@ export default function QuestionsPage() {
   );
 
   const patterns = getAllPatterns();
+  const extraPatterns = getExtraDatasetPatterns();
   const { progress } = useProgressStore();
 
   function cardCount(tfId: TimeframeId) {
@@ -151,11 +156,7 @@ export default function QuestionsPage() {
     const matchesDiff =
       selectedDifficulty.length === 0 || selectedDifficulty.includes(p.difficulty);
     const matchesPattern =
-      !selectedPattern ||
-      p.primaryPattern?.toLowerCase().includes(selectedPattern.toLowerCase()) ||
-      p.secondaryPatterns.some((s) =>
-        s.toLowerCase().includes(selectedPattern.toLowerCase())
-      );
+      !selectedPattern || matchesPatternValue(p, selectedPattern);
     return matchesTf && matchesSearch && matchesDiff && matchesPattern;
   });
 
@@ -312,11 +313,22 @@ export default function QuestionsPage() {
             className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50"
           >
             <option value="">All Patterns</option>
-            {patterns.map((p) => (
-              <option key={p.id} value={p.name}>
-                {p.name}
-              </option>
-            ))}
+            <optgroup label="Pattern Roadmaps">
+              {patterns.map((p) => (
+                <option key={p.id} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </optgroup>
+            {extraPatterns.length > 0 && (
+              <optgroup label="Other Categories">
+                {extraPatterns.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
 
           {/* Sort Control */}

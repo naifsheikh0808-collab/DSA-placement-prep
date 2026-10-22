@@ -6,6 +6,7 @@ import {
 import { getAllPatterns, getAllCompanies, getPlatformStats, getSmartNextProblem, TOP_PROBLEMS } from "@/lib/db";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/layout/user-avatar";
 
 export default function HomePage() {
   const patterns = getAllPatterns();
@@ -15,6 +16,18 @@ export default function HomePage() {
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto pb-12">
+      {/* ── Top Bar: account / profile ─────────────────────────── */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2 text-xs text-slate-400 min-w-0">
+          <Compass className="w-4 h-4 text-violet-400 shrink-0" />
+          <span className="truncate">
+            <strong className="text-slate-200">DSA Command Center</strong>
+            <span className="hidden sm:inline"> · company-wise prep with live recency signals</span>
+          </span>
+        </div>
+        <UserAvatar size="md" />
+      </div>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#16132b]/80 via-[#101322]/80 to-[#0c0e17]/80 border border-violet-500/20 p-8 sm:p-10 backdrop-blur-xl">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
@@ -32,7 +45,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-normal">
-            <strong>LeetPrime</strong> brings together all LeetCode Pro DSA problems mapped company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Packed with extra intelligence you won't find on LeetCode Pro—including real-time 30-day interview recency filters, 15 pattern-first mastery roadmaps, and priority scoring.
+            <strong>LeetPrime</strong> brings together all LeetCode Pro DSA problems mapped company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Packed with extra intelligence you won&apos;t find on LeetCode Pro—including real-time 30-day interview recency filters, 15 pattern-first mastery roadmaps, and priority scoring.
           </p>
 
           {/* Value comparison pills */}

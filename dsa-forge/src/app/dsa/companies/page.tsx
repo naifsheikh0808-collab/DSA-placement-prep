@@ -245,7 +245,7 @@ export default function CompaniesPage() {
   const allCompanies = getAllCompanies();
 
   // Filter companies
-  let filtered = allCompanies.filter((c) => {
+  const filtered = allCompanies.filter((c) => {
     const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.normalizedName.toLowerCase().includes(search.toLowerCase());
