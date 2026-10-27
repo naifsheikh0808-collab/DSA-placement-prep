@@ -1,0 +1,237 @@
+import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// ── Constants ──────────────────────────────────────────────────────────────────
+const MAX_MESSAGE_LENGTH = 1000; // chars per user message
+const MAX_HISTORY_MESSAGES = 20; // total history items sent per request
+const MAX_REQUESTS_PER_WINDOW = 20; // per user, per window
+const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+// In-memory rate limit store. Resets when the server process restarts.
+// For production, replace with Redis or a database-backed counter.
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>();
+
+function checkRateLimit(uid: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const entry = rateLimitStore.get(uid);
+
+  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
+    rateLimitStore.set(uid, { count: 1, windowStart: now });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1 };
+  }
+
+  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  entry.count += 1;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - entry.count };
+}
+
+// ── Firebase ID Token Verification ────────────────────────────────────────────
+// We verify the Firebase ID token directly via the Google public-key endpoint,
+// avoiding the Firebase Admin SDK (which requires a service-account secret).
+// The token is a signed JWT; we validate its signature, audience, and expiry.
+async function verifyFirebaseIdToken(
+  idToken: string
+): Promise<{ uid: string; email: string | null } | null> {
+  try {
+    // Fetch Google's public keys for Firebase
+    const keysRes = await fetch(
+      "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com",
+      { next: { revalidate: 3600 } }
+    );
+    if (!keysRes.ok) return null;
+    const keys: Record<string, string> = await keysRes.json();
+
+    // Decode header to get kid
+    const [headerB64, payloadB64, signatureB64] = idToken.split(".");
+    if (!headerB64 || !payloadB64 || !signatureB64) return null;
+
+    const header = JSON.parse(Buffer.from(headerB64, "base64url").toString());
+    const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString());
+
+    // Basic claims validation
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const now = Math.floor(Date.now() / 1000);
+
+    if (
+      payload.aud !== projectId ||
+      payload.iss !== `https://securetoken.google.com/${projectId}` ||
+      payload.exp < now ||
+      payload.iat > now + 300 // allow 5-min clock skew
+    ) {
+      return null;
+    }
+
+    // Verify signature using the matching public key
+    const certPem = keys[header.kid];
+    if (!certPem) return null;
+
+    // Import public key from PEM certificate
+    const certBody = certPem
+      .replace("-----BEGIN CERTIFICATE-----", "")
+      .replace("-----END CERTIFICATE-----", "")
+      .replace(/\s/g, "");
+    const certDer = Buffer.from(certBody, "base64");
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "spki",
+      certDer,
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const signingInput = `${headerB64}.${payloadB64}`;
+    const signature = Buffer.from(signatureB64, "base64url");
+
+    const valid = await crypto.subtle.verify(
+      "RSASSA-PKCS1-v1_5",
+      cryptoKey,
+      signature,
+      new TextEncoder().encode(signingInput)
+    );
+
+    if (!valid) return null;
+
+    return { uid: payload.sub as string, email: (payload.email as string) ?? null };
+  } catch {
+    return null;
+  }
+}
+
+// ── System Prompt ──────────────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are the LeetPrime AI Study Assistant, an expert DSA and placement preparation coach.
+
+Your role:
+- Help users understand DSA concepts, patterns, and problem-solving strategies
+- Guide placement preparation: interview tips, time management, mindset
+- Explain algorithmic patterns (Two Pointers, BFS/DFS, DP, etc.) clearly
+- Suggest study approaches based on the user's goals and skill level
+- Answer questions about system design fundamentals for SDE roles
+
+What you MUST NOT do:
+- Invent or mention specific LeetCode problem numbers, difficulty ratings, or question lists — you don't have access to the database yet
+- Claim problems are or are not on the platform — say "I don't have question data in this stage"
+- Provide full code solutions for problems the user hasn't attempted yet (guide, not solve)
+- Discuss topics unrelated to DSA, coding interviews, or placement prep
+
+Keep responses concise, structured, and actionable. Use markdown formatting.`;
+
+// ── Message type ───────────────────────────────────────────────────────────────
+interface ChatMessage {
+  role: "user" | "model";
+  content: string;
+}
+
+// ── Route Handler ──────────────────────────────────────────────────────────────
+export async function POST(req: NextRequest) {
+  // 1. Auth check
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return NextResponse.json(
+      { error: "Unauthorized. Please sign in to use the AI assistant." },
+      { status: 401 }
+    );
+  }
+
+  const idToken = authHeader.slice(7);
+  const verified = await verifyFirebaseIdToken(idToken);
+  if (!verified) {
+    return NextResponse.json(
+      { error: "Invalid or expired session. Please sign in again." },
+      { status: 401 }
+    );
+  }
+
+  const { uid } = verified;
+
+  // 2. Rate limit
+  const { allowed, remaining } = checkRateLimit(uid);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "You've reached the hourly AI request limit (20/hr). Please try again later." },
+      { status: 429 }
+    );
+  }
+
+  // 3. Parse & validate body
+  let body: { message?: unknown; history?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const userMessage = body.message;
+  if (
+    typeof userMessage !== "string" ||
+    userMessage.trim().length === 0 ||
+    userMessage.length > MAX_MESSAGE_LENGTH
+  ) {
+    return NextResponse.json(
+      {
+        error: `Message must be a non-empty string up to ${MAX_MESSAGE_LENGTH} characters.`,
+      },
+      { status: 400 }
+    );
+  }
+
+  // Validate and truncate history
+  const rawHistory = Array.isArray(body.history) ? body.history : [];
+  const history: ChatMessage[] = rawHistory
+    .filter(
+      (m): m is ChatMessage =>
+        m &&
+        typeof m === "object" &&
+        (m.role === "user" || m.role === "model") &&
+        typeof m.content === "string"
+    )
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map((m) => ({
+      role: m.role,
+      content: m.content.slice(0, MAX_MESSAGE_LENGTH),
+    }));
+
+  // 4. Gemini API key check
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "AI service is not configured yet. Please add GEMINI_API_KEY to .env.local." },
+      { status: 503 }
+    );
+  }
+
+  // 5. Call Gemini
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT,
+    });
+
+    const chat = model.startChat({
+      history: history.map((m) => ({
+        role: m.role,
+        parts: [{ text: m.content }],
+      })),
+    });
+
+    const result = await chat.sendMessage(userMessage.trim());
+    const text = result.response.text();
+
+    return NextResponse.json(
+      { reply: text, remainingRequests: remaining },
+      { status: 200 }
+    );
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    // Don't leak internal details to the client
+    console.error("[AI chat route] Gemini error:", msg);
+    return NextResponse.json(
+      { error: "The AI service encountered an error. Please try again." },
+      { status: 500 }
+    );
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { AiAssistantPanel } from "@/components/ai/AiAssistantPanel";
 import {
   Compass,
   Sparkles,
@@ -810,6 +811,23 @@ export default function SmartPlannerPage() {
             })}
           </div>
         )}
+      </div>
+
+      {/* ── AI Study Coach ─────────────────────────────────────────── */}
+      <div className="space-y-3">
+        <div>
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-400 uppercase tracking-wider mb-1">
+            <span>✦</span>
+            <span>AI Study Coach</span>
+          </div>
+          <h2 className="text-2xl font-extrabold text-white tracking-tight">
+            Gemini-Powered DSA Assistant
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Ask about patterns, interview strategies, time complexity, and study tips.
+          </p>
+        </div>
+        <AiAssistantPanel />
       </div>
 
       {/* ── 4-Phase Structured Roadmap ───────────────────────────── */}
