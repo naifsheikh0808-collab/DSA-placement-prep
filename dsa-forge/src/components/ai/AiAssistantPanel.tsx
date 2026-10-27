@@ -140,7 +140,7 @@ export function AiAssistantPanel() {
 
       try {
         // Get a fresh Firebase ID token — never send uid directly
-        const idToken = await getIdToken(user, /* forceRefresh */ false);
+        const idToken = await getIdToken(user, /* forceRefresh */ true);
 
         // Build history (exclude errored messages)
         const history = messages

@@ -29,55 +29,73 @@ function checkRateLimit(uid: string): { allowed: boolean; remaining: number } {
 }
 
 // ── Firebase ID Token Verification ────────────────────────────────────────────
-// We verify the Firebase ID token directly via the Google public-key endpoint,
-// avoiding the Firebase Admin SDK (which requires a service-account secret).
-// The token is a signed JWT; we validate its signature, audience, and expiry.
+// Verifies Firebase ID tokens using Google's JWK endpoint so that
+// crypto.subtle.importKey receives a proper JWK object.
 async function verifyFirebaseIdToken(
   idToken: string
 ): Promise<{ uid: string; email: string | null } | null> {
   try {
-    // Fetch Google's public keys for Firebase
-    const keysRes = await fetch(
-      "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com",
-      { next: { revalidate: 3600 } }
-    );
-    if (!keysRes.ok) return null;
-    const keys: Record<string, string> = await keysRes.json();
-
-    // Decode header to get kid
-    const [headerB64, payloadB64, signatureB64] = idToken.split(".");
-    if (!headerB64 || !payloadB64 || !signatureB64) return null;
+    const parts = idToken.split(".");
+    if (parts.length !== 3) {
+      console.warn("[AI auth] Token format invalid: expected 3 parts, got", parts.length);
+      return null;
+    }
+    const [headerB64, payloadB64, signatureB64] = parts;
 
     const header = JSON.parse(Buffer.from(headerB64, "base64url").toString());
     const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString());
 
-    // Basic claims validation
+    // ── Claims validation ──────────────────────────────────────────────────
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
     const now = Math.floor(Date.now() / 1000);
 
-    if (
-      payload.aud !== projectId ||
-      payload.iss !== `https://securetoken.google.com/${projectId}` ||
-      payload.exp < now ||
-      payload.iat > now + 300 // allow 5-min clock skew
-    ) {
+    if (!payload.sub) {
+      console.warn("[AI auth] Token payload missing 'sub'");
       return null;
     }
 
-    // Verify signature using the matching public key
-    const certPem = keys[header.kid];
-    if (!certPem) return null;
+    if (payload.aud !== projectId) {
+      console.warn(`[AI auth] 'aud' mismatch: token has '${payload.aud}', expected '${projectId}'`);
+      return null;
+    }
 
-    // Import public key from PEM certificate
-    const certBody = certPem
-      .replace("-----BEGIN CERTIFICATE-----", "")
-      .replace("-----END CERTIFICATE-----", "")
-      .replace(/\s/g, "");
-    const certDer = Buffer.from(certBody, "base64");
+    if (payload.iss !== `https://securetoken.google.com/${projectId}`) {
+      console.warn(`[AI auth] 'iss' mismatch: token has '${payload.iss}', expected 'https://securetoken.google.com/${projectId}'`);
+      return null;
+    }
 
+    // Allow 5-minute clock skew tolerance on both expiration and issue time
+    if (payload.exp < now - 300) {
+      console.warn(`[AI auth] Token expired (exp: ${payload.exp}, now: ${now})`);
+      return null;
+    }
+
+    if (payload.iat > now + 300) {
+      console.warn(`[AI auth] Token issued in future (iat: ${payload.iat}, now: ${now})`);
+      return null;
+    }
+
+    // ── Fetch Google's JWKs for Firebase tokens ────────────────────────────
+    const jwksRes = await fetch(
+      "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+      { next: { revalidate: 3600 } }
+    );
+    if (!jwksRes.ok) {
+      console.warn("[AI auth] Failed to fetch Google JWKs, status:", jwksRes.status);
+      return null;
+    }
+
+    const jwks: { keys: (JsonWebKey & { kid?: string })[] } = await jwksRes.json();
+    const jwk = jwks.keys.find((k) => k.kid === header.kid);
+    if (!jwk) {
+      console.warn("[AI auth] Key ID not found in Google JWKs:", header.kid);
+      return null;
+    }
+
+    // ── Import the matching JWK and verify signature ───────────────────────
     const cryptoKey = await crypto.subtle.importKey(
-      "spki",
-      certDer,
+      "jwk",
+      jwk,
       { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
       false,
       ["verify"]
@@ -93,10 +111,14 @@ async function verifyFirebaseIdToken(
       new TextEncoder().encode(signingInput)
     );
 
-    if (!valid) return null;
+    if (!valid) {
+      console.warn("[AI auth] Signature verification failed");
+      return null;
+    }
 
     return { uid: payload.sub as string, email: (payload.email as string) ?? null };
-  } catch {
+  } catch (err) {
+    console.error("[AI auth] Exception during token verification:", err);
     return null;
   }
 }
@@ -207,7 +229,7 @@ export async function POST(req: NextRequest) {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
 
