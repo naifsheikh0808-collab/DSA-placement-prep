@@ -10,6 +10,7 @@ import {
   matchesPatternValue,
 } from "@/lib/pattern-map";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
+import { useProgressStore } from "@/hooks/use-progress";
 import type { Difficulty, Timeframe } from "@/lib/types";
 
 type SortOption = "most_asked" | "priority" | "difficulty" | "title";
@@ -20,6 +21,8 @@ function CompanyContent({ slug }: { slug: string }) {
   if (!company) {
     notFound();
   }
+
+  const { progress } = useProgressStore();
 
   const rawProblems = getCompanyProblems(company.id);
   const patterns = getAllPatterns();
@@ -186,6 +189,7 @@ function CompanyContent({ slug }: { slug: string }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-[#0c0e17]/80 border-b border-white/10 text-slate-400 uppercase tracking-wider font-bold">
               <tr>
+                <th className="py-3.5 px-5 w-10">Status</th>
                 <th className="py-3.5 px-5">Problem Title</th>
                 <th className="py-3.5 px-5">Difficulty</th>
                 <th className="py-3.5 px-5">Pattern</th>
@@ -196,9 +200,34 @@ function CompanyContent({ slug }: { slug: string }) {
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.map(({ problem, companyData }) => (
-                <tr key={problem.id} className="hover:bg-white/[0.03] transition-colors group">
+                <tr
+                  key={problem.id}
+                  className="hover:bg-white/[0.03] transition-colors group cursor-pointer"
+                  onClick={(e: React.MouseEvent) => {
+                    if ((e.target as HTMLElement).tagName === "A") return;
+                    window.location.href = `/dsa/questions/${problem.slug}`;
+                  }}
+                >
+                  {/* Status dot */}
+                  <td className="py-4 px-5">
+                    <span
+                      className={`inline-block w-2.5 h-2.5 rounded-full ${
+                        progress[problem.id]?.status === "solved"
+                          ? "bg-emerald-400 shadow-[0_0_8px_#34d399]"
+                          : progress[problem.id]?.status === "attempted"
+                          ? "bg-amber-400"
+                          : progress[problem.id]?.status === "revise"
+                          ? "bg-indigo-400"
+                          : "bg-slate-700"
+                      }`}
+                      title={`Status: ${progress[problem.id]?.status ?? "todo"}`}
+                    />
+                  </td>
                   <td className="py-4 px-5 font-semibold text-white group-hover:text-violet-300 transition-colors">
-                    <Link href={`/dsa/questions/${problem.slug}`}>
+                    <Link
+                      href={`/dsa/questions/${problem.slug}`}
+                      className="text-violet-300 hover:underline hover:text-violet-200 transition-colors"
+                    >
                       {problem.title}
                     </Link>
                   </td>
@@ -221,18 +250,12 @@ function CompanyContent({ slug }: { slug: string }) {
                   </td>
                   <td className="py-4 px-5 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/dsa/questions/${problem.slug}`}
-                        className="px-3 py-1.5 bg-violet-600/20 text-violet-300 border border-violet-500/30 rounded-lg hover:bg-violet-600/40 transition-colors font-semibold"
-                      >
-                        Solve
-                      </Link>
                       {problem.canonicalUrl && (
                         <a
                           href={problem.canonicalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1.5 text-slate-400 hover:text-white transition-colors"
+                          className="p-1.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 hover:bg-violet-500/20 hover:border-violet-500/50 transition-colors"
                           title="Open Problem"
                         >
                           <ExternalLink className="w-4 h-4" />

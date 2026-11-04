@@ -371,7 +371,7 @@ export default function QuestionsPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-[#0c0e17]/80 text-slate-400 uppercase tracking-wider border-b border-white/10 font-bold">
               <tr>
-                <th className="py-3.5 px-5 w-10">·</th>
+                <th className="py-3.5 px-5 w-10">Status</th>
                 <th className="py-3.5 px-5">Problem Title</th>
                 <th className="py-3.5 px-5">Difficulty</th>
                 <th className="py-3.5 px-5">Recency</th>
@@ -397,7 +397,11 @@ export default function QuestionsPage() {
                   return (
                     <tr
                       key={prob.id}
-                      className="hover:bg-white/[0.03] transition-colors group"
+                      className="hover:bg-white/[0.03] transition-colors group cursor-pointer"
+                      onClick={(e: React.MouseEvent) => {
+                        if ((e.target as HTMLElement).tagName === "A") return;
+                        window.location.href = `/dsa/questions/${prob.slug}`;
+                      }}
                     >
                       {/* Status dot */}
                       <td className="py-4 px-5">
@@ -417,7 +421,12 @@ export default function QuestionsPage() {
 
                       {/* Title */}
                       <td className="py-4 px-5 font-semibold text-white group-hover:text-violet-300 transition-colors">
-                        <Link href={`/dsa/questions/${prob.slug}`}>{prob.title}</Link>
+                        <Link
+                          href={`/dsa/questions/${prob.slug}`}
+                          className="text-violet-300 hover:underline hover:text-violet-200 transition-colors"
+                        >
+                          {prob.title}
+                        </Link>
                       </td>
 
                       {/* Difficulty */}
@@ -467,17 +476,12 @@ export default function QuestionsPage() {
                       {/* Action */}
                       <td className="py-4 px-5 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link href={`/dsa/questions/${prob.slug}`}>
-                            <Button variant="outline" size="sm">
-                              Solve
-                            </Button>
-                          </Link>
                           {prob.canonicalUrl && (
                             <a
                               href={prob.canonicalUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 text-slate-400 hover:text-white transition-colors"
+                              className="p-1.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 hover:bg-violet-500/20 hover:border-violet-500/50 transition-colors"
                               title="Open on LeetCode"
                             >
                               <ExternalLink className="w-4 h-4" />

@@ -32,6 +32,9 @@ import { DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useProgressStore } from "@/hooks/use-progress";
 import type { Difficulty, Problem, Timeframe } from "@/lib/types";
+import { loadPlan, savePlan, updateTaskStatus, rescheduleTask, deletePlan } from "@/lib/plan-storage";
+import { generateStudyPlan, validateStudyPlan } from "@/lib/plan-generator";
+import type { StudyPlan, StudyTask } from "@/lib/types";
 
 /* ─── Profile Types ─────────────────────────────────────────── */
 export type RoleTarget = "intern" | "sde1" | "sde2" | "quant";
@@ -248,6 +251,11 @@ export default function SmartPlannerPage() {
   const [profile, setProfile] = useState<PlannerProfile | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
+  const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
+  const [planPreview, setPlanPreview] = useState<StudyPlan | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [planLoading, setPlanLoading] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
 
   // Form states for questionnaire
   const [formRole, setFormRole] = useState<RoleTarget>("sde1");
@@ -261,29 +269,120 @@ export default function SmartPlannerPage() {
 
   const { progress, markSolved, markAttempted, markRevise } = useProgressStore();
 
-  // Load profile from localStorage
+  // Load profile from localStorage & listen for AI Coach applied plans
   useEffect(() => {
     setMounted(true);
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as PlannerProfile;
-        setProfile(parsed);
-        // Pre-fill form
-        setFormRole(parsed.role);
-        setFormStage(parsed.stage);
-        setFormLevel(parsed.level);
-        setFormCompanyPreset(parsed.companyPreset || "maang");
-        setFormCustomCompanies(parsed.targetCompanies || []);
-        setFormDuration(parsed.durationDays);
-        setFormDailyHours(parsed.dailyHours);
-      } else {
+    const loadSaved = () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved) as PlannerProfile;
+          setProfile(parsed);
+          setIsEditing(false);
+          // Pre-fill form
+          setFormRole(parsed.role);
+          setFormStage(parsed.stage);
+          setFormLevel(parsed.level);
+          setFormCompanyPreset(parsed.companyPreset || "maang");
+          setFormCustomCompanies(parsed.targetCompanies || []);
+          setFormDuration(parsed.durationDays);
+          setFormDailyHours(parsed.dailyHours);
+        } else {
+          setIsEditing(true);
+        }
+      } catch (e) {
         setIsEditing(true);
       }
-    } catch (e) {
-      setIsEditing(true);
-    }
+    };
+
+    loadSaved();
+    // Load study plan
+    const savedPlan = loadPlan();
+    if (savedPlan) setStudyPlan(savedPlan);
+    window.addEventListener("leetprime:plan-updated", loadSaved);
+    return () => window.removeEventListener("leetprime:plan-updated", loadSaved);
   }, []);
+
+  // Smooth scroll to AI coach if navigated with #ai-coach
+  useEffect(() => {
+    if (mounted && typeof window !== "undefined" && window.location.hash === "#ai-coach") {
+      const el = document.getElementById("ai-coach");
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
+      }
+    }
+  }, [mounted, profile]);
+
+  // Generate plan preview
+  const handleGeneratePlan = () => {
+    if (!profile) return;
+    setPlanLoading(true);
+    setPlanError(null);
+    try {
+      const plan = generateStudyPlan(profile, progress);
+      plan.userId = "local"; // Will be set by auth context
+      const validation = validateStudyPlan(plan);
+      if (!validation.valid) {
+        setPlanError(validation.errors.join("; "));
+        return;
+      }
+      setPlanPreview(plan);
+      setShowPreview(true);
+    } catch (e) {
+      setPlanError("Failed to generate plan. Please try again.");
+    } finally {
+      setPlanLoading(false);
+    }
+  };
+
+  // Confirm and save plan
+  const handleConfirmPlan = () => {
+    if (!planPreview) return;
+    savePlan(planPreview);
+    setStudyPlan(planPreview);
+    setPlanPreview(null);
+    setShowPreview(false);
+  };
+
+  // Cancel plan preview
+  const handleCancelPreview = () => {
+    setPlanPreview(null);
+    setShowPreview(false);
+  };
+
+  // Task actions
+  const handleTaskComplete = (taskId: string) => {
+    if (!studyPlan) return;
+    const updated = updateTaskStatus(studyPlan, taskId, "completed");
+    setStudyPlan(updated);
+  };
+
+  const handleTaskSkip = (taskId: string) => {
+    if (!studyPlan) return;
+    const updated = updateTaskStatus(studyPlan, taskId, "skipped");
+    setStudyPlan(updated);
+  };
+
+  const handleTaskRevise = (taskId: string) => {
+    if (!studyPlan) return;
+    const updated = updateTaskStatus(studyPlan, taskId, "revision_needed");
+    setStudyPlan(updated);
+  };
+
+  const handleTaskReschedule = (taskId: string, newDay: number) => {
+    if (!studyPlan) return;
+    const updated = rescheduleTask(studyPlan, taskId, newDay);
+    setStudyPlan(updated);
+  };
+
+  // Get today's tasks
+  const todaysPlan = useMemo(() => {
+    if (!studyPlan) return null;
+    const today = new Date().toISOString().split("T")[0];
+    return studyPlan.dailyPlans.find((d) => d.date === today) || studyPlan.dailyPlans[0];
+  }, [studyPlan]);
 
   // Save profile and generate roadmap
   const handleSaveProfile = () => {
@@ -616,83 +715,83 @@ export default function SmartPlannerPage() {
      RENDER: Active Roadmap & Smart Practice Mission Control
   ────────────────────────────────────────────────────────────── */
   return (
-    <div className="space-y-10 max-w-7xl mx-auto pb-20">
-      {/* ── Top Header & Profile Banner ─────────────────────────── */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#16132b]/90 via-[#101322] to-[#0c0e17] border border-violet-500/20 backdrop-blur-xl relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="space-y-6 sm:space-y-7 max-w-7xl mx-auto pb-20">
+      {/* ── Sleek & Lean Mission Control HUD Bar ─────────────────── */}
+      <div className="p-4 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-[#14172b]/95 via-[#0f1222] to-[#0a0c16] border border-violet-500/30 shadow-lg shadow-violet-950/20 backdrop-blur-xl relative overflow-hidden">
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5 text-amber-400" />
-                Personalized Mission Control
-              </span>
-              <span className="text-xs text-slate-400 font-mono">
-                {profile.durationDays}-Day Plan · {profile.dailyHours} hrs/day
-              </span>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+          {/* Left: Active Mission HUD Pill & Target Role */}
+          <div className="flex flex-wrap items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-500/40 flex items-center justify-center shrink-0 shadow-inner">
+              <Compass className="w-4 h-4 text-amber-400" />
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Your Customized Placement Roadmap
-            </h1>
-
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Targeting <strong className="text-white capitalize">{profile.role.replace("_", "-")}</strong> with focus on{" "}
-              <strong className="text-violet-300 font-semibold">
-                {COMPANY_PRESETS[profile.companyPreset]?.label || "Top Tech Companies"}
-              </strong>
-              . Sequenced dynamically based on your <strong className="text-slate-200 capitalize">{profile.level}</strong> foundation.
-            </p>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-white font-extrabold text-sm sm:text-base tracking-tight">
+                  Mission Control: <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-200 to-indigo-200">{profile.role.toUpperCase().replace("_", "-")} Roadmap</span>
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-bold uppercase tracking-wider">
+                  {profile.durationDays}D Plan · {profile.dailyHours}h/day
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold capitalize">
+                  {profile.level} Level
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 truncate max-w-xl mt-0.5">
+                Targeting <strong className="text-slate-200 font-semibold">{COMPANY_PRESETS[profile.companyPreset]?.label || "Top Tech Companies"}</strong> · Sequenced by foundation & company recency
+              </p>
+            </div>
           </div>
 
-          {/* Action & Stats Buttons */}
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* Right: Live Interactive Stats & Quick Edit Button */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-white/5">
+            {/* Compact Progress Badge with Bar */}
+            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10">
+              <div className="text-right">
+                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span className="text-emerald-400 font-extrabold">{completionPct}%</span>
+                  <span className="text-[10px] text-slate-400 font-normal">({solvedCount}/{allRoadmapProblems.length} Qs)</span>
+                </div>
+                <div className="w-24 bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
+                  <div
+                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${completionPct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Adjust Preferences Button */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsEditing(true)}
-              className="text-xs border-white/10 hover:border-violet-500/40 text-slate-300 hover:text-white"
+              className="text-xs font-semibold border-violet-500/30 hover:border-violet-500/60 bg-violet-600/10 hover:bg-violet-600/20 text-violet-200 hover:text-white px-3 py-1.5 h-8 rounded-xl shadow-sm transition-all cursor-pointer active:scale-95"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" />
+              <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5 text-violet-400" />
               Adjust Preferences
             </Button>
           </div>
         </div>
+      </div>
 
-        {/* Progress Metric Bar */}
-        <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Plan Progress</div>
-            <div className="text-2xl font-extrabold text-white mt-1">
-              {solvedCount} <span className="text-sm font-normal text-slate-400">/ {allRoadmapProblems.length} Qs</span>
-            </div>
-            <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
-                style={{ width: `${completionPct}%` }}
-              />
-            </div>
+      {/* ── AI Placement & Study Coach (Directly Visible) ────────────── */}
+      <div id="ai-coach" className="space-y-3 scroll-mt-6">
+        <div>
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-400 uppercase tracking-wider mb-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>AI Placement & Study Coach</span>
           </div>
-
-          <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Completion Rate</div>
-            <div className="text-2xl font-extrabold text-emerald-400 mt-1">{completionPct}%</div>
-            <div className="text-[11px] text-slate-400 mt-1">On schedule</div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Roadmap Window</div>
-            <div className="text-2xl font-extrabold text-violet-300 mt-1">{profile.durationDays} Days</div>
-            <div className="text-[11px] text-slate-400 mt-1">4 Progressive phases</div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Skill Baseline</div>
-            <div className="text-lg font-bold text-amber-300 mt-1.5 capitalize">{profile.level}</div>
-            <div className="text-[11px] text-slate-400 mt-1">Auto-balanced difficulty</div>
-          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+            Gemini-Powered DSA Strategist
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Ask about customized roadmap adjustments, interview trends, weak patterns, or revision recommendations.
+          </p>
         </div>
+        <AiAssistantPanel />
       </div>
 
       {/* ── Today's Smart Practice Focus (UPGRADED SMART PRACTICE) ──── */}
@@ -813,22 +912,141 @@ export default function SmartPlannerPage() {
         )}
       </div>
 
-      {/* ── AI Study Coach ─────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-400 uppercase tracking-wider mb-1">
-            <span>✦</span>
-            <span>AI Study Coach</span>
+      {/* ── Adaptive Study Plan Tasks ─────────────────────────────── */}
+      {studyPlan && (
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#10131f]/80 border border-white/10 backdrop-blur-xl space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-extrabold text-white tracking-tight">Today's Adaptive Tasks</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {studyPlan.completedTasks}/{studyPlan.totalTasks} completed
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleGeneratePlan} disabled={planLoading}>
+                {planLoading ? "Generating..." : "Regenerate Plan"}
+              </Button>
+            </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-white tracking-tight">
-            Gemini-Powered DSA Assistant
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Ask about patterns, interview strategies, time complexity, and study tips.
-          </p>
+
+          {planError && (
+            <div className="p-3 rounded-xl bg-rose-900/20 border border-rose-500/30 text-rose-300 text-xs">
+              {planError}
+            </div>
+          )}
+
+          {todaysPlan && todaysPlan.tasks.length > 0 ? (
+            <div className="space-y-3">
+              {todaysPlan.tasks.map((task) => (
+                <div
+                  key={task.id}
+                  className={`p-4 rounded-2xl border transition-all ${
+                    task.status === "completed"
+                      ? "bg-emerald-950/20 border-emerald-500/30"
+                      : task.status === "skipped"
+                      ? "bg-slate-800/30 border-slate-600/30 opacity-60"
+                      : task.status === "revision_needed"
+                      ? "bg-amber-950/20 border-amber-500/30"
+                      : "bg-white/[0.02] border-white/10"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                          task.type === "solving" ? "bg-violet-500/20 text-violet-300" :
+                          task.type === "revision" ? "bg-amber-500/20 text-amber-300" :
+                          task.type === "mock" ? "bg-rose-500/20 text-rose-300" :
+                          "bg-cyan-500/20 text-cyan-300"
+                        }`}>
+                          {task.type}
+                        </span>
+                        <span className="text-xs text-slate-400">{task.estimatedMinutes}min</span>
+                      </div>
+                      <h3 className="text-sm font-bold text-white">{task.title}</h3>
+                      <p className="text-xs text-slate-400">{task.description}</p>
+                      {task.problemUrl && (
+                        <a href={task.problemUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-violet-400 hover:underline">
+                          Open Problem →
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
+                      <button
+                        onClick={() => handleTaskComplete(task.id)}
+                        className={`p-2 rounded-lg text-xs border transition-all ${
+                          task.status === "completed"
+                            ? "bg-emerald-500 text-white border-emerald-400"
+                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-emerald-300"
+                        }`}
+                        title="Complete"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleTaskSkip(task.id)}
+                        className={`p-2 rounded-lg text-xs border transition-all ${
+                          task.status === "skipped"
+                            ? "bg-slate-500 text-white border-slate-400"
+                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-slate-300"
+                        }`}
+                        title="Skip"
+                      >
+                        <Circle className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleTaskRevise(task.id)}
+                        className={`p-2 rounded-lg text-xs border transition-all ${
+                          task.status === "revision_needed"
+                            ? "bg-amber-500 text-white border-amber-400"
+                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-amber-300"
+                        }`}
+                        title="Needs Revision"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-slate-400 text-sm">
+              No tasks for today. Generate a new plan to get started.
+            </div>
+          )}
         </div>
-        <AiAssistantPanel />
-      </div>
+      )}
+
+      {/* Plan Preview Modal */}
+      {showPreview && planPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 rounded-3xl bg-[#10131f] border border-violet-500/30 space-y-4">
+            <h2 className="text-xl font-extrabold text-white">Preview New Plan</h2>
+            <p className="text-xs text-slate-400">
+              {planPreview.totalTasks} tasks over {planPreview.dailyPlans.length} days.
+              Replacing will preserve completed tasks only if you choose to merge.
+            </p>
+            <div className="flex gap-3 pt-4">
+              <Button variant="ghost" onClick={handleCancelPreview}>Cancel</Button>
+              <Button onClick={handleConfirmPlan} className="bg-violet-600 hover:bg-violet-500">
+                Confirm & Save Plan
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generate Plan Button (when no plan exists) */}
+      {!studyPlan && !isEditing && profile && (
+        <div className="p-6 rounded-3xl bg-[#10131f]/80 border border-white/10 text-center space-y-4">
+          <p className="text-slate-400 text-sm">No study plan yet. Generate one based on your profile.</p>
+          <Button onClick={handleGeneratePlan} disabled={planLoading} className="bg-violet-600 hover:bg-violet-500">
+            {planLoading ? "Generating..." : "Generate Adaptive Study Plan"}
+          </Button>
+          {planError && <p className="text-rose-400 text-xs">{planError}</p>}
+        </div>
+      )}
 
       {/* ── 4-Phase Structured Roadmap ───────────────────────────── */}
       <div className="space-y-6">

@@ -184,7 +184,7 @@ function PatternContent({ slug }: { slug: string }) {
                         href={q.canonicalUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 rounded hover:bg-zinc-800 text-zinc-600 hover:text-zinc-300 transition-colors"
+                        className="p-1.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 hover:bg-violet-500/20 hover:border-violet-500/50 transition-colors"
                         title="Open on LeetCode"
                         onClick={(e) => e.stopPropagation()}
                       >

@@ -162,3 +162,73 @@ export interface SmartNextResult {
   reasons: string[];
   score: number;
 }
+
+// ─── Study Plan (Adaptive Planner) ─────────────────────────────────────────────
+
+export type PlanTaskType = "learning" | "solving" | "revision" | "mock";
+export type PlanTaskStatus = "pending" | "completed" | "skipped" | "revision_needed";
+
+export interface StudyTask {
+  id: string;
+  dayNumber: number;
+  date: string; // ISO date string
+  type: PlanTaskType;
+  title: string;
+  description: string;
+  problemId?: string;
+  problemTitle?: string;
+  problemUrl?: string;
+  difficulty?: Difficulty;
+  pattern?: string;
+  estimatedMinutes: number;
+  status: PlanTaskStatus;
+  completedAt?: string;
+  notes?: string;
+}
+
+export interface DailyPlan {
+  dayNumber: number;
+  date: string;
+  tasks: StudyTask[];
+  totalEstimatedMinutes: number;
+}
+
+export interface StudyPlan {
+  id: string;
+  userId: string;
+  profile: PlannerProfile;
+  createdAt: string;
+  updatedAt: string;
+  startDate: string;
+  endDate: string;
+  dailyPlans: DailyPlan[];
+  totalTasks: number;
+  completedTasks: number;
+  skippedTasks: number;
+  revisionTasks: number;
+}
+
+export interface PlannerProfile {
+  role: "intern" | "sde1" | "sde2" | "quant";
+  stage: "1st_2nd" | "3rd_4th" | "recent_grad" | "working";
+  level: "beginner" | "basics" | "intermediate" | "advanced";
+  companyPreset: string;
+  targetCompanies: string[];
+  durationDays: 15 | 30 | 60 | 90;
+  dailyHours: 1 | 2 | 4 | 6;
+  createdAt: string;
+}
+
+export interface PlanPreview {
+  proposedPlan: StudyPlan;
+  currentPlan?: StudyPlan;
+  changes: PlanChange[];
+  reasoning: string;
+}
+
+export interface PlanChange {
+  type: "added" | "removed" | "modified" | "rescheduled";
+  dayNumber?: number;
+  taskId?: string;
+  description: string;
+}

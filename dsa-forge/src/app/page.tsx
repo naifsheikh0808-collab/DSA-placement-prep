@@ -65,7 +65,7 @@ export default function HomePage() {
           </div>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
-            <Link href="/dsa/planner">
+            <Link href="/dsa/planner#ai-coach">
               <Button size="lg" className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-violet-600/30">
                 <Compass className="w-4 h-4 mr-1.5 text-amber-300" /> AI Smart Planner
               </Button>
