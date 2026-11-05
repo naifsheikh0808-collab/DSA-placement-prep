@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { useAiChat } from "@/hooks/use-ai-chat";
+import { usePrimeAi } from "@/hooks/use-prime-ai";
 import { useAuth } from "@/context/auth-context";
+import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
+import { PrimeAiSettingsModal } from "@/components/ai/PrimeAiSettingsModal";
 import { Button } from "@/components/ui/button";
 import {
-  Bot,
-  Sparkles,
   Lightbulb,
   Clock,
   Code,
@@ -15,6 +15,9 @@ import {
   X,
   Send,
   Trash2,
+  Settings,
+  ChevronDown,
+  Sparkles,
 } from "lucide-react";
 
 interface AiSidePanelProps {
@@ -40,11 +43,107 @@ interface AiSidePanelProps {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Give me a subtle hint", icon: Lightbulb, color: "text-amber-400" },
-  { label: "Explain time & space complexity", icon: Clock, color: "text-blue-400" },
-  { label: "Identify edge cases", icon: AlertTriangle, color: "text-rose-400" },
-  { label: "Review my approach in notes", icon: Code, color: "text-violet-400" },
+  { label: "Give me a subtle hint", icon: Lightbulb, color: "text-amber-400", bg: "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20" },
+  { label: "Explain time & space complexity", icon: Clock, color: "text-blue-400", bg: "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20" },
+  { label: "Identify edge cases", icon: AlertTriangle, color: "text-rose-400", bg: "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20" },
+  { label: "Review my approach in notes", icon: Code, color: "text-violet-400", bg: "bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20" },
 ];
+
+const MODEL_INFO = {
+  gemini: {
+    id: "gemini",
+    name: "Gemini 2.5 Flash",
+    shortName: "Gemini 2.5",
+    badge: "⚡",
+    color: "text-blue-400",
+  },
+  groq: {
+    id: "groq",
+    name: "Llama 3.3 70B",
+    shortName: "Llama 3.3",
+    badge: "🚀",
+    color: "text-orange-400",
+  },
+};
+
+// ── Minimal Markdown Renderer ────────────────────────────────────────────────
+function renderMarkdown(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    const bulletMatch = line.match(/^(\s*[-*])\s+(.*)/);
+    if (bulletMatch) {
+      return (
+        <li key={i} className="ml-4 list-disc text-slate-300 text-xs">
+          {inlineFormat(bulletMatch[2])}
+        </li>
+      );
+    }
+    if (line.startsWith("### ")) {
+      return (
+        <p key={i} className="font-bold text-violet-300 mt-2 text-xs">
+          {line.slice(4)}
+        </p>
+      );
+    }
+    if (line.startsWith("## ")) {
+      return (
+        <p key={i} className="font-bold text-white mt-2 text-xs font-semibold">
+          {line.slice(3)}
+        </p>
+      );
+    }
+    if (line.trim() === "") {
+      return <div key={i} className="h-1.5" />;
+    }
+    return (
+      <p key={i} className="text-white/85 text-xs leading-relaxed">
+        {inlineFormat(line)}
+      </p>
+    );
+  });
+}
+
+function inlineFormat(text: string): React.ReactNode {
+  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code key={i} className="bg-white/10 text-cyan-300 px-1 py-0.5 rounded text-[11px] font-mono">
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} className="text-white font-semibold">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+      return (
+        <em key={i} className="text-white/70 italic">
+          {part.slice(1, -1)}
+        </em>
+      );
+    }
+    const linkMatch = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (linkMatch) {
+      return (
+        <a
+          key={i}
+          href={linkMatch[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-violet-400 hover:text-violet-300 underline underline-offset-2 font-medium"
+        >
+          {linkMatch[1]}
+        </a>
+      );
+    }
+    return part;
+  });
+}
 
 export function AiSidePanel({
   problem,
@@ -56,6 +155,7 @@ export function AiSidePanel({
   isMobileDrawer = false,
 }: AiSidePanelProps) {
   const { user, isConfigured, signInWithGoogle } = useAuth();
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
 
   const {
     messages,
@@ -66,8 +166,13 @@ export function AiSidePanel({
     clearChat,
     handleKeyDown,
     textareaRef,
-    remainingRequests,
-  } = useAiChat({
+    activeModel,
+    setActiveModel,
+    remainingGemini,
+    remainingGroq,
+    isSettingsOpen,
+    setIsSettingsOpen,
+  } = usePrimeAi({
     mode: "question",
     contextPayload: {
       problemId: problem.id,
@@ -80,236 +185,286 @@ export function AiSidePanel({
       acceptanceRate: problem.acceptanceRate,
       platform: problem.platform,
       priorityScore: problem.priorityScore,
+      canonicalUrl: problem.canonicalUrl,
       currentStatus: status,
       currentNotes: notes,
     },
   });
 
-  const panelBody = (
-    <div
-      className={cn(
-        "rounded-2xl border border-violet-500/25",
-        "bg-gradient-to-b from-[#111326] via-[#0d0f1d] to-[#080911]",
-        "shadow-2xl shadow-violet-950/40 backdrop-blur-2xl flex flex-col overflow-hidden",
-        isMobileDrawer ? "h-full w-full" : "h-[calc(100vh-4.5rem)] max-h-[850px] w-full",
-        className
-      )}
-    >
-      {/* ── Header ───────────────────────────────────────────── */}
-      <div className="shrink-0 px-4 py-3.5 border-b border-white/[0.08] bg-gradient-to-r from-violet-900/35 via-indigo-900/25 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 border border-violet-400/40 flex items-center justify-center shadow-lg shadow-violet-600/35">
-              <Bot className="w-[18px] h-[18px] text-white" />
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messages.length > 0 && chatScrollRef.current) {
+      chatScrollRef.current.scrollTo({
+        top: chatScrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
+
+  const model = MODEL_INFO[activeModel];
+  const toggleModel = () => setActiveModel(activeModel === "gemini" ? "groq" : "gemini");
+
+  const remThisModel = activeModel === "gemini" ? remainingGemini : remainingGroq;
+  const isByok = remThisModel === null;
+  const tierBadgeLabel = isByok
+    ? "💎 BYOK Unlimited"
+    : `⚡ Free: ${remThisModel !== undefined && remThisModel !== null ? remThisModel : 10}/10`;
+
+  if (!isOpen && !isMobileDrawer) return null;
+
+  return (
+    <>
+      {/* Settings Modal */}
+      <PrimeAiSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        activeModel={activeModel}
+        onModelChange={setActiveModel}
+        remainingGemini={remainingGemini}
+        remainingGroq={remainingGroq}
+      />
+
+      {/* Side Panel */}
+      <aside
+        className={cn(
+          "flex flex-col bg-[#0e0c1a] border border-white/[0.08] rounded-2xl overflow-hidden",
+          "shadow-2xl shadow-violet-900/20",
+          isMobileDrawer
+            ? "h-full max-h-full w-full"
+            : "w-[390px] xl:w-[440px] h-[610px] xl:h-[630px] max-h-[calc(100vh-3rem)] flex-shrink-0",
+          className
+        )}
+      >
+        {/* ── Header ── */}
+        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/[0.07] bg-gradient-to-r from-violet-950/40 via-[#120f26] to-indigo-950/30 flex-shrink-0">
+          <PrimeAiLogo size="xs" />
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-white font-extrabold text-sm tracking-tight">Prime AI</span>
+              <span className="text-white/20 text-xs">|</span>
+              <span className="text-violet-300 text-xs font-medium">Solver</span>
             </div>
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#0e101d] animate-pulse" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-white tracking-tight">AI Problem Solver</span>
-              <span className="px-1.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 text-[10px] font-bold border border-violet-500/30">
-                Gemini
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 truncate max-w-[190px]">{problem.title}</p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-1 shrink-0">
-          {messages.length > 0 && (
+          {/* Header Action Buttons */}
+          <div className="flex items-center gap-1">
             <button
-              onClick={clearChat}
-              className="p-1.5 text-slate-400 hover:text-rose-300 hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
-              title="Clear chat"
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+              title="Prime AI Settings & API Keys"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Settings className="w-3.5 h-3.5" />
             </button>
-          )}
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/[0.08] rounded-xl transition-colors cursor-pointer"
-              title="Close panel"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
 
-      {/* ── Content: Not signed in vs Signed in ─────────────── */}
-      {!user ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center mb-4">
-            <Bot className="w-7 h-7 text-violet-400" />
-          </div>
-          <p className="text-sm font-bold text-white mb-1.5">Sign In to Ask AI</p>
-          <p className="text-xs text-slate-400 max-w-[220px] leading-relaxed mb-5">
-            Sign in with Google to get customized hints, edge case analysis, and complexity breakdowns.
-          </p>
-          <Button
-            onClick={signInWithGoogle}
-            disabled={!isConfigured}
-            className="w-full max-w-[240px] text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white rounded-xl shadow-lg shadow-violet-600/30 cursor-pointer"
-          >
-            {isConfigured ? "Sign in with Google" : "Firebase not configured"}
-          </Button>
-        </div>
-      ) : (
-        <>
-          {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto min-h-0 p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent">
-            {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center text-center h-full py-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600/30 to-indigo-600/20 border border-violet-500/25 flex items-center justify-center mb-3 shadow-lg shadow-violet-600/20">
-                  <Sparkles className="w-6 h-6 text-violet-300" />
-                </div>
-                <p className="text-sm font-bold text-white mb-1">Ask me anything</p>
-                <p className="text-xs text-slate-400 max-w-[220px] leading-relaxed mb-5">
-                  Get hints, complexity breakdowns, or edge-case analysis for{" "}
-                  <span className="text-slate-200 font-semibold">{problem.title}</span>.
-                </p>
-
-                {/* Quick Action Buttons */}
-                <div className="w-full space-y-2">
-                  {QUICK_ACTIONS.map(({ label, icon: Icon, color }) => (
-                    <button
-                      key={label}
-                      onClick={() => sendMessage(label)}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-left text-xs font-medium text-slate-300 hover:bg-violet-500/15 hover:border-violet-500/35 hover:text-white transition-all group active:scale-[0.99] cursor-pointer"
-                    >
-                      <Icon className={cn("w-3.5 h-3.5 shrink-0 group-hover:scale-110 transition-transform", color)} />
-                      <span>{label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {messages.length > 0 && (
+              <button
+                onClick={clearChat}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                title="Clear chat"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             )}
 
-            {/* Message List */}
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                title="Close AI panel"
               >
-                {msg.role === "model" && !msg.error && (
-                  <div className="w-6 h-6 rounded-lg bg-violet-600/30 border border-violet-500/30 flex items-center justify-center shrink-0 mt-0.5 mr-2">
-                    <Bot className="w-3.5 h-3.5 text-violet-300" />
-                  </div>
-                )}
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Body ── */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+          {!user || !isConfigured ? (
+            /* Not signed in */
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6 text-center">
+              <PrimeAiLogo size="lg" animated />
+              <div>
+                <h3 className="text-white font-semibold text-sm">Sign in to use Prime AI</h3>
+                <p className="text-white/40 text-xs mt-1">Get progressive hints, complexity analysis, and approach reviews.</p>
+              </div>
+              <Button
+                onClick={signInWithGoogle}
+                size="sm"
+                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 rounded-xl px-5 shadow-lg shadow-violet-900/30"
+              >
+                Sign in with Google
+              </Button>
+            </div>
+          ) : messages.length === 0 ? (
+            /* Empty state */
+            <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-4 p-4 sm:p-5">
+              <div className="text-center">
+                <PrimeAiLogo size="md" className="mx-auto mb-2.5" />
+                <h3 className="text-white font-bold text-sm">Ask about this problem</h3>
+                <p className="text-white/40 text-xs mt-1 max-w-[240px] mx-auto leading-relaxed">
+                  Context-aware hints & guidance for{" "}
+                  <span className="text-violet-400 font-semibold">{problem.title}</span>
+                </p>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="w-full space-y-2">
+                {QUICK_ACTIONS.map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <button
+                      key={action.label}
+                      onClick={() => sendMessage(action.label)}
+                      disabled={loading}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left text-xs font-medium transition-all",
+                        "text-white/70 hover:text-white",
+                        action.bg
+                      )}
+                    >
+                      <Icon className={cn("w-3.5 h-3.5 flex-shrink-0", action.color)} />
+                      {action.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* Messages Feed */
+            <div
+              ref={chatScrollRef}
+              className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3.5 scroll-smooth overscroll-contain"
+            >
+              {messages.map((msg) => (
                 <div
+                  key={msg.id}
                   className={cn(
-                    "max-w-[85%] rounded-2xl text-sm leading-relaxed px-3.5 py-2.5 whitespace-pre-wrap",
-                    msg.role === "user"
-                      ? "bg-gradient-to-br from-violet-600/50 to-indigo-600/40 border border-violet-500/35 text-violet-100 shadow-lg shadow-violet-950/30"
-                      : msg.error
-                      ? "bg-rose-900/30 border border-rose-500/30 text-rose-300"
-                      : "bg-white/[0.05] border border-white/[0.08] text-slate-200 shadow-sm"
+                    "flex gap-2.5",
+                    msg.role === "user" ? "flex-row-reverse" : "flex-row"
                   )}
                 >
-                  {msg.content}
-                  {msg.error && (
-                    <button
-                      onClick={() => {
-                        const lastUser = [...messages].reverse().find(
-                          (m) => m.role === "user" && !m.error
-                        );
-                        if (lastUser) sendMessage(lastUser.content);
-                      }}
-                      className="mt-1.5 block text-[11px] text-rose-400 hover:text-rose-200 underline cursor-pointer"
-                    >
-                      Retry
-                    </button>
+                  {msg.role === "model" && (
+                    <div className="flex-shrink-0 mt-0.5">
+                      <PrimeAiLogo size="xs" />
+                    </div>
                   )}
-                </div>
-              </div>
-            ))}
-
-            {/* Thinking Animation */}
-            {loading && (
-              <div className="flex justify-start gap-2">
-                <div className="w-6 h-6 rounded-lg bg-violet-600/30 border border-violet-500/30 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bot className="w-3.5 h-3.5 text-violet-300" />
-                </div>
-                <div className="rounded-2xl bg-white/[0.05] border border-white/[0.08] px-3.5 py-2.5 flex items-center gap-2 text-sm text-slate-400">
-                  <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:0ms]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:150ms]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:300ms]" />
-                  </span>
-                  <span>Thinking…</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Input Area */}
-          <div className="shrink-0 px-4 py-3 border-t border-white/[0.08] bg-black/25">
-            {remainingRequests !== null && (
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] text-slate-500">
-                  {remainingRequests} / 20 requests left this hour
-                </span>
-                <div className="w-20 h-1 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-400 transition-all duration-300"
-                    style={{ width: `${((20 - (remainingRequests ?? 0)) / 20) * 100}%` }}
-                  />
-                </div>
-              </div>
-            )}
+                    className={cn(
+                      "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed",
+                      msg.role === "user"
+                        ? "bg-violet-600 text-white rounded-tr-sm shadow-md shadow-violet-900/30"
+                        : msg.error
+                        ? "bg-rose-500/15 border border-rose-500/30 text-rose-300"
+                        : "bg-white/[0.06] border border-white/[0.07] text-white/90 rounded-tl-sm backdrop-blur-sm"
+                    )}
+                  >
+                    <div className="space-y-0.5">
+                      {msg.role === "model" ? renderMarkdown(msg.content) : msg.content}
+                    </div>
 
-            <div className="flex gap-2 items-end bg-white/[0.04] border border-white/[0.10] rounded-xl px-3 py-2.5 focus-within:border-violet-500/60 focus-within:ring-1 focus-within:ring-violet-500/30 transition-all">
+                    {/* Attribution */}
+                    {msg.role === "model" && !msg.error && (
+                      <div className="mt-1.5 flex items-center gap-1 opacity-35 text-[9px]">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        <span>
+                          {msg.model === "groq" ? "Llama 3.3 · Groq" : "Gemini 2.5 Flash"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Thinking animation */}
+              {loading && (
+                <div className="flex gap-2.5">
+                  <PrimeAiLogo size="xs" animated />
+                  <div className="bg-white/[0.06] border border-white/[0.07] rounded-2xl rounded-tl-sm px-3.5 py-2 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:0ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:300ms]" />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ── Chat Input Container with Toolbar INSIDE the box ── */}
+        {user && isConfigured && (
+          <div className="p-3 pt-0 flex-shrink-0">
+            <div className="rounded-2xl border border-white/[0.1] bg-[#141126]/90 backdrop-blur-md p-2.5 focus-within:border-violet-500/50 focus-within:ring-1 focus-within:ring-violet-500/30 transition-all shadow-inner">
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask for a hint, complexity, or approach…"
+                placeholder="Ask for hint, edge cases, complexity..."
                 rows={1}
-                maxLength={1000}
-                className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 resize-none outline-none min-h-[22px] max-h-[80px] leading-relaxed"
-                disabled={loading}
+                className="w-full bg-transparent text-white text-xs placeholder:text-white/25 outline-none resize-none px-1 py-0.5 leading-relaxed max-h-24"
+                style={{ scrollbarWidth: "none" }}
               />
-              <button
-                onClick={() => sendMessage()}
-                disabled={!input.trim() || loading}
-                className={cn(
-                  "p-2 rounded-lg transition-all shrink-0 cursor-pointer",
-                  input.trim() && !loading
-                    ? "bg-gradient-to-br from-violet-600 to-indigo-700 text-white hover:from-violet-500 hover:to-indigo-600 shadow-md shadow-violet-600/30 active:scale-95"
-                    : "bg-white/[0.04] text-slate-600 cursor-not-allowed"
-                )}
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
+
+              {/* INTEGRATED BOTTOM TOOLBAR INSIDE THE CHAT BOX */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] mt-1 px-0.5">
+                {/* Left: Model Switch Dropdown & Noticeable Quota Badge */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {/* Model Toggle Button */}
+                  <button
+                    onClick={toggleModel}
+                    type="button"
+                    title="Click to switch AI model"
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white/[0.07] hover:bg-white/[0.14] border border-white/10 text-white transition-all shadow-sm group"
+                  >
+                    <span>{model.badge}</span>
+                    <span className={model.color}>{model.shortName}</span>
+                    <ChevronDown className="w-2.5 h-2.5 text-white/50 group-hover:text-white transition-transform" />
+                  </button>
+
+                  {/* Noticeable Free Tier / BYOK Indicator */}
+                  <button
+                    onClick={() => setIsSettingsOpen(true)}
+                    type="button"
+                    title="View API quota & settings"
+                    className={cn(
+                      "flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all",
+                      isByok
+                        ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                        : (remThisModel !== null && remThisModel <= 3)
+                        ? "bg-rose-500/15 border-rose-500/30 text-rose-300 animate-pulse"
+                        : "bg-amber-500/15 border-amber-500/30 text-amber-300"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "w-1 h-1 rounded-full",
+                        isByok
+                          ? "bg-emerald-400"
+                          : (remThisModel !== null && remThisModel <= 3)
+                          ? "bg-rose-400"
+                          : "bg-amber-400"
+                      )}
+                    />
+                    <span>{tierBadgeLabel}</span>
+                  </button>
+                </div>
+
+                {/* Right: Send Button */}
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={!input.trim() || loading}
+                  className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-violet-900/30 transition-all"
+                >
+                  <span>Send</span>
+                  <Send className="w-3 h-3" />
+                </button>
+              </div>
             </div>
-
-            <p className="text-[10px] text-slate-600 mt-2 text-center">
-              Powered by Gemini · Context-aware for this problem
-            </p>
           </div>
-        </>
-      )}
-    </div>
+        )}
+      </aside>
+    </>
   );
-
-  // If mobile drawer mode is requested (for smaller screens)
-  if (isMobileDrawer) {
-    if (!isOpen) return null;
-    return (
-      <div className="fixed inset-0 z-50 flex">
-        <div
-          onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-        />
-        <div className="fixed right-0 top-0 bottom-0 w-full max-w-md z-10 p-3 flex flex-col">
-          {panelBody}
-        </div>
-      </div>
-    );
-  }
-
-  // Desktop in-flow mode: rendered directly into the layout without backdrop
-  return panelBody;
 }

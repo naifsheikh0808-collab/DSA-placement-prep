@@ -288,8 +288,9 @@ function QuestionContent({ slug }: { slug: string }) {
 
         {/* ── Docked AI Side Panel (In-Flow on Desktop when Open) ── */}
         {isAiOpen && (
-          <div className="hidden lg:flex w-[390px] xl:w-[440px] shrink-0 sticky top-4 self-start">
+          <div className="hidden lg:flex w-[390px] xl:w-[440px] shrink-0 sticky top-4 self-start h-[610px] xl:h-[630px] max-h-[calc(100vh-3rem)]">
             <AiSidePanel
+              className="h-full max-h-full"
               problem={{
                 id: problem.id,
                 title: problem.title,
@@ -314,27 +315,30 @@ function QuestionContent({ slug }: { slug: string }) {
 
       {/* ── Mobile Overlay Drawer (when open on smaller screens < 1024px) ── */}
       {isAiOpen && (
-        <div className="lg:hidden">
-          <AiSidePanel
-            problem={{
-              id: problem.id,
-              title: problem.title,
-              slug: problem.slug,
-              difficulty: problem.difficulty,
-              primaryPattern: problem.primaryPattern,
-              secondaryPatterns: problem.secondaryPatterns,
-              companies: problem.companies,
-              acceptanceRate: problem.acceptanceRate,
-              platform: problem.platform,
-              priorityScore: problem.priorityScore,
-              canonicalUrl: problem.canonicalUrl,
-            }}
-            status={currentStatus}
-            notes={notes}
-            isOpen={isAiOpen}
-            onClose={() => setIsAiOpen(false)}
-            isMobileDrawer={true}
-          />
+        <div className="lg:hidden fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md h-full p-3 sm:p-4 flex flex-col">
+            <AiSidePanel
+              problem={{
+                id: problem.id,
+                title: problem.title,
+                slug: problem.slug,
+                difficulty: problem.difficulty,
+                primaryPattern: problem.primaryPattern,
+                secondaryPatterns: problem.secondaryPatterns,
+                companies: problem.companies,
+                acceptanceRate: problem.acceptanceRate,
+                platform: problem.platform,
+                priorityScore: problem.priorityScore,
+                canonicalUrl: problem.canonicalUrl,
+              }}
+              status={currentStatus}
+              notes={notes}
+              isOpen={isAiOpen}
+              onClose={() => setIsAiOpen(false)}
+              isMobileDrawer={true}
+              className="h-full max-h-full w-full"
+            />
+          </div>
         </div>
       )}
 

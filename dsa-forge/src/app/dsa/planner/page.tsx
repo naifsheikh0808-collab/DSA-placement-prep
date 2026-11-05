@@ -777,18 +777,18 @@ export default function SmartPlannerPage() {
         </div>
       </div>
 
-      {/* ── AI Placement & Study Coach (Directly Visible) ────────────── */}
+      {/* ── Prime AI Study Coach (Directly Visible) ────────────── */}
       <div id="ai-coach" className="space-y-3 scroll-mt-6">
         <div>
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-400 uppercase tracking-wider mb-1">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>AI Placement & Study Coach</span>
+            <span>Multi-Model Adaptive Strategist</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-            Gemini-Powered DSA Strategist
+            Prime AI Study Coach
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Ask about customized roadmap adjustments, interview trends, weak patterns, or revision recommendations.
+            Adaptive multi-model mentor powered by Gemini & Groq for roadmap tuning, weak patterns & company prep.
           </p>
         </div>
         <AiAssistantPanel />
