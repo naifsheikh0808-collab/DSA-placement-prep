@@ -407,6 +407,21 @@ export default function SmartPlannerPage() {
     setIsEditing(false);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newProfile));
+      // ── Sync Study Plan & Notify all tabs & Active Roadmap ──
+      try {
+        const newPlan = generateStudyPlan(newProfile, progress);
+        newPlan.userId = "local";
+        savePlan(newPlan);
+        setStudyPlan(newPlan);
+      } catch {
+        const existing = loadPlan();
+        if (existing) {
+          existing.profile = newProfile;
+          savePlan(existing);
+        } else {
+          window.dispatchEvent(new Event("leetprime:plan-updated"));
+        }
+      }
     } catch (e) {
       // storage quota or disabled
     }
@@ -460,6 +475,22 @@ export default function SmartPlannerPage() {
 
         {/* Wizard Card */}
         <div className="p-6 sm:p-8 rounded-3xl bg-[#10131f]/80 border border-white/10 backdrop-blur-xl shadow-2xl space-y-8">
+          {/* ── Caution Notice Banner When Adjusting Preferences ── */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/35 flex items-start gap-3.5 shadow-lg shadow-amber-950/20">
+            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <div className="text-xs sm:text-sm font-bold text-amber-200 flex items-center gap-2">
+                <span>Caution: Updating Preferences Will Recalibrate Your Roadmap</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold uppercase tracking-wider">
+                  Notice
+                </span>
+              </div>
+              <p className="text-xs text-amber-300/80 leading-relaxed">
+                Modifying your target role, timeline, or target companies will generate a new preparation roadmap and update or reset your <strong>Active Placement Roadmap</strong> in &quot;My Progress&quot; to match your new target goals.
+              </p>
+            </div>
+          </div>
+
           {/* Step 1: Target Role & Year */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-white font-bold text-base">
@@ -691,8 +722,13 @@ export default function SmartPlannerPage() {
             </div>
           </div>
 
-          {/* Action Button */}
-          <div className="pt-4 flex items-center justify-end gap-3">
+          {/* Action Button with Caution Reminder */}
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/[0.08]">
+            <p className="text-[11px] text-amber-400/90 flex items-center gap-1.5 self-start sm:self-center">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Saving will recalibrate and update your active roadmap in My Progress.</span>
+            </p>
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             {profile && (
               <Button variant="ghost" onClick={() => setIsEditing(false)}>
                 Cancel
@@ -706,6 +742,7 @@ export default function SmartPlannerPage() {
               <Sparkles className="w-4 h-4 mr-2" />
               Generate My Smart Roadmap
             </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -762,6 +799,12 @@ export default function SmartPlannerPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Caution reminder tag next to Adjust Preferences */}
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/25 px-2.5 py-1 rounded-xl">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Adjusting preferences updates Active Roadmap</span>
             </div>
 
             {/* Adjust Preferences Button */}
