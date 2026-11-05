@@ -234,9 +234,9 @@ function QuestionContent({ slug }: { slug: string }) {
             </div>
 
             {/* ── Right 1 column: Companies ── */}
-            <div className="md:col-span-1 flex flex-col h-full min-h-0">
+            <div className="md:col-span-1 flex flex-col gap-4">
               {!problem.primaryPattern && (
-                <Card className="shrink-0 mb-4">
+                <Card className="shrink-0">
                   <CardContent className="pt-4">
                     <div className="flex gap-2.5">
                       <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -253,34 +253,40 @@ function QuestionContent({ slug }: { slug: string }) {
 
               {/*
                 Companies Card:
-                - flex-1 and h-full so it matches the left column height exactly
-                - min-h-0 on card & content so overflow-y-auto works reliably
+                - Fixed max-height so it never grows too tall (compact look)
+                - overflow-y-auto for internal scroll when companies are many
+                - Does NOT stretch to fill the full column height anymore
               */}
-              <Card className="flex flex-col flex-1 h-full min-h-0 overflow-hidden" hover={false}>
-                <CardHeader className="shrink-0 mb-3">
+              <Card className="overflow-hidden" hover={false}>
+                <CardHeader className="shrink-0">
                   <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-violet-400" />
                     Companies ({problem.companyCount})
                   </h2>
                 </CardHeader>
-                <div className="flex-1 min-h-0 overflow-y-auto pr-1 overscroll-contain [scrollbar-width:thin]">
-                  <div className="flex flex-wrap gap-1.5 pb-2">
-                    {problem.companies.map((c) => (
-                      <Link
-                        key={c}
-                        href={`/dsa/companies/${c}`}
-                        className="text-xs px-2.5 py-1 rounded-lg bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 hover:bg-violet-600/20 hover:border-violet-500/40 hover:text-white transition-all capitalize"
-                      >
-                        {c}
-                      </Link>
-                    ))}
-                    {problem.companyCount > problem.companies.length && (
-                      <span className="text-xs px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-500 border border-zinc-800">
-                        +{problem.companyCount - problem.companies.length} more
-                      </span>
-                    )}
+                <CardContent className="pt-0">
+                  <div
+                    className="overflow-y-auto overscroll-contain [scrollbar-width:thin] pr-0.5"
+                    style={{ maxHeight: "13rem" }}
+                  >
+                    <div className="flex flex-wrap gap-1.5 pb-1">
+                      {problem.companies.map((c) => (
+                        <Link
+                          key={c}
+                          href={`/dsa/companies/${c}`}
+                          className="text-xs px-2.5 py-1 rounded-lg bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 hover:bg-violet-600/20 hover:border-violet-500/40 hover:text-white transition-all capitalize"
+                        >
+                          {c}
+                        </Link>
+                      ))}
+                      {problem.companyCount > problem.companies.length && (
+                        <span className="text-xs px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-500 border border-zinc-800">
+                          +{problem.companyCount - problem.companies.length} more
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </CardContent>
               </Card>
             </div>
           </div>

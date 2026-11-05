@@ -25,9 +25,57 @@ interface UsePrimeAiOptions {
 
 const LOCAL_STORAGE_MODEL_KEY = "prime_ai_active_model";
 
+// ── Chat persistence helpers ─────────────────────────────────────────────────
+// Key is scoped to mode + (problemId for question mode) so each problem page
+// keeps its own history and the planner keeps its own history.
+function getChatStorageKey(mode: string, contextPayload?: Record<string, unknown>): string {
+  if (mode === "question" && contextPayload?.problemId) {
+    return `prime_ai_chat_question_${contextPayload.problemId}`;
+  }
+  return "prime_ai_chat_planner";
+}
+
+function loadPersistedMessages(key: string): AiChatMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as AiChatMessage[];
+    // Basic validation — only keep well-formed messages
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (m) =>
+        m &&
+        typeof m.id === "string" &&
+        (m.role === "user" || m.role === "model") &&
+        typeof m.content === "string"
+    );
+  } catch {
+    return [];
+  }
+}
+
+function persistMessages(key: string, messages: AiChatMessage[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    // Keep only the last 60 messages to avoid bloating localStorage
+    const toStore = messages.slice(-60);
+    localStorage.setItem(key, JSON.stringify(toStore));
+  } catch {
+    // Quota exceeded or private browsing — silently ignore
+  }
+}
+
 export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UsePrimeAiOptions = {}) {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<AiChatMessage[]>([]);
+
+  // Compute the storage key once (stable across renders for same mode+problem)
+  const storageKey = getChatStorageKey(mode, contextPayload);
+
+  // Load persisted messages on first mount
+  const [messages, setMessagesRaw] = useState<AiChatMessage[]>(() =>
+    loadPersistedMessages(storageKey)
+  );
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeModel, setActiveModelState] = useState<PrimeAiModel>("gemini");
@@ -35,6 +83,18 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
   const [remainingGroq, setRemainingGroq] = useState<number | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Wrapper: set messages AND persist to localStorage
+  const setMessages = useCallback(
+    (updater: AiChatMessage[] | ((prev: AiChatMessage[]) => AiChatMessage[])) => {
+      setMessagesRaw((prev) => {
+        const next = typeof updater === "function" ? updater(prev) : updater;
+        persistMessages(storageKey, next);
+        return next;
+      });
+    },
+    [storageKey]
+  );
 
   // Restore model preference from localStorage
   useEffect(() => {
@@ -148,6 +208,7 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
           }
         }
 
+        // Send only non-error messages in history to avoid confusing the AI
         const history = messages
           .filter((m) => !m.error)
           .map((m) => ({ role: m.role, content: m.content }));
@@ -205,14 +266,18 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
         setLoading(false);
       }
     },
-    [input, loading, messages, user, mode, contextPayload, onMessage, activeModel]
+    [input, loading, messages, user, mode, contextPayload, onMessage, activeModel, setMessages]
   );
 
-  const clearChat = () => {
-    setMessages([]);
+  // Clear chat: wipe state + localStorage
+  const clearChat = useCallback(() => {
+    setMessagesRaw([]);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(storageKey);
+    }
     setRemainingGemini(null);
     setRemainingGroq(null);
-  };
+  }, [storageKey]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -247,4 +312,3 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
     user,
   };
 }
-
