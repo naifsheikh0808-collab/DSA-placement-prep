@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Target,
@@ -11,11 +11,13 @@ import {
   ArrowRight,
   Sparkles,
   Building2,
-  ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
 import { loadPlan, PLAN_UPDATED_EVENT } from "@/lib/plan-storage";
-import type { StudyPlan } from "@/lib/types";
+import { useProgressStore } from "@/hooks/use-progress";
+import { TOP_PROBLEMS } from "@/lib/db";
+import type { StudyPlan, PlannerProfile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -32,35 +34,177 @@ const LEVEL_LABELS: Record<string, string> = {
   advanced: "Advanced",
 };
 
+const STORAGE_KEY = "leetprime_smart_plan_profile";
+
 export function ActiveRoadmapCard() {
   const [plan, setPlan] = useState<StudyPlan | null>(null);
+  const [profile, setProfile] = useState<PlannerProfile | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  const refreshPlan = useCallback(() => {
-    setPlan(loadPlan());
+  const { progress } = useProgressStore();
+
+  const refreshData = useCallback(() => {
+    // 1. Load active study plan (if created)
+    const savedPlan = loadPlan();
+
+    // 2. Load active smart plan profile (updated by Adjust Preferences)
+    let savedProfile: PlannerProfile | null = null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) savedProfile = JSON.parse(raw);
+    } catch {
+      // ignore JSON parse errors
+    }
+
+    setProfile(savedProfile);
+
+    if (savedPlan) {
+      // Keep profile synced if user adjusted preferences
+      if (savedProfile) {
+        savedPlan.profile = savedProfile;
+      }
+      setPlan(savedPlan);
+    } else {
+      setPlan(null);
+    }
   }, []);
 
   useEffect(() => {
     setMounted(true);
-    refreshPlan();
+    refreshData();
 
-    const onPlanUpdated = () => refreshPlan();
+    const onPlanUpdated = () => refreshData();
     window.addEventListener(PLAN_UPDATED_EVENT, onPlanUpdated);
+    window.addEventListener("leetprime:plan-updated", onPlanUpdated);
     window.addEventListener("storage", onPlanUpdated);
 
     return () => {
       window.removeEventListener(PLAN_UPDATED_EVENT, onPlanUpdated);
+      window.removeEventListener("leetprime:plan-updated", onPlanUpdated);
       window.removeEventListener("storage", onPlanUpdated);
     };
-  }, [refreshPlan]);
+  }, [refreshData]);
+
+  // Derived active profile: either from plan or directly from savedProfile
+  const activeProfile = profile || plan?.profile;
+
+  // Compute problems in this profile roadmap to accurately track progress
+  const roadmapStats = useMemo(() => {
+    if (!activeProfile) return null;
+
+    const duration = activeProfile.durationDays || 30;
+    const dailyHrs = activeProfile.dailyHours || 2;
+
+    // 1. Target companies
+    const targetCo = (activeProfile.targetCompanies || []).map((c) => c.toLowerCase());
+
+    // 2. Calculate problem budget (matching planner algorithm)
+    let problemsPerDay = 1.5;
+    if (dailyHrs <= 1) problemsPerDay = 1;
+    else if (dailyHrs === 2) problemsPerDay = 2;
+    else if (dailyHrs === 4) problemsPerDay = 3.5;
+    else problemsPerDay = 5;
+
+    const targetProblemBudget = Math.min(
+      Math.max(Math.round(duration * problemsPerDay * 0.7), 24),
+      90
+    );
+
+    // 3. Find matching problems in candidate pool
+    let candidatePool = [...TOP_PROBLEMS];
+    if (targetCo.length > 0) {
+      const matching = candidatePool.filter((p) =>
+        p.companies.some((c) => targetCo.includes(c.toLowerCase()))
+      );
+      if (matching.length >= 20) {
+        candidatePool = [...matching, ...candidatePool.filter((p) => !matching.includes(p))];
+      }
+    }
+
+    const roadmapProblems = candidatePool.slice(0, targetProblemBudget);
+    const solvedCount = roadmapProblems.filter(
+      (p) => progress[p.id]?.status === "solved"
+    ).length;
+
+    // If a full StudyPlan exists, use its daily task counts, otherwise use roadmap problem counts
+    let totalTasksCount = targetProblemBudget;
+    let completedTasksCount = solvedCount;
+
+    if (plan && plan.dailyPlans && plan.dailyPlans.length > 0) {
+      const allTasks = plan.dailyPlans.flatMap((d) => d.tasks);
+      totalTasksCount = allTasks.length;
+      completedTasksCount = allTasks.filter(
+        (t) => t.status === "completed" || (t.problemId && progress[t.problemId]?.status === "solved")
+      ).length;
+    }
+
+    const taskPct = Math.min(100, Math.round((completedTasksCount / Math.max(1, totalTasksCount)) * 100));
+
+    // Day computation
+    const startDate = new Date(plan?.startDate || activeProfile.createdAt || Date.now());
+    const now = new Date();
+    const diffDays = Math.max(
+      1,
+      Math.min(
+        duration,
+        Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+      )
+    );
+
+    // Today's remaining tasks
+    let todayRemaining = 0;
+    if (plan && plan.dailyPlans) {
+      const todayPlan = plan.dailyPlans.find((d) => d.dayNumber === diffDays);
+      if (todayPlan) {
+        const todayCompleted = todayPlan.tasks.filter(
+          (t) => t.status === "completed" || (t.problemId && progress[t.problemId]?.status === "solved")
+        ).length;
+        todayRemaining = Math.max(0, todayPlan.tasks.length - todayCompleted);
+      }
+    } else {
+      // Heuristic: expected daily target minus today's progress
+      todayRemaining = Math.max(0, Math.round(problemsPerDay) - (solvedCount % Math.round(problemsPerDay)));
+    }
+
+    // Pace calculation
+    const expectedRatio = diffDays / duration;
+    const expectedTasks = Math.round(totalTasksCount * expectedRatio);
+    let paceStatus = {
+      label: "On Track",
+      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
+      icon: CheckCircle2,
+    };
+    if (completedTasksCount > expectedTasks + 2) {
+      paceStatus = {
+        label: `Ahead by ${completedTasksCount - expectedTasks} Tasks`,
+        color: "text-amber-300 bg-amber-500/10 border-amber-500/25",
+        icon: Flame,
+      };
+    } else if (completedTasksCount < expectedTasks - 2) {
+      paceStatus = {
+        label: `${expectedTasks - completedTasksCount} Tasks Behind`,
+        color: "text-rose-400 bg-rose-500/10 border-rose-500/25",
+        icon: Clock,
+      };
+    }
+
+    return {
+      duration,
+      diffDays,
+      totalTasksCount,
+      completedTasksCount,
+      taskPct,
+      todayRemaining,
+      paceStatus,
+    };
+  }, [activeProfile, plan, progress]);
 
   if (!mounted) return null;
 
   // ── No Active Plan State: Inspiring Teaser ─────────────────────────────────
-  if (!plan || !plan.profile) {
+  if (!activeProfile || !roadmapStats) {
     return (
       <div className="relative overflow-hidden rounded-3xl border border-violet-500/25 bg-gradient-to-br from-[#14112a]/80 via-[#0e0c1f]/90 to-[#0a0814] p-5 sm:p-6 backdrop-blur-xl shadow-xl shadow-violet-950/20">
-        {/* Subtle background glow */}
         <div className="absolute -right-16 -top-16 w-56 h-56 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
@@ -97,60 +241,17 @@ export function ActiveRoadmapCard() {
   }
 
   // ── Active Plan Calculations ──────────────────────────────────────────────
-  const { profile } = plan;
-  const roleName = ROLE_LABELS[profile.role] ?? profile.role.toUpperCase();
-  const levelName = LEVEL_LABELS[profile.level] ?? profile.level;
-  const duration = profile.durationDays || 30;
-
-  // Day computation
-  const startDate = new Date(plan.startDate || plan.createdAt || Date.now());
-  const now = new Date();
-  const diffDays = Math.max(
-    1,
-    Math.min(
-      duration,
-      Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-    )
-  );
-
-  // Task computations
-  const totalTasks =
-    plan.totalTasks ||
-    plan.dailyPlans?.flatMap((d) => d.tasks).length ||
-    1;
-  const completedTasks =
-    plan.completedTasks ||
-    plan.dailyPlans?.flatMap((d) => d.tasks).filter((t) => t.status === "completed").length ||
-    0;
-  const taskPct = Math.min(100, Math.round((completedTasks / totalTasks) * 100));
-
-  // Today's tasks
-  const todayPlan = plan.dailyPlans?.find((d) => d.dayNumber === diffDays);
-  const todayTasks = todayPlan?.tasks ?? [];
-  const todayCompleted = todayTasks.filter((t) => t.status === "completed").length;
-  const todayRemaining = Math.max(0, todayTasks.length - todayCompleted);
-
-  // Pace estimation
-  const expectedRatio = diffDays / duration;
-  const expectedTasks = Math.round(totalTasks * expectedRatio);
-  let paceStatus = {
-    label: "On Track",
-    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
-    icon: CheckCircle2,
-  };
-  if (completedTasks > expectedTasks + 2) {
-    paceStatus = {
-      label: `Ahead by ${completedTasks - expectedTasks} Tasks`,
-      color: "text-amber-300 bg-amber-500/10 border-amber-500/25",
-      icon: Flame,
-    };
-  } else if (completedTasks < expectedTasks - 2) {
-    paceStatus = {
-      label: `${expectedTasks - completedTasks} Tasks Behind`,
-      color: "text-rose-400 bg-rose-500/10 border-rose-500/25",
-      icon: Clock,
-    };
-  }
+  const roleName = ROLE_LABELS[activeProfile.role] ?? activeProfile.role.toUpperCase();
+  const levelName = LEVEL_LABELS[activeProfile.level] ?? activeProfile.level;
+  const {
+    duration,
+    diffDays,
+    totalTasksCount,
+    completedTasksCount,
+    taskPct,
+    todayRemaining,
+    paceStatus,
+  } = roadmapStats;
 
   const PaceIcon = paceStatus.icon;
 
@@ -198,12 +299,12 @@ export function ActiveRoadmapCard() {
           </div>
 
           {/* Target Companies */}
-          {profile.targetCompanies && profile.targetCompanies.length > 0 ? (
+          {activeProfile.targetCompanies && activeProfile.targetCompanies.length > 0 ? (
             <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
               <span className="text-[11px] text-slate-400 flex items-center gap-1 mr-1">
                 <Building2 className="w-3 h-3 text-violet-400" /> Focus:
               </span>
-              {profile.targetCompanies.slice(0, 4).map((c) => (
+              {activeProfile.targetCompanies.slice(0, 4).map((c) => (
                 <span
                   key={c}
                   className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-violet-500/10 border border-violet-500/25 text-violet-200 capitalize"
@@ -211,15 +312,15 @@ export function ActiveRoadmapCard() {
                   {c}
                 </span>
               ))}
-              {profile.targetCompanies.length > 4 && (
+              {activeProfile.targetCompanies.length > 4 && (
                 <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded bg-white/[0.04]">
-                  +{profile.targetCompanies.length - 4} more
+                  +{activeProfile.targetCompanies.length - 4} more
                 </span>
               )}
             </div>
           ) : (
             <p className="text-xs text-slate-400">
-              Cross-company top placement patterns · {profile.dailyHours || 2}h daily
+              Cross-company top placement patterns · {activeProfile.dailyHours || 2}h daily
             </p>
           )}
         </div>
@@ -234,7 +335,7 @@ export function ActiveRoadmapCard() {
               </span>
             </div>
             <span className="text-slate-300 font-mono text-[11px]">
-              {completedTasks} / {totalTasks} Tasks ({taskPct}%)
+              {completedTasksCount} / {totalTasksCount} Tasks ({taskPct}%)
             </span>
           </div>
 
@@ -260,7 +361,7 @@ export function ActiveRoadmapCard() {
               )}
             </span>
             <span className="text-slate-500 text-[10px]">
-              {profile.dailyHours || 2}h target / day
+              {activeProfile.dailyHours || 2}h target / day
             </span>
           </div>
         </div>
