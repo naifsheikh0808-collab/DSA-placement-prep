@@ -377,6 +377,17 @@ export function ActiveRoadmapCard() {
           </Link>
         </div>
       </div>
+
+      {/* Bottom Sync Note */}
+      <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-400 relative z-10 flex-wrap gap-2">
+        <span className="flex items-center gap-1.5 text-amber-300/80">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span>Note: Changing goals in Smart Planner (&quot;Adjust Preferences&quot;) updates this sprint.</span>
+        </span>
+        <Link href="/dsa/planner" className="text-violet-400 hover:text-violet-300 underline font-medium">
+          Adjust Preferences →
+        </Link>
+      </div>
     </div>
   );
 }
