@@ -722,13 +722,8 @@ export default function SmartPlannerPage() {
             </div>
           </div>
 
-          {/* Action Button with Caution Reminder */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/[0.08]">
-            <p className="text-[11px] text-amber-400/90 flex items-center gap-1.5 self-start sm:self-center">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Saving will recalibrate and update your active roadmap in My Progress.</span>
-            </p>
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          {/* Action Button */}
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/[0.08]">
             {profile && (
               <Button variant="ghost" onClick={() => setIsEditing(false)}>
                 Cancel
@@ -742,7 +737,6 @@ export default function SmartPlannerPage() {
               <Sparkles className="w-4 h-4 mr-2" />
               Generate My Smart Roadmap
             </Button>
-            </div>
           </div>
         </div>
       </div>
@@ -801,12 +795,6 @@ export default function SmartPlannerPage() {
               </div>
             </div>
 
-            {/* Caution reminder tag next to Adjust Preferences */}
-            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/25 px-2.5 py-1 rounded-xl">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Adjusting preferences updates Active Roadmap</span>
-            </div>
-
             {/* Adjust Preferences Button */}
             <Button
               variant="outline"
@@ -818,19 +806,6 @@ export default function SmartPlannerPage() {
               Adjust Preferences
             </Button>
           </div>
-        </div>
-      </div>
-
-            {/* ── Active Roadmap Caution Banner (Always Visible on Smart Planner) ── */}
-      <div className="flex items-center gap-3 p-3.5 sm:px-4 sm:py-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/35 text-amber-200 shadow-md shadow-amber-950/20">
-        <div className="p-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 shrink-0">
-          <AlertTriangle className="w-4 h-4 text-amber-300" />
-        </div>
-        <div className="flex-1 min-w-0 text-xs sm:text-sm">
-          <span className="font-bold text-amber-200 mr-1.5">⚠️ Caution:</span>
-          <span className="text-amber-200/90 leading-relaxed">
-            Doing any changes in <strong className="text-white bg-white/10 px-1.5 py-0.5 rounded">&quot;Adjust Preferences&quot;</strong> will recalibrate and update or reset your <strong>Active Placement Roadmap</strong> in the &quot;My Progress&quot; tab.
-          </span>
         </div>
       </div>
 
