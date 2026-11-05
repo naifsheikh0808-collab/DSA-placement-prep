@@ -105,10 +105,10 @@ function QuestionContent({ slug }: { slug: string }) {
                       ? "bg-violet-600/25 border border-violet-500/50 text-violet-200 hover:bg-violet-600/35"
                       : "bg-gradient-to-r from-violet-600/20 to-indigo-600/20 border border-violet-500/35 text-violet-200 hover:bg-violet-600/30 hover:border-violet-400"
                   )}
-                  title={isAiOpen ? "Close AI Side Panel" : "Open AI Problem Solver"}
+                  title={isAiOpen ? "Close AI Panel" : "Open Prime AI"}
                 >
                   <Bot className="w-4 h-4 text-violet-400" />
-                  <span>{isAiOpen ? "Close AI Panel" : "Ask AI Coach"}</span>
+                  <span>{isAiOpen ? "Close AI Panel" : "Ask Prime AI"}</span>
                   <Sparkles className="w-3 h-3 text-amber-400" />
                 </button>
 
@@ -127,110 +127,108 @@ function QuestionContent({ slug }: { slug: string }) {
 
           {/*
             3-Column Inner Grid:
-            - Column 1 & 2: Status, Notes, Available Timeframes & Priority Score
-            - Column 3: Companies card, stretching to exactly match the bottom of Priority Score
+            - Column 1 & 2: Status & Notes Unified Card, Available Timeframes & Priority Score Unified Card
+            - Column 3: Companies card, sleek with internal scroll
           */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch min-h-0">
 
-            {/* ── Left 2 columns: Status + Notes + Timeframes & Priority Score ── */}
+            {/* ── Left 2 columns: Status + Notes & Timeframes + Priority Score ── */}
             <div className="md:col-span-2 flex flex-col gap-4">
 
-              {/* Status Card */}
+              {/* ── 1. Status & Notes Unified Card ── */}
               <Card>
-                <CardHeader>
-                  <h2 className="text-sm font-semibold text-zinc-200">Your Status</h2>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    {(
-                      Object.entries(STATUS_CONFIG) as [
-                        ProgressStatus,
-                        (typeof STATUS_CONFIG)[ProgressStatus],
-                      ][]
-                    ).map(([status, cfg]) => {
-                      const Icon = cfg.icon;
-                      const active = currentStatus === status;
-                      return (
-                        <button
-                          key={status}
-                          onClick={() => updateStatus(problem.id, status, notes)}
-                          className={cn(
-                            "flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
-                            active
-                              ? "border-violet-500/50 bg-violet-500/15 text-violet-200 shadow-md shadow-violet-950/30"
-                              : "border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300 hover:bg-zinc-800/30"
-                          )}
-                        >
-                          <Icon className={cn("w-4 h-4", active ? cfg.color : "")} />
-                          {cfg.label}
-                        </button>
-                      );
-                    })}
+                <CardContent className="p-4 sm:p-5 space-y-4 sm:space-y-5">
+                  {/* Status Section */}
+                  <div>
+                    <h2 className="text-sm font-semibold text-zinc-200 mb-2.5">Your Status</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+                      {(
+                        Object.entries(STATUS_CONFIG) as [
+                          ProgressStatus,
+                          (typeof STATUS_CONFIG)[ProgressStatus],
+                        ][]
+                      ).map(([status, cfg]) => {
+                        const Icon = cfg.icon;
+                        const active = currentStatus === status;
+                        return (
+                          <button
+                            key={status}
+                            onClick={() => updateStatus(problem.id, status, notes)}
+                            className={cn(
+                              "flex flex-col items-center gap-1 sm:gap-1.5 p-2.5 sm:p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
+                              active
+                                ? "border-violet-500/50 bg-violet-500/15 text-violet-200 shadow-md shadow-violet-950/30"
+                                : "border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300 hover:bg-zinc-800/30"
+                            )}
+                          >
+                            <Icon className={cn("w-4 h-4", active ? cfg.color : "")} />
+                            <span className="truncate max-w-full">{cfg.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Clean Divider between Status and Notes */}
+                  <div className="border-t border-zinc-800/80" />
+
+                  {/* Notes Section */}
+                  <div>
+                    <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2.5">
+                      <BookOpen className="w-4 h-4 text-violet-400" />
+                      Notes
+                    </h2>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      onBlur={() => updateStatus(problem.id, currentStatus, notes)}
+                      placeholder="Add your approach, time complexity, or insights..."
+                      rows={4}
+                      className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/30 transition-all resize-none font-mono"
+                    />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Notes Card */}
+              {/* ── 2. Timeframes & Priority Score Unified Card ── */}
               <Card>
-                <CardHeader>
-                  <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-violet-400" />
-                    Notes
-                  </h2>
-                </CardHeader>
-                <CardContent>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    onBlur={() => updateStatus(problem.id, currentStatus, notes)}
-                    placeholder="Add your approach, time complexity, or insights..."
-                    rows={4}
-                    className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/30 transition-all resize-none font-mono"
-                  />
+                <CardContent className="p-4 sm:p-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 divide-y md:divide-y-0 md:divide-x divide-zinc-800/80">
+                    {/* Available Timeframes Section */}
+                    <div className="md:pr-5 flex flex-col justify-between">
+                      <div>
+                        <h2 className="text-sm font-semibold text-zinc-200 mb-2.5">Available Timeframes</h2>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                          {problem.timeframes.map((t) => (
+                            <Badge key={t} variant="outline" className="text-xs py-1 px-2.5">
+                              <Clock className="w-3 h-3 mr-1 text-zinc-400" />
+                              {timeframeLabel(t)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Priority Score Section */}
+                    <div className="pt-4 md:pt-0 md:pl-5">
+                      <h2 className="text-sm font-semibold text-zinc-200 mb-1.5">Priority Score</h2>
+                      <div className="text-2xl sm:text-3xl font-extrabold text-white mb-1.5 tracking-tight flex items-baseline">
+                        {Math.round(problem.priorityScore * 100)}
+                        <span className="text-xs sm:text-sm text-zinc-500 font-normal ml-1">/100</span>
+                      </div>
+                      <div className="w-full bg-zinc-800/80 h-2 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-500 to-indigo-400 rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min(100, Math.max(0, problem.priorityScore * 100))}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
+                        Based on company count, frequency, pattern importance, and timeframe relevance.
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-
-              {/* Timeframes + Priority Score side-by-side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Available Timeframes */}
-                <Card>
-                  <CardHeader>
-                    <h2 className="text-sm font-semibold text-zinc-200">Available Timeframes</h2>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {problem.timeframes.map((t) => (
-                        <Badge key={t} variant="outline" className="text-xs py-1 px-2.5">
-                          <Clock className="w-3 h-3 mr-1 text-zinc-400" />
-                          {timeframeLabel(t)}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Priority Score */}
-                <Card>
-                  <CardHeader>
-                    <h2 className="text-sm font-semibold text-zinc-200">Priority Score</h2>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-extrabold text-white mb-1.5 tracking-tight">
-                      {Math.round(problem.priorityScore * 100)}
-                      <span className="text-sm text-zinc-500 font-normal ml-1">/100</span>
-                    </div>
-                    <div className="w-full bg-zinc-800/80 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-violet-500 to-indigo-400 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(100, Math.max(0, problem.priorityScore * 100))}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-zinc-500 mt-2.5 leading-relaxed">
-                      Based on company count, frequency, pattern importance, and timeframe relevance.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
 
             {/* ── Right 1 column: Companies ── */}
@@ -253,21 +251,20 @@ function QuestionContent({ slug }: { slug: string }) {
 
               {/*
                 Companies Card:
-                - Fixed max-height so it never grows too tall (compact look)
+                - Slightly increased max-height for better visibility
                 - overflow-y-auto for internal scroll when companies are many
-                - Does NOT stretch to fill the full column height anymore
               */}
               <Card className="overflow-hidden" hover={false}>
-                <CardHeader className="shrink-0">
+                <CardHeader className="shrink-0 p-4 sm:p-5 pb-2 sm:pb-3">
                   <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-violet-400" />
                     Companies ({problem.companyCount})
                   </h2>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="p-4 sm:p-5 pt-0 sm:pt-0">
                   <div
-                    className="overflow-y-auto overscroll-contain [scrollbar-width:thin] pr-0.5"
-                    style={{ maxHeight: "13rem" }}
+                    className="overflow-y-auto overscroll-contain [scrollbar-width:thin] pr-1"
+                    style={{ maxHeight: "17rem" }}
                   >
                     <div className="flex flex-wrap gap-1.5 pb-1">
                       {problem.companies.map((c) => (
@@ -352,8 +349,8 @@ function QuestionContent({ slug }: { slug: string }) {
       {!isAiOpen && (
         <button
           onClick={() => setIsAiOpen(true)}
-          title="Open AI Problem Solver"
-          aria-label="Open AI Assistant"
+          title="Open Prime AI"
+          aria-label="Open Prime AI Assistant"
           className="fixed bottom-7 right-7 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-700 border-2 border-violet-400/40 shadow-[0_8px_30px_rgba(124,58,237,0.45)] flex items-center justify-center text-white hover:scale-110 hover:shadow-[0_12px_40px_rgba(124,58,237,0.65)] hover:border-violet-300/60 active:scale-95 transition-all duration-300 ease-out cursor-pointer group"
         >
           {/* Glowing online pulse indicator */}
