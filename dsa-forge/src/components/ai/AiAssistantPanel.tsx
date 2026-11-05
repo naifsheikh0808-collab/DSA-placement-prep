@@ -20,94 +20,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
 import { PrimeAiSettingsModal } from "@/components/ai/PrimeAiSettingsModal";
+import { PrimeAiMessageRenderer } from "@/components/ai/PrimeAiMessageRenderer";
 import { usePrimeAi } from "@/hooks/use-prime-ai";
 import type { ProposedPlannerConfig } from "@/lib/question-search";
-
-// ── Minimal Markdown Renderer ────────────────────────────────────────────────
-function renderMarkdown(text: string) {
-  const lines = text.split("\n");
-  return lines.map((line, i) => {
-    const bulletMatch = line.match(/^(\s*[-*])\s+(.*)/);
-    if (bulletMatch) {
-      return (
-        <li key={i} className="ml-4 list-disc text-slate-300 text-xs sm:text-sm">
-          {inlineFormat(bulletMatch[2])}
-        </li>
-      );
-    }
-    if (line.startsWith("### ")) {
-      return (
-        <p key={i} className="font-bold text-violet-300 mt-2 text-xs sm:text-sm">
-          {line.slice(4)}
-        </p>
-      );
-    }
-    if (line.startsWith("## ")) {
-      return (
-        <p key={i} className="font-bold text-white mt-2.5 text-sm">
-          {line.slice(3)}
-        </p>
-      );
-    }
-    if (line.startsWith("# ")) {
-      return (
-        <p key={i} className="font-extrabold text-white mt-3 text-base">
-          {line.slice(2)}
-        </p>
-      );
-    }
-    if (line.trim() === "") {
-      return <div key={i} className="h-1.5" />;
-    }
-    return (
-      <p key={i} className="text-white/85 text-xs sm:text-sm leading-relaxed">
-        {inlineFormat(line)}
-      </p>
-    );
-  });
-}
-
-function inlineFormat(text: string): React.ReactNode {
-  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("`") && part.endsWith("`")) {
-      return (
-        <code key={i} className="bg-white/10 text-cyan-300 px-1 py-0.5 rounded text-[11px] font-mono">
-          {part.slice(1, -1)}
-        </code>
-      );
-    }
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <strong key={i} className="text-white font-semibold">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
-      return (
-        <em key={i} className="text-white/70 italic">
-          {part.slice(1, -1)}
-        </em>
-      );
-    }
-    const linkMatch = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
-    if (linkMatch) {
-      return (
-        <a
-          key={i}
-          href={linkMatch[2]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-violet-400 hover:text-violet-300 underline underline-offset-2 font-medium"
-        >
-          {linkMatch[1]}
-        </a>
-      );
-    }
-    return part;
-  });
-}
 
 // ── Proposed Plan Card ────────────────────────────────────────────────────────
 interface PlanCardProps {
@@ -395,7 +310,11 @@ export function AiAssistantPanel() {
                     )}
                   >
                     <div className="space-y-0.5">
-                      {msg.role === "model" ? renderMarkdown(msg.content) : msg.content}
+                      {msg.role === "model" && !msg.error ? (
+                        <PrimeAiMessageRenderer content={msg.content} />
+                      ) : (
+                        <span>{msg.content}</span>
+                      )}
                     </div>
 
                     {!!msg.proposedPlan && (
