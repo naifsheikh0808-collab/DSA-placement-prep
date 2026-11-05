@@ -32,6 +32,7 @@ import { DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { useProgressStore } from "@/hooks/use-progress";
+import { ActiveRoadmapCard } from "@/components/progress/ActiveRoadmapCard";
 import type { Difficulty, Problem } from "@/lib/types";
 
 /* ─── Custom Social Brand Icons ──────────────────────────────── */
@@ -335,6 +336,9 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
           </div>
         )}
       </div>
+
+      {/* ── Active Prime AI Roadmap Sprint ───────────────────── */}
+      <ActiveRoadmapCard />
 
       {/* ── Summary Problem Metrics (clickable) ─────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
