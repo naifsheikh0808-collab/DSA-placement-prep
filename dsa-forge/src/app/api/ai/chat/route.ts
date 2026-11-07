@@ -9,6 +9,8 @@ import {
 import {
   getGeminiApiKey,
   getGroqApiKey,
+  setGeminiApiKey,
+  setGroqApiKey,
 } from "@/lib/ai-keystore";
 
 // ━━ Constants ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -557,9 +559,17 @@ export async function POST(req: NextRequest) {
       content: m.content.slice(0, MAX_MESSAGE_LENGTH),
     }));
 
-  // 3. Check BYOK keys and rate limits per model
-  const geminiByokKey = getGeminiApiKey(uid);
-  const groqByokKey = getGroqApiKey(uid);
+  // 3. Check BYOK keys (supports server keystore, custom headers, or body backup)
+  const headerGroqKey = req.headers.get("x-byok-groq-key")?.trim();
+  const headerGeminiKey = req.headers.get("x-byok-gemini-key")?.trim();
+  const bodyGroqKey = typeof (body as any)?.groqApiKey === "string" ? (body as any).groqApiKey.trim() : undefined;
+  const bodyGeminiKey = typeof (body as any)?.geminiApiKey === "string" ? (body as any).geminiApiKey.trim() : undefined;
+
+  const geminiByokKey = bodyGeminiKey || headerGeminiKey || getGeminiApiKey(uid);
+  const groqByokKey = bodyGroqKey || headerGroqKey || getGroqApiKey(uid);
+
+  if (groqByokKey && !getGroqApiKey(uid)) setGroqApiKey(uid, groqByokKey);
+  if (geminiByokKey && !getGeminiApiKey(uid)) setGeminiApiKey(uid, geminiByokKey);
 
   let isByok = false;
   let remainingGemini: number | null = null;

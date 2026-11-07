@@ -80,8 +80,45 @@ export function PrimeAiSettingsModal({
       });
       if (res.ok) {
         const data = await res.json();
-        setGeminiConfigured(!!data.geminiConfigured);
-        setGroqConfigured(!!data.groqConfigured);
+        let gConfigured = !!data.geminiConfigured;
+        let qConfigured = !!data.groqConfigured;
+
+        // Auto-heal / re-sync from localStorage if dev server restarted and wiped RAM
+        if (typeof window !== "undefined") {
+          const localGroq =
+            localStorage.getItem(`prime_ai_groq_key_${user.uid}`) ||
+            localStorage.getItem("prime_ai_groq_key");
+          if (!qConfigured && localGroq) {
+            // Re-sync to server
+            fetch("/api/ai/config", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({ apiKey: localGroq, provider: "groq", validate: false }),
+            }).catch(() => {});
+            qConfigured = true;
+          }
+
+          const localGemini =
+            localStorage.getItem(`prime_ai_gemini_key_${user.uid}`) ||
+            localStorage.getItem("prime_ai_gemini_key");
+          if (!gConfigured && localGemini) {
+            fetch("/api/ai/config", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({ apiKey: localGemini, provider: "gemini", validate: false }),
+            }).catch(() => {});
+            gConfigured = true;
+          }
+        }
+
+        setGeminiConfigured(gConfigured);
+        setGroqConfigured(qConfigured);
       }
     } catch {
       // silent
@@ -110,6 +147,7 @@ export function PrimeAiSettingsModal({
     setMsg("");
 
     try {
+      const trimmedKey = key.trim();
       const idToken = await getIdToken(user, true);
       const res = await fetch("/api/ai/config", {
         method: "POST",
@@ -117,7 +155,7 @@ export function PrimeAiSettingsModal({
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ apiKey: key.trim(), provider, validate: true }),
+        body: JSON.stringify({ apiKey: trimmedKey, provider, validate: true }),
       });
 
       const data = await res.json();
@@ -125,7 +163,12 @@ export function PrimeAiSettingsModal({
       if (res.ok && data.valid) {
         setStatus("valid");
         setConfigured(true);
-        setMsg("✓ API key verified & saved! Unlimited queries enabled.");
+        // Persist to browser localStorage so it survives dev server restarts
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`prime_ai_${provider}_key_${user.uid}`, trimmedKey);
+          localStorage.setItem(`prime_ai_${provider}_key`, trimmedKey);
+        }
+        setMsg("✓ API key verified & permanently saved! Unlimited queries enabled.");
         if (provider === "gemini") setGeminiKey("");
         else setGroqKey("");
       } else {
@@ -145,6 +188,12 @@ export function PrimeAiSettingsModal({
     const setMsg = provider === "gemini" ? setGeminiMsg : setGroqMsg;
 
     try {
+      // Remove from browser localStorage
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(`prime_ai_${provider}_key_${user.uid}`);
+        localStorage.removeItem(`prime_ai_${provider}_key`);
+      }
+
       const idToken = await getIdToken(user, true);
       await fetch("/api/ai/config", {
         method: "DELETE",

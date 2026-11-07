@@ -213,17 +213,35 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
           .filter((m) => !m.error)
           .map((m) => ({ role: m.role, content: m.content }));
 
+        // Retrieve any local BYOK keys as a persistent fallback across server restarts
+        let groqKey: string | null = null;
+        let geminiKey: string | null = null;
+        if (typeof window !== "undefined" && user) {
+          groqKey =
+            localStorage.getItem(`prime_ai_groq_key_${user.uid}`) ||
+            localStorage.getItem("prime_ai_groq_key");
+          geminiKey =
+            localStorage.getItem(`prime_ai_gemini_key_${user.uid}`) ||
+            localStorage.getItem("prime_ai_gemini_key");
+        }
+
+        const reqHeaders: Record<string, string> = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        };
+        if (groqKey) reqHeaders["x-byok-groq-key"] = groqKey;
+        if (geminiKey) reqHeaders["x-byok-gemini-key"] = geminiKey;
+
         const res = await fetch("/api/ai/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`,
-          },
+          headers: reqHeaders,
           body: JSON.stringify({
             message: text,
             history,
             context: clientContext,
             model: activeModel,
+            groqApiKey: groqKey || undefined,
+            geminiApiKey: geminiKey || undefined,
           }),
         });
 
