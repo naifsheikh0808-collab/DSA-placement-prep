@@ -1,11 +1,13 @@
 # ⚡ LeetPrime — Beyond LeetCode Pro
 
-> **The Ultimate Company-Wise DSA Preparation Platform & Real-Time Interview Recency Engine**
+> **The Ultimate Company-Wise DSA Preparation Platform & Multi-Model AI Placement Strategist**
 
 🔗 **Live Website:** [https://dsa-placement-prep.vercel.app](https://dsa-placement-prep.vercel.app/)  
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://dsa-placement-prep.vercel.app/)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16%20(App%20Router)-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Powered by Gemini & Groq](https://img.shields.io/badge/Powered%20by-Gemini%202.5%20%7C%20Groq%20Llama%203.3-8A2BE2?style=for-the-badge)](https://aistudio.google.com/)
 
-**LeetPrime** contains the complete library of **LeetCode Pro / Premium DSA problems** organized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. On top of that, it introduces a suite of intelligent features engineered to make technical interview preparation faster, smarter, and significantly higher ROI than standard LeetCode Pro.
+**LeetPrime** contains the complete archive of **LeetCode Pro / Premium DSA problems** categorized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Supercharged with **Prime AI**, LeetPrime introduces intelligent multi-model coaching, real-time interview recency tracking, adaptive roadmaps, and rich DSA visualization to make placement prep faster, smarter, and significantly higher ROI.
 
 ---
 
@@ -13,62 +15,138 @@
 
 | Feature | Standard LeetCode Pro | ⚡ LeetPrime |
 | :--- | :---: | :---: |
-| **Company-Wise Problem Bank** | ✅ Yes | ✅ **Complete Company-Wise Question Library** |
+| **Company-Wise Problem Bank** | ✅ Yes | ✅ **Complete Company-Wise Question Library (650+ Companies)** |
 | **Real-Time Interview Recency Engine** | ❌ Static / Cumbersome | ⚡ **Interactive 30d, 3m, 6m, 1yr+ timeframes** |
 | **Company Tier Classification** | ❌ None (mixed alphabetically) | 🎯 **Tier 1 (FAANG/HFT), Tier 2 (Banks/FinTech), Tier 3** |
-| **Sub-Category Filtering** | ❌ None | 🏷️ **Banks, HFT/Quant, Indian Unicorns, AI/Cloud, etc.** |
-| **15 Pattern-First Frameworks** | ❌ Blind random lists | 🧩 **Sliding Window, Two Pointers, Monotonic Stack, etc.** |
-| **Unified Multi-Filter Explorer** | ❌ Limited split views | 🔍 **Combine Timeframe + Difficulty + Pattern + Search** |
-| **Priority Frequency Scoring** | ⚠️ Generic frequency bar | 📊 **Normalized Interview Priority Weights** |
-| **Direct Problem Solvers** | ⚠️ LeetCode only | 🔗 **Detailed Breakdown + 1-Click External Solve** |
+| **Algorithmic Pattern Frameworks** | ❌ Blind random lists | 🧩 **25+ Curated Patterns (Sliding Window, Two Pointers, etc.)** |
+| **AI Problem Coach** | ⚠️ Generic / Rigid | 🧠 **Context-Aware Prime AI (Progressive hints, notes review)** |
+| **Multi-Model Intelligence** | ❌ Single locked model | 🔄 **Toggle between Google Gemini 2.5 Flash & Groq Llama 3.3 70B** |
+| **Professional Markdown & Big-O Badges** | ❌ Monospace plain text | 📊 **Formatted comparison tables & glowing Big-O badges** |
+| **Adaptive Placement Roadmap** | ❌ Static study lists | 🧭 **Day-by-Day Milestone Roadmap with Live Sprint Pace** |
+| **BYOK (Bring Your Own Key) Freedom** | ❌ Paywalled subscription | 💎 **Free Tier + BYOK Key Manager for unlimited queries** |
 
 ---
 
-## 🎯 Core Features
+## 🤖 Prime AI — Elite Multi-Model DSA Mentor
+
+LeetPrime features **Prime AI**, a proprietary AI coaching engine designed specifically for technical interview preparation:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        💎 PRIME AI MULTI-MODEL ENGINE                  │
+├───────────────────────────────────┬────────────────────────────────────┤
+│ ⚡ Google Gemini 2.5 Flash        │ 🚀 Groq Cloud Llama 3.3 70B / Qwen │
+│ Deep multimodal reasoning,        │ Ultra-low latency, blazing-fast    │
+│ dataset tool execution, roadmaps  │ hints, syntax, and complexity code │
+└───────────────────────────────────┴────────────────────────────────────┘
+```
+
+### 1. Context-Aware Problem Solver ("Ask Prime AI")
+* Accessible directly from any problem detail page via the **"Ask Prime AI"** toggle button.
+* **Full Context Ingestion**: Prime AI knows the exact problem you are solving, difficulty, acceptance rate, company frequency, and your personal approach notes.
+* **Socratic Hint Ladder**: Delivers progressive intuition, invariants, and edge cases before revealing full code.
+* **Docked Non-Blocking Workspace**: The side panel docks seamlessly alongside your notes, status toggles, and company badges without blocking your view.
+
+### 2. Multi-Model Model Switcher in Chat
+* Toggle effortlessly between **Gemini 2.5 Flash** and **Groq Llama 3.3 70B** directly inside the chat input box toolbar.
+* Dynamic model fallback automatically switches to `qwen/qwen3.8-27b` or `llama-3.1-8b` if rate limits or tier constraints occur.
+
+### 3. Professional DSA Message Renderer
+* **Formatted Comparison Tables**: Markdown tables render as dark UI comparison boards with glowing headers and cell borders.
+* **Big-O Complexity Badges**: Automatically detects algorithmic notations and formats them into glowing badges:
+  * $O(1)$, $O(\log n)$ $\to$ **Emerald Green** (Optimal)
+  * $O(n)$, $O(\min(n, m))$, $O(V + E)$ $\to$ **Cyan / Sky Blue** (Linear)
+  * $O(n^2)$, $O(n^3)$, $O(2^n)$ $\to$ **Rose / Crimson** (Heavy)
+* **IDE Code Blocks**: Syntax containers with language labels and a 1-click **Copy** button with checkmark feedback.
+
+### 4. Smart Planner & Interactive Plan Proposals
+* Ask Prime AI to build custom preparation roadmaps for target companies (e.g., *"Build an Amazon SDE-1 plan for 30 days"*).
+* Prime AI renders interactive **Proposed Roadmap Cards** that can be applied to your live Smart Planner with a single click.
+
+---
+
+## 🎯 Core Platform Features
 
 ### 1. 🏢 Company-Wise DSA (Tier 1 · Tier 2 · Tier 3)
-- **Tier 1**: FAANG/MAANG (Google, Meta, Apple, Amazon, Microsoft, Netflix), Elite Tech (OpenAI, Stripe, Uber, Airbnb), HFT/Quant (Jane Street, Citadel, Tower Research), Indian Unicorns (Flipkart, Swiggy, Zomato, Razorpay).
-- **Tier 2**: Top Banks & FinTech (Goldman Sachs, Morgan Stanley, JPMorgan, American Express), Enterprise Tech (Cisco, Oracle, Intel, IBM, Salesforce).
-- **Tier 3**: Service and IT Services (TCS, Infosys, Wipro, Cognizant, Accenture).
-- **Sub-Category Pills**: Instantly filter companies by *Banks/Finance, Enterprise Tech, HFT/Quant, Indian Unicorns, AI/Autonomous*, etc.
+* **Tier 1**: FAANG / MAANG (Google, Meta, Apple, Amazon, Microsoft, Netflix), Elite Tech (OpenAI, Stripe, Uber, Airbnb), HFT / Quant (Jane Street, Citadel, Tower Research), Indian Unicorns (Flipkart, Swiggy, Zomato, Razorpay).
+* **Tier 2**: Top Banks & FinTech (Goldman Sachs, Morgan Stanley, JPMorgan, American Express), Enterprise Tech (Cisco, Oracle, Intel, IBM, Salesforce).
+* **Tier 3**: IT Services (TCS, Infosys, Wipro, Cognizant, Accenture).
+* **Sub-Category Pills**: Instant filters for *Banks/Finance, Enterprise Tech, HFT/Quant, Indian Unicorns, AI/Cloud*.
 
 ### 2. ⚡ Real-Time Interview Recency Engine
-- **30 Days (Urgent)**: Freshly reported in recent interview rounds.
-- **3 Months (Hot)**: Active question pool for the current hiring quarter.
-- **6 Months (Recent)**: Medium-term hiring trend.
-- **Last Year (Classic)**: Evergreen problems that never go out of style.
+* **30 Days (Urgent)**: Freshly reported in recent interview rounds.
+* **3 Months (Hot)**: Active question pool for the current hiring quarter.
+* **6 Months (Recent)**: Medium-term hiring trend.
+* **All Time / Classic**: Evergreen benchmark problems.
 
-### 3. 🧩 15 Fundamental DSA Patterns
-Stop memorizing thousands of solutions. Master the 15 algorithmic templates that solve 90%+ of technical rounds:
-- Two Pointers & Fast/Slow Pointers
-- Sliding Window & Monotonic Queue
-- Dynamic Programming & Kadane's Algorithm
-- Topological Sort & Graph BFS/DFS
-- Binary Search & Interval Merging
+### 3. 🧩 25+ Algorithmic Pattern Frameworks
+Master algorithmic templates that solve 90%+ of technical rounds:
+* Two Pointers & Fast/Slow Pointers
+* Sliding Window & Monotonic Queue
+* Dynamic Programming & Kadane's Algorithm
+* Topological Sort & Graph BFS/DFS
+* Binary Search & Interval Merging
 
-### 4. 🧭 AI-Driven Smart Prep Planner (Personalized Roadmaps + Today's Practice)
-- **Interactive Intake Wizard**: Provide your target role (Intern, SDE-1, SDE-2, Quant), career year, current DSA baseline (Beginner to Advanced), target companies, and daily time commitment.
-- **Dynamic 4-Phase Roadmap**: Automatically balances problem difficulty, recency weighting, and pattern sequencing across your preparation window (15, 30, 60, or 90 days).
-- **Today's Smart Practice Focus**: Pushes the highest-signal 2–3 questions recommended for today with live solve tracking, status updates, and LeetCode direct links.
+### 4. 🧭 Smart Planner & Active Placement Roadmap
+* **Personalized Mission Control**: Set target role, timeline (15, 30, 60, or 90 days), and daily hours.
+* **Highest-Signal Today Focus**: Curates top 2–3 daily problems pushing your roadmap forward.
+* **Active Placement Roadmap in "My Progress"**: A dedicated sprint command card tracking current day progress (`Day 14 of 30`), completion percentage, daily remaining tasks, and sprint pace (`🔥 Ahead of Pace`, `🟢 On Track`).
+
+### 5. 💎 Multi-Tier BYOK Key Storage & Free Quotas
+* **Generous Free Tier**: 10 Gemini + 10 Groq queries per user/hour out-of-the-box.
+* **Permanent BYOK Persistence**: API keys are saved across server restarts using server-side storage and browser `localStorage` auto-sync.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
-- **Styling**: Tailwind CSS with dark-mode glassmorphic aesthetics
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Data Architecture**: Curated dataset of 659 companies and 3,399+ prioritized problems
+* **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack)
+* **Language**: TypeScript 5
+* **Styling**: Tailwind CSS v4 with dark-mode glassmorphic aesthetics
+* **AI Providers**: Google Generative AI SDK (`gemini-2.5-flash`), Groq Cloud API (`llama-3.3-70b-versatile`, `qwen/qwen3.8-27b`)
+* **Authentication**: Firebase Auth (Google Sign-In with cryptographic JWK token verification)
+* **Icons**: [Lucide React](https://lucide.dev/)
+* **Charts**: Recharts & custom SVG visualizers
+* **Deployment**: [Vercel](https://vercel.com/)
 
 ---
 
 ## 🏁 Getting Started
 
-Run the development server locally:
-
+### 1. Clone the repository
 ```bash
-cd dsa-forge
+git clone https://github.com/naifsheikh0808-collab/DSA-placement-prep.git
+cd DSA-placement-prep/dsa-forge
+```
+
+### 2. Install dependencies
+```bash
 npm install
+```
+
+### 3. Configure Environment Variables
+Copy `.env.example` to `.env.local`:
+```bash
+cp .env.example .env.local
+```
+
+Add your keys inside `.env.local`:
+```env
+# Firebase Configuration (for Auth & Cloud Progress Sync)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+# AI Provider API Keys (Server-side only — never expose to client)
+GEMINI_API_KEY=your_google_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
+```
+
+### 4. Run the development server
+```bash
 npm run dev
 ```
 
@@ -78,14 +156,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 👨‍💻 Creator & Developer
 
-- **SK NAIF ALAM** — *Creator & Full Stack Developer*
-  - 💼 LinkedIn: [sk-naif-alam-553901406](https://www.linkedin.com/in/sk-naif-alam-553901406/)
-  - 🐙 GitHub: [@naifsheikh0808-collab](https://github.com/naifsheikh0808-collab)
+* **SK NAIF ALAM** — *Creator & Full Stack Developer*
+  * 💼 LinkedIn: [sk-naif-alam-553901406](https://www.linkedin.com/in/sk-naif-alam-553901406/)
+  * 🐙 GitHub: [@naifsheikh0808-collab](https://github.com/naifsheikh0808-collab)
 
 ---
 
-## ❤️ Special Thanks & Contributor Acknowledgment
+## ❤️ Special Thanks & Dataset Acknowledgments
 
-A heartfelt special thanks to:
-- **Mohana Dhar Chowdhury** ([@Mohana1008](https://github.com/Mohana1008)) for curating and providing the comprehensive LeetCode Premium company-wise dataset that powers LeetPrime's problem archives.
-
+* **Mohana Dhar Chowdhury** ([@Mohana1008](https://github.com/Mohana1008)) for curating the comprehensive LeetCode Premium company-wise problem archives that power LeetPrime.
