@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
 import { loadPlan, PLAN_UPDATED_EVENT } from "@/lib/plan-storage";
+import { generatePersonalizedRoadmap } from "@/lib/plan-generator";
 import { useProgressStore } from "@/hooks/use-progress";
 import { TOP_PROBLEMS } from "@/lib/db";
 import type { StudyPlan, PlannerProfile } from "@/lib/types";
@@ -93,40 +94,21 @@ export function ActiveRoadmapCard() {
 
     const duration = activeProfile.durationDays || 30;
     const dailyHrs = activeProfile.dailyHours || 2;
-
-    // 1. Target companies
-    const targetCo = (activeProfile.targetCompanies || []).map((c) => c.toLowerCase());
-
-    // 2. Calculate problem budget (matching planner algorithm)
     let problemsPerDay = 1.5;
     if (dailyHrs <= 1) problemsPerDay = 1;
     else if (dailyHrs === 2) problemsPerDay = 2;
     else if (dailyHrs === 4) problemsPerDay = 3.5;
     else problemsPerDay = 5;
 
-    const targetProblemBudget = Math.min(
-      Math.max(Math.round(duration * problemsPerDay * 0.7), 24),
-      90
-    );
-
-    // 3. Find matching problems in candidate pool
-    let candidatePool = [...TOP_PROBLEMS];
-    if (targetCo.length > 0) {
-      const matching = candidatePool.filter((p) =>
-        p.companies.some((c) => targetCo.includes(c.toLowerCase()))
-      );
-      if (matching.length >= 20) {
-        candidatePool = [...matching, ...candidatePool.filter((p) => !matching.includes(p))];
-      }
-    }
-
-    const roadmapProblems = candidatePool.slice(0, targetProblemBudget);
+    // Use unified, curriculum-ordered roadmap phases
+    const phases = generatePersonalizedRoadmap(activeProfile);
+    const roadmapProblems = phases.flatMap((ph) => ph.problems);
     const solvedCount = roadmapProblems.filter(
       (p) => progress[p.id]?.status === "solved"
     ).length;
 
     // If a full StudyPlan exists, use its daily task counts, otherwise use roadmap problem counts
-    let totalTasksCount = targetProblemBudget;
+    let totalTasksCount = roadmapProblems.length;
     let completedTasksCount = solvedCount;
 
     if (plan && plan.dailyPlans && plan.dailyPlans.length > 0) {

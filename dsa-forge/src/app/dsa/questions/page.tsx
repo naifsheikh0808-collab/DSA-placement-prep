@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Search,
@@ -132,7 +133,10 @@ function RecencyBadge({ timeframes }: { timeframes: string[] }) {
 }
 
 /* ─── Page ───────────────────────────────────────────────────── */
-export default function QuestionsPage() {
+function QuestionsPageContent() {
+  const searchParams = useSearchParams();
+  const patternParam = searchParams.get("pattern");
+
   const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeId>("ALL");
   const [search, setSearch] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty[]>([]);
@@ -144,6 +148,23 @@ export default function QuestionsPage() {
   const patterns = getAllPatterns();
   const extraPatterns = getExtraDatasetPatterns();
   const { progress } = useProgressStore();
+
+  // Initialize and synchronize selected pattern from URL search param if present
+  useEffect(() => {
+    if (patternParam) {
+      const decoded = decodeURIComponent(patternParam).trim();
+      const matched = patterns.find(
+        (p) =>
+          p.name.toLowerCase() === decoded.toLowerCase() ||
+          p.slug.toLowerCase() === decoded.toLowerCase()
+      );
+      if (matched) {
+        setSelectedPattern(matched.name);
+      } else {
+        setSelectedPattern(decoded);
+      }
+    }
+  }, [patternParam, patterns]);
 
   function cardCount(tfId: TimeframeId) {
     return TOP_PROBLEMS.filter((p) => matchesTimeframe(p, tfId)).length;
@@ -498,5 +519,13 @@ export default function QuestionsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function QuestionsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-zinc-400">Loading Question Bank...</div>}>
+      <QuestionsPageContent />
+    </Suspense>
   );
 }

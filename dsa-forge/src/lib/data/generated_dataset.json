@@ -103472,6 +103472,734 @@
       "secondaryPatterns": [],
       "frequency": 2.5,
       "priorityScore": 2.0
+    },
+    {
+      "id": "3977",
+      "externalId": "3977",
+      "title": "Triplets with Smaller Sum",
+      "slug": "count-triplets-with-sum-smaller-than-x5549",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/count-triplets-with-sum-smaller-than-x5549/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "1. Pattern: Two Pointers",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3978",
+      "externalId": "3978",
+      "title": "Longest Substring with K Distinct Characters",
+      "slug": "longest-k-unique-characters-substring0853",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/longest-k-unique-characters-substring0853/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "3. Pattern: Sliding Window",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3979",
+      "externalId": "3979",
+      "title": "Minimum Subarray Sum",
+      "slug": "smallest-sum-contiguous-subarray",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/smallest-sum-contiguous-subarray/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "Pattern: Kadane pattern",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3980",
+      "externalId": "3980",
+      "title": "Overlapping Intervals",
+      "slug": "check-if-any-two-intervals-overlap-among-a-given-set-of-intervals",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/check-if-any-two-intervals-overlap-among-a-given-set-of-intervals/",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "4. Pattern: Merge Intervals",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3981",
+      "externalId": "3981",
+      "title": "Minimum Meeting Rooms",
+      "slug": "attend-all-meetings-ii",
+      "difficulty": "Hard",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "4. Pattern: Merge Intervals",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3982",
+      "externalId": "3982",
+      "title": "Maximum CPU Load",
+      "slug": "maximum-cpu-load-from-the-given-list-of-jobs",
+      "difficulty": "Hard",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/maximum-cpu-load-from-the-given-list-of-jobs/",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "4. Pattern: Merge Intervals",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3983",
+      "externalId": "3983",
+      "title": "Employee Free Time",
+      "slug": "problem-challenge-3-employee-free-time-hard",
+      "difficulty": "Hard",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.codertrain.co/employee-free-time",
+      "platform": "other",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "4. Pattern: Merge Intervals",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3984",
+      "externalId": "3984",
+      "title": "Reverse a String",
+      "slug": "reverse-a-string",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/reverse-a-string/",
+      "platform": "other",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "7. Pattern: Stack",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3985",
+      "externalId": "3985",
+      "title": "Ceiling / Upper Bound in Sorted Array",
+      "slug": "ceil-in-a-sorted-array",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/ceil-in-a-sorted-array/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "10. Pattern : Binary Search",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3986",
+      "externalId": "3986",
+      "title": "Count Number of Occurrences",
+      "slug": "number-of-occurrence2259",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/number-of-occurrence2259/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "10. Pattern : Binary Search",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3987",
+      "externalId": "3987",
+      "title": "Search in Infinite Sorted Array",
+      "slug": "find-position-element-sorted-array-infinite-numbers",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/find-position-element-sorted-array-infinite-numbers/",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "10. Pattern : Binary Search",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3988",
+      "externalId": "3988",
+      "title": "Find Number of Rotations in Sorted Array",
+      "slug": "rotation4723",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/rotation4723/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "10. Pattern : Binary Search",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3989",
+      "externalId": "3989",
+      "title": "Aggressive Cows",
+      "slug": "aggressive-cows",
+      "difficulty": "Hard",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/aggressive-cows/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "10. Pattern : Binary Search",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3990",
+      "externalId": "3990",
+      "title": "Book Allocation Problem",
+      "slug": "allocate-minimum-number-of-pages0937",
+      "difficulty": "Hard",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/allocate-minimum-number-of-pages0937/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "10. Pattern : Binary Search",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3991",
+      "externalId": "3991",
+      "title": "Kth Smallest Element",
+      "slug": "kth-smallest-element5635",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/kth-smallest-element5635/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "HEAP PATTERN",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3992",
+      "externalId": "3992",
+      "title": "Merge K Sorted Arrays",
+      "slug": "merge-k-sorted-arrays",
+      "difficulty": "Hard",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/merge-k-sorted-arrays/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "HEAP PATTERN",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3993",
+      "externalId": "3993",
+      "title": "Check if String is Palindrome",
+      "slug": "palindrome-string0817",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/palindrome-string0817/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "Recursion and Backtracking Pattern",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3994",
+      "externalId": "3994",
+      "title": "Check if Array is Sorted",
+      "slug": "check-if-an-array-is-sorted0701",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/check-if-an-array-is-sorted0701/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "Recursion and Backtracking Pattern",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3995",
+      "externalId": "3995",
+      "title": "Sum of Digits of a Number",
+      "slug": "sum-of-digits1742",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/sum-of-digits1742/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "Recursion and Backtracking Pattern",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3996",
+      "externalId": "3996",
+      "title": "Remove All Occurrences of Character",
+      "slug": "remove-all-occurrences-of-a-character-in-a-string",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/remove-all-occurrences-of-a-character-in-a-string/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "Recursion and Backtracking Pattern",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3997",
+      "externalId": "3997",
+      "title": "Print Adjacency List for Graph",
+      "slug": "print-adjacency-list-1587115620",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/print-adjacency-list-1587115620/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3998",
+      "externalId": "3998",
+      "title": "Depth First Traversal (DFS) of Graph",
+      "slug": "depth-first-traversal-for-a-graph",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/depth-first-traversal-for-a-graph/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "3999",
+      "externalId": "3999",
+      "title": "Breadth First Traversal (BFS) of Graph",
+      "slug": "bfs-traversal-of-graph",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/bfs-traversal-of-graph/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "4000",
+      "externalId": "4000",
+      "title": "Detect Cycle in Undirected Graph",
+      "slug": "detect-cycle-in-an-undirected-graph",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "4001",
+      "externalId": "4001",
+      "title": "Detect Cycle in Directed Graph",
+      "slug": "detect-cycle-in-a-directed-graph",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "4002",
+      "externalId": "4002",
+      "title": "Topological Sort",
+      "slug": "topological-sort",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/topological-sort/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "4003",
+      "externalId": "4003",
+      "title": "Shortest Path in Undirected Graph",
+      "slug": "shortest-path-in-undirected-graph-having-unit-distance",
+      "difficulty": "Easy",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/shortest-path-in-undirected-graph-having-unit-distance/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
+    },
+    {
+      "id": "4004",
+      "externalId": "4004",
+      "title": "Dijkstra's Shortest Path Algorithm",
+      "slug": "implementing-dijkstra-set-1-adjacency-matrix",
+      "difficulty": "Medium",
+      "acceptanceRate": 48.5,
+      "canonicalUrl": "https://www.geeksforgeeks.org/problems/implementing-dijkstra-set-1-adjacency-matrix/1",
+      "platform": "gfg",
+      "companyCount": 15,
+      "companies": [
+        "amazon",
+        "google",
+        "microsoft",
+        "adobe"
+      ],
+      "timeframes": [
+        "3m",
+        "6m",
+        "all"
+      ],
+      "primaryPattern": "GRAPHS",
+      "secondaryPatterns": [],
+      "frequency": 120.0,
+      "priorityScore": 75.0
     }
   ]
 }

@@ -3,9 +3,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { use, Suspense } from "react";
-import { ExternalLink, GitBranch, Building2, CheckCircle2, Circle, Clock, RefreshCw } from "lucide-react";
+import { ExternalLink, GitBranch, Building2, CheckCircle2, Circle, Clock, RefreshCw, ArrowRight, Sparkles } from "lucide-react";
 import { getPatternBySlug, isSolvedStatus } from "@/lib/db";
-import { getPatternProblems, resolveProblemId } from "@/lib/pattern-map";
+import { getPatternProblems, resolveProblemId, getProblemByReference } from "@/lib/pattern-map";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useProgressStore } from "@/hooks/use-progress";
@@ -137,11 +137,29 @@ function PatternContent({ slug }: { slug: string }) {
             <div className="space-y-2">
               {questions.map((q, i) => {
                 const status = statusOf(q.id);
+                const linkedProblem =
+                  getProblemByReference(q.slug) ||
+                  getProblemByReference(q.id) ||
+                  getProblemByReference(q.externalId);
+
                 return (
                   <div
                     key={q.id}
+                    onClick={(e) => {
+                      if (
+                        (e.target as HTMLElement).closest("button") ||
+                        (e.target as HTMLElement).closest("a")
+                      )
+                        return;
+                      if (linkedProblem) {
+                        window.location.href = `/dsa/questions/${linkedProblem.slug}`;
+                      } else {
+                        window.open(q.canonicalUrl, "_blank", "noopener,noreferrer");
+                      }
+                    }}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all group",
+                      "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all group cursor-pointer",
+                      linkedProblem && "hover:border-violet-500/40 hover:bg-zinc-900/70",
                       status === "solved"
                         ? "border-emerald-500/20 bg-emerald-500/5"
                         : "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
@@ -149,13 +167,21 @@ function PatternContent({ slug }: { slug: string }) {
                   >
                     {/* Status toggle */}
                     <button
-                      onClick={() =>
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         updateStatus(
                           q.id,
-                          status === "solved" ? "todo" : status === "attempted" ? "solved" : status === "todo" ? "attempted" : "todo"
-                        )
-                      }
-                      className="flex-shrink-0 hover:scale-110 transition-transform"
+                          status === "solved"
+                            ? "todo"
+                            : status === "attempted"
+                            ? "solved"
+                            : status === "todo"
+                            ? "attempted"
+                            : "todo"
+                        );
+                      }}
+                      className="flex-shrink-0 hover:scale-110 transition-transform cursor-pointer"
                       title="Toggle status"
                     >
                       {statusIcon(q.id)}
@@ -164,15 +190,30 @@ function PatternContent({ slug }: { slug: string }) {
                     {/* Number */}
                     <span className="text-xs text-zinc-700 font-mono w-5 flex-shrink-0">{i + 1}</span>
 
-                    {/* Title */}
-                    <span
-                      className={cn(
-                        "text-sm font-medium flex-1 min-w-0 truncate",
-                        status === "solved" ? "text-zinc-500 line-through" : "text-zinc-300 group-hover:text-white"
+                    {/* Title & Link to Question Bank */}
+                    <div className="flex-1 min-w-0">
+                      {linkedProblem ? (
+                        <Link
+                          href={`/dsa/questions/${linkedProblem.slug}`}
+                          className={cn(
+                            "text-sm font-medium hover:underline hover:text-violet-300 transition-colors block truncate",
+                            status === "solved" ? "text-zinc-500 line-through" : "text-zinc-200 group-hover:text-white"
+                          )}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {q.title}
+                        </Link>
+                      ) : (
+                        <span
+                          className={cn(
+                            "text-sm font-medium block truncate",
+                            status === "solved" ? "text-zinc-500 line-through" : "text-zinc-300 group-hover:text-white"
+                          )}
+                        >
+                          {q.title}
+                        </span>
                       )}
-                    >
-                      {q.title}
-                    </span>
+                    </div>
 
                     {/* Metadata */}
                     <div className="flex items-center gap-2 flex-shrink-0">
@@ -184,8 +225,8 @@ function PatternContent({ slug }: { slug: string }) {
                         href={q.canonicalUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 hover:bg-violet-500/20 hover:border-violet-500/50 transition-colors"
-                        title="Open on LeetCode"
+                        className="p-1.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 hover:bg-violet-500/20 hover:border-violet-500/50 transition-colors cursor-pointer"
+                        title={q.platform === "gfg" ? "Open on GeeksforGeeks" : "Open on LeetCode"}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -198,6 +239,27 @@ function PatternContent({ slug }: { slug: string }) {
           </section>
         );
       })}
+      {/* ── Explore More in Question Bank CTA ── */}
+      <div className="pt-2">
+        <div className="p-6 rounded-2xl border border-violet-500/20 bg-gradient-to-r from-violet-950/40 via-[#131128]/70 to-indigo-950/40 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-5 shadow-[0_4px_24px_rgba(124,58,237,0.1)]">
+          <div className="space-y-1.5 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-2 text-violet-300 font-bold text-base">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Want more practice on {pattern.name}?</span>
+            </div>
+            <p className="text-xs text-zinc-400 max-w-xl">
+              Explore hundreds of additional company-tagged, recency-filtered {pattern.name} problems directly in the Question Bank.
+            </p>
+          </div>
+          <Link
+            href={`/dsa/questions?pattern=${encodeURIComponent(pattern.name)}`}
+            className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-violet-900/40 hover:shadow-violet-900/60 hover:scale-[1.03] active:scale-95 transition-all flex-shrink-0 cursor-pointer border border-violet-400/30"
+          >
+            <span>Explore More {pattern.name} Questions</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

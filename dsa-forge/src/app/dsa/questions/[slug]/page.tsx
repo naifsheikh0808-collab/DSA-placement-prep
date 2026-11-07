@@ -107,7 +107,7 @@ function QuestionContent({ slug }: { slug: string }) {
                   )}
                   title={isAiOpen ? "Close AI Panel" : "Open Prime AI"}
                 >
-                  <Bot className="w-4 h-4 text-violet-400" />
+                  <img src="/ai-logo.png" alt="Prime AI" className="w-4 h-4 object-contain rounded-sm" />
                   <span>{isAiOpen ? "Close AI Panel" : "Ask Prime AI"}</span>
                   <Sparkles className="w-3 h-3 text-amber-400" />
                 </button>
@@ -351,11 +351,15 @@ function QuestionContent({ slug }: { slug: string }) {
           onClick={() => setIsAiOpen(true)}
           title="Open Prime AI"
           aria-label="Open Prime AI Assistant"
-          className="fixed bottom-7 right-7 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-700 border-2 border-violet-400/40 shadow-[0_8px_30px_rgba(124,58,237,0.45)] flex items-center justify-center text-white hover:scale-110 hover:shadow-[0_12px_40px_rgba(124,58,237,0.65)] hover:border-violet-300/60 active:scale-95 transition-all duration-300 ease-out cursor-pointer group"
+          className="fixed bottom-7 right-7 z-40 w-14 h-14 rounded-full bg-gradient-to-b from-violet-500 via-violet-600 to-indigo-800 border-t border-l border-r-2 border-b-[5px] border-t-violet-300/60 border-x-violet-500/50 border-b-violet-950 shadow-[0_10px_20px_-3px_rgba(0,0,0,0.6),0_6px_0_#3b0764,0_0_25px_rgba(139,92,246,0.45),inset_0_2px_4px_rgba(255,255,255,0.4),inset_0_-2px_4px_rgba(0,0,0,0.5)] flex items-center justify-center text-white hover:scale-105 hover:shadow-[0_14px_28px_-3px_rgba(0,0,0,0.7),0_8px_0_#3b0764,0_0_35px_rgba(139,92,246,0.6)] hover:brightness-110 active:translate-y-1.5 active:shadow-[0_2px_0_#3b0764,0_4px_12px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.6)] transition-all duration-200 ease-out cursor-pointer group"
         >
           {/* Glowing online pulse indicator */}
-          <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#090a0f] shadow-sm animate-pulse" />
-          <Bot className="w-6 h-6 text-white group-hover:rotate-12 transition-transform duration-300" />
+          <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#090a0f] shadow-sm animate-pulse z-20" />
+          <img
+            src="/ai-logo.png"
+            alt="Prime AI"
+            className="w-8 h-8 object-contain rounded-lg drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] group-hover:scale-110 transition-transform duration-300"
+          />
         </button>
       )}
     </div>

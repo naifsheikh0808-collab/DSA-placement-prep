@@ -34,7 +34,12 @@ import { Button } from "@/components/ui/button";
 import { useProgressStore } from "@/hooks/use-progress";
 import type { Difficulty, Problem, Timeframe } from "@/lib/types";
 import { loadPlan, savePlan, updateTaskStatus, rescheduleTask, deletePlan } from "@/lib/plan-storage";
-import { generateStudyPlan, validateStudyPlan } from "@/lib/plan-generator";
+import {
+  generateStudyPlan,
+  validateStudyPlan,
+  generatePersonalizedRoadmap,
+  RoadmapPhaseGenerated,
+} from "@/lib/plan-generator";
 import type { StudyPlan, StudyTask } from "@/lib/types";
 
 /* ─── Profile Types ─────────────────────────────────────────── */
@@ -53,15 +58,6 @@ export interface PlannerProfile {
   durationDays: DurationOption;
   dailyHours: DailyHourOption;
   createdAt: string;
-}
-
-export interface RoadmapPhaseGenerated {
-  phaseNumber: number;
-  title: string;
-  tagline: string;
-  dayRange: string;
-  focusPatterns: string[];
-  problems: Problem[];
 }
 
 const STORAGE_KEY = "leetprime_smart_plan_profile";
@@ -99,153 +95,6 @@ const COMPANY_PRESETS: Record<string, { label: string; desc: string; companies: 
     companies: [],
   },
 };
-
-/* ─── Recommendation Algorithm ──────────────────────────────── */
-function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPhaseGenerated[] {
-  // 1. Calculate problem budget
-  let problemsPerDay = 1.5;
-  if (profile.dailyHours <= 1) problemsPerDay = 1;
-  else if (profile.dailyHours === 2) problemsPerDay = 2;
-  else if (profile.dailyHours === 4) problemsPerDay = 3.5;
-  else problemsPerDay = 5;
-
-  const totalBudget = Math.min(
-    Math.max(Math.round(profile.durationDays * problemsPerDay * 0.7), 24),
-    90
-  );
-
-  // 2. Filter candidate problems based on company selection
-  let candidatePool = [...TOP_PROBLEMS];
-  const targetCo = profile.targetCompanies.map((c) => c.toLowerCase());
-
-  if (targetCo.length > 0) {
-    const matchingCo = candidatePool.filter((p) =>
-      p.companies.some((c) => targetCo.includes(c.toLowerCase()))
-    );
-    // If we have enough company questions, prefer them heavily
-    if (matchingCo.length >= 20) {
-      candidatePool = [
-        ...matchingCo,
-        ...candidatePool.filter((p) => !matchingCo.includes(p)),
-      ];
-    }
-  }
-
-  // 3. Difficulty weighting based on skill level & role
-  const diffWeights = {
-    beginner: { Easy: 0.45, Medium: 0.5, Hard: 0.05 },
-    basics: { Easy: 0.25, Medium: 0.65, Hard: 0.1 },
-    intermediate: { Easy: 0.1, Medium: 0.7, Hard: 0.2 },
-    advanced: { Easy: 0.0, Medium: 0.5, Hard: 0.5 },
-  }[profile.level];
-
-  // 4. Score each candidate problem
-  const scoredProblems = candidatePool.map((p) => {
-    let score = p.priorityScore;
-
-    // Recency boost (30d and 3m questions get priority)
-    if (p.timeframes.includes("30d")) score += 25;
-    else if (p.timeframes.includes("3m")) score += 15;
-    else if (p.timeframes.includes("6m")) score += 5;
-
-    // Company match boost
-    if (targetCo.length > 0 && p.companies.some((c) => targetCo.includes(c.toLowerCase()))) {
-      score += 20;
-    }
-
-    // Role-based tailoring
-    if (profile.role === "quant" && p.difficulty === "Hard") score += 20;
-    if (profile.role === "intern" && p.difficulty === "Easy") score += 10;
-
-    return { problem: p, score };
-  });
-
-  // Sort by calculated score
-  scoredProblems.sort((a, b) => b.score - a.score);
-
-  // 5. Partition into 4 structured phases according to pattern progression
-  const phase1Patterns = ["two pointers", "sliding window", "hash map", "array", "binary search", "string"];
-  const phase2Patterns = ["tree", "binary tree", "linked list", "breadth-first", "depth-first", "stack", "queue"];
-  const phase3Patterns = ["dynamic programming", "graph", "heap", "priority queue", "backtracking", "greedy", "intervals"];
-  const phase4Patterns = ["trie", "monotonic stack", "segment tree", "union find", "bit manipulation", "design"];
-
-  function matchesPatterns(p: Problem, patterns: string[]) {
-    const primary = (p.primaryPattern || "").toLowerCase();
-    const secondaries = p.secondaryPatterns.map((s) => s.toLowerCase());
-    return patterns.some((pat) => primary.includes(pat) || secondaries.some((s) => s.includes(pat)));
-  }
-
-  const p1Candidates: Problem[] = [];
-  const p2Candidates: Problem[] = [];
-  const p3Candidates: Problem[] = [];
-  const p4Candidates: Problem[] = [];
-
-  const usedIds = new Set<string>();
-
-  for (const item of scoredProblems) {
-    const p = item.problem;
-    if (usedIds.has(p.id)) continue;
-
-    if (matchesPatterns(p, phase1Patterns)) {
-      p1Candidates.push(p);
-      usedIds.add(p.id);
-    } else if (matchesPatterns(p, phase2Patterns)) {
-      p2Candidates.push(p);
-      usedIds.add(p.id);
-    } else if (matchesPatterns(p, phase3Patterns)) {
-      p3Candidates.push(p);
-      usedIds.add(p.id);
-    } else {
-      p4Candidates.push(p);
-      usedIds.add(p.id);
-    }
-  }
-
-  // Budget per phase
-  const p1Count = Math.max(Math.round(totalBudget * 0.25), 6);
-  const p2Count = Math.max(Math.round(totalBudget * 0.3), 7);
-  const p3Count = Math.max(Math.round(totalBudget * 0.3), 7);
-  const p4Count = Math.max(totalBudget - (p1Count + p2Count + p3Count), 5);
-
-  const daySplit1 = Math.round(profile.durationDays * 0.25);
-  const daySplit2 = Math.round(profile.durationDays * 0.55);
-  const daySplit3 = Math.round(profile.durationDays * 0.85);
-
-  return [
-    {
-      phaseNumber: 1,
-      title: "Foundations & High-Frequency Frameworks",
-      tagline: "Master Two Pointers, Sliding Window & Hash Maps to build problem-solving velocity.",
-      dayRange: `Day 1 – Day ${daySplit1}`,
-      focusPatterns: ["Two Pointers", "Sliding Window", "Binary Search", "Hash Map"],
-      problems: p1Candidates.slice(0, p1Count),
-    },
-    {
-      phaseNumber: 2,
-      title: "Hierarchical Structures & Traversal",
-      tagline: "Conquer Trees, BFS/DFS, Recursion & Linked Lists — the bread & butter of rounds.",
-      dayRange: `Day ${daySplit1 + 1} – Day ${daySplit2}`,
-      focusPatterns: ["Binary Trees", "BFS & DFS", "Linked Lists", "Stacks & Queues"],
-      problems: p2Candidates.slice(0, p2Count),
-    },
-    {
-      phaseNumber: 3,
-      title: "Core Algorithmic Mastery & Optimization",
-      tagline: "Dynamic Programming, Graphs & Heaps — unlock Tier-1 and MAANG clearing questions.",
-      dayRange: `Day ${daySplit2 + 1} – Day ${daySplit3}`,
-      focusPatterns: ["Dynamic Programming", "Graphs", "Heap / Priority Queue", "Intervals"],
-      problems: p3Candidates.slice(0, p3Count),
-    },
-    {
-      phaseNumber: 4,
-      title: "Target Company Recency & Mock Sprint",
-      tagline: "Fresh 30-day interview questions from your target companies + edge-case mastery.",
-      dayRange: `Day ${daySplit3 + 1} – Day ${profile.durationDays}`,
-      focusPatterns: ["Company Recency 30d", "Monotonic Stack", "Trie & Advanced", "Speed Mocks"],
-      problems: p4Candidates.slice(0, p4Count),
-    },
-  ];
-}
 
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function SmartPlannerPage() {
