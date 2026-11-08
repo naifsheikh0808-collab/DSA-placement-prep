@@ -271,7 +271,22 @@ COACHING BEHAVIOR & RULES:
    - When the user asks to create a study plan, prepare for a specific company or role, or optimize their roadmap, call 'propose_planner_configuration'.
 6. REALISTIC WORKLOAD & SAFETY:
    - Use realistic time estimates (Easy: 15-25m, Medium: 35-45m, Hard: 50-70m).
-   - Keep answers structured, inspiring, and formatted with clean markdown.`;
+   - Keep answers structured, inspiring, and formatted with clean markdown.
+7. PROPORTIONAL RESPONSE LENGTH & CONCISENESS (CRITICAL):
+   - Golden Rule: Match response length strictly to the question asked — NEVER unnecessarily long, and NEVER dismissively short.
+   - Direct / Targeted / List Questions (e.g., "Top 5 Google questions", "What is the time complexity?", "Give me a subtle hint", "List edge cases"):
+     * Jump IMMEDIATELY into the answer in sentence 1.
+     * ZERO conversational fluff, pleasantries, or preamble ("Sure!", "Certainly!", "Great question! Here is the breakdown:").
+     * ZERO concluding boilerplate ("I hope this helps!", "Happy coding!", "Let me know if you have more questions!").
+     * Deliver high-density, scannable bullets or 1-3 focused paragraphs. No essays.
+   - In-depth / Conceptual Questions (e.g., "Explain Kadane's algorithm from intuition to code", "How does Sliding Window work?"):
+     * Keep it structured and balanced: 2-4 concise sections (Mental Model -> Algorithm Invariant -> Complexity -> Example/Trap).
+     * Avoid repeating the same concept in multiple paragraphs.
+   - Socratic Hints:
+     * Never give a 1-sentence cryptic non-answer (e.g., "Use two pointers"). Provide the key mental bridge or invariant the user needs to progress.
+     * Never dump full solution code unless explicitly asked ("give me the code", "show full solution").
+   - Code Snippets:
+     * Keep code minimal, clean, and focused solely on the algorithm. Avoid excessive boilerplate.`;
 
 // ━━ Message type ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 interface ChatMessage {
@@ -395,7 +410,9 @@ async function callGroq(
   userMessage: string,
   isPlannerMode: boolean
 ): Promise<{ text: string; proposedPlan?: ProposedPlannerConfig }> {
-  let sys = systemPrompt;
+  let sys =
+    systemPrompt +
+    "\n\nCRITICAL CONCISENESS & LENGTH RULE FOR GROQ:\nAlways provide proportional answers matching question depth. Strictly avoid verbose intros, conversational filler, and repetitive concluding advice. Jump straight into the answer.";
   if (isPlannerMode) {
     sys += "\n\nPLANNER PROPOSAL INSTRUCTION:\nWhen recommending or generating a new study plan or roadmap adjustments, provide your coaching advice and include a JSON code block in this exact format at the very end of your response so the user can interactively apply it to their Smart Planner:\n```json-plan\n{\n  \"role\": \"sde1\",\n  \"level\": \"intermediate\",\n  \"durationDays\": 30,\n  \"dailyHours\": 2,\n  \"targetCompanies\": [\"Google\", \"Amazon\"],\n  \"planSummary\": \"1-2 sentence executive summary of this roadmap\",\n  \"focusAreas\": [\"Sliding Window\", \"Binary Tree\", \"Dynamic Programming\"]\n}\n```\nValid roles: 'intern', 'sde1', 'sde2', 'quant'. Valid levels: 'beginner', 'basics', 'intermediate', 'advanced'. Valid durationDays: 15, 30, 60, 90. Valid dailyHours: 1, 2, 4, 6.";
   }
@@ -450,8 +467,8 @@ async function callGroq(
       body: JSON.stringify({
         model: modelId,
         messages: rawMessages,
-        max_tokens: 2048,
-        temperature: 0.7,
+        max_tokens: 1500,
+        temperature: 0.5,
       }),
     });
 
@@ -683,6 +700,10 @@ export async function POST(req: NextRequest) {
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_PROMPT,
+      generationConfig: {
+        temperature: 0.5,
+        maxOutputTokens: 1600,
+      },
       tools: [
         {
           functionDeclarations: [SEARCH_QUESTIONS_TOOL, PROPOSE_PLANNER_TOOL],
