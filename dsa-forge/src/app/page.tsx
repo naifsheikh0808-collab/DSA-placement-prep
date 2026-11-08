@@ -7,6 +7,7 @@ import { getAllPatterns, getAllCompanies, getPlatformStats, getSmartNextProblem,
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/layout/user-avatar";
+import { HomeAiButton } from "@/components/ai/HomeAiButton";
 
 export default function HomePage() {
   const patterns = getAllPatterns();
@@ -220,6 +221,9 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* ── Floating AI Button (home-page general assistant) ── */}
+      <HomeAiButton />
     </div>
   );
 }

@@ -18,7 +18,7 @@ export interface AiChatMessage {
 }
 
 interface UsePrimeAiOptions {
-  mode?: "planner" | "question";
+  mode?: "planner" | "question" | "general";
   contextPayload?: Record<string, unknown>;
   onMessage?: (message: AiChatMessage) => void;
 }
@@ -31,6 +31,9 @@ const LOCAL_STORAGE_MODEL_KEY = "prime_ai_active_model";
 function getChatStorageKey(mode: string, contextPayload?: Record<string, unknown>): string {
   if (mode === "question" && contextPayload?.problemId) {
     return `prime_ai_chat_question_${contextPayload.problemId}`;
+  }
+  if (mode === "general") {
+    return "prime_ai_chat_home";
   }
   return "prime_ai_chat_planner";
 }
