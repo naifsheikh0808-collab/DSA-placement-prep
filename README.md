@@ -1,11 +1,27 @@
+<div align="center">
+
 # ⚡ LeetPrime — Beyond LeetCode Pro
 
-> **The Ultimate Company-Wise DSA Preparation Platform & Multi-Model AI Placement Strategist**
+### The Ultimate Company-Wise DSA Preparation Platform & Multi-Model AI Placement Strategist
 
-🔗 **Live Website:** [https://dsa-placement-prep.vercel.app](https://dsa-placement-prep.vercel.app/)  
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://dsa-placement-prep.vercel.app/)
+<br />
+
+[![🚀 Launch LeetPrime Live](https://img.shields.io/badge/🌐_LIVE_WEBSITE-dsa--placement--prep.vercel.app-7c3aed?style=for-the-badge&logo=vercel&logoColor=white&labelColor=0f172a)](https://dsa-placement-prep.vercel.app/)
+[![Deployed on Vercel](https://img.shields.io/badge/Status-Live%20&%20Active-00C781?style=for-the-badge&logo=vercel&logoColor=white)](https://dsa-placement-prep.vercel.app/)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16%20(App%20Router)-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![Powered by Gemini & Groq](https://img.shields.io/badge/Powered%20by-Gemini%202.5%20%7C%20Groq%20Llama%203.3-8A2BE2?style=for-the-badge)](https://aistudio.google.com/)
+[![Powered by Gemini & Groq](https://img.shields.io/badge/AI-Gemini%202.5%20%7C%20Groq%20Llama%203.3-8A2BE2?style=for-the-badge&logo=google)](https://aistudio.google.com/)
+
+</div>
+
+---
+
+> [!IMPORTANT]
+> ### 🌐 **EXPERIENCE THE LIVE PLATFORM:**
+> # 👉 **[https://dsa-placement-prep.vercel.app](https://dsa-placement-prep.vercel.app/)** 👈
+> **Click the link above to explore the live application.**  
+> *✨ 3,300+ LeetCode Pro problems across 650+ tech giants · 30-Day live interview recency engine · Prime AI multi-model coach.*
+
+---
 
 **LeetPrime** contains the complete archive of **LeetCode Pro / Premium DSA problems** categorized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Supercharged with **Prime AI**, LeetPrime introduces intelligent multi-model coaching, real-time interview recency tracking, adaptive roadmaps, and rich DSA visualization to make placement prep faster, smarter, and significantly higher ROI.
 
