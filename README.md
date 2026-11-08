@@ -1,25 +1,29 @@
-<div align="center">
-
 # ⚡ LeetPrime — Beyond LeetCode Pro
 
-### The Ultimate Company-Wise DSA Preparation Platform & Multi-Model AI Placement Strategist
+> **The Ultimate Company-Wise DSA Preparation Platform & Multi-Model AI Placement Strategist**
 
-<br />
-
-[![🚀 Launch LeetPrime Live](https://img.shields.io/badge/🌐_LIVE_WEBSITE-dsa--placement--prep.vercel.app-7c3aed?style=for-the-badge&logo=vercel&logoColor=white&labelColor=0f172a)](https://dsa-placement-prep.vercel.app/)
-[![Deployed on Vercel](https://img.shields.io/badge/Status-Live%20&%20Active-00C781?style=for-the-badge&logo=vercel&logoColor=white)](https://dsa-placement-prep.vercel.app/)
-[![Next.js 16](https://img.shields.io/badge/Next.js-16%20(App%20Router)-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![Powered by Gemini & Groq](https://img.shields.io/badge/AI-Gemini%202.5%20%7C%20Groq%20Llama%203.3-8A2BE2?style=for-the-badge&logo=google)](https://aistudio.google.com/)
-
-</div>
+<p align="left">
+  <a href="https://leetprime-pro.vercel.app/">
+    <img src="https://img.shields.io/badge/🌐_Website-leetprime--pro.vercel.app-7c3aed?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Website" />
+  </a>
+  <a href="https://leetprime-pro.vercel.app/">
+    <img src="https://img.shields.io/badge/Status-Live-059669?style=for-the-badge" alt="Deployment Status" />
+  </a>
+  <a href="https://nextjs.org/">
+    <img src="https://img.shields.io/badge/Next.js-16%20App%20Router-black?style=for-the-badge&logo=next.js" alt="Next.js 16" />
+  </a>
+  <a href="https://aistudio.google.com/">
+    <img src="https://img.shields.io/badge/AI-Gemini%202.5%20%7C%20Groq%20Llama%203.3-4338ca?style=for-the-badge&logo=google" alt="AI Models" />
+  </a>
+</p>
 
 ---
 
-> [!IMPORTANT]
-> ### 🌐 **EXPERIENCE THE LIVE PLATFORM:**
-> # 👉 **[https://dsa-placement-prep.vercel.app](https://dsa-placement-prep.vercel.app/)** 👈
-> **Click the link above to explore the live application.**  
-> *✨ 3,300+ LeetCode Pro problems across 650+ tech giants · 30-Day live interview recency engine · Prime AI multi-model coach.*
+### 🌐 Live Platform
+
+🔗 **Website:** [**https://leetprime-pro.vercel.app**](https://leetprime-pro.vercel.app/)
+
+*Complete archive of 3,300+ LeetCode Pro problems mapped company-wise across 650+ tech giants, real-time 30-day interview recency filters, and Prime AI placement coaching.*
 
 ---
 
