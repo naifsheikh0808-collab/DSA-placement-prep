@@ -15,3 +15,4 @@ export function event(action: string, params: Record<string, any> = {}) {
     (window as any).gtag("event", action, params);
   }
 }
+

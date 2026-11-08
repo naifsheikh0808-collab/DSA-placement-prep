@@ -666,10 +666,10 @@ export default function SmartPlannerPage() {
             <span>Multi-Model Adaptive Strategist</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-            Prime AI Placement Coach
+            Prime AI Study Coach
           </h2>
-          <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl leading-relaxed">
-            Your 24/7 placement strategist. Ask for optimal question order, targeted company breakdowns, or custom plan modifications — calibrated directly to real interview standards.
+          <p className="text-slate-400 text-xs sm:text-sm mt-0.5 max-w-xl">
+            Ask for problem hints, roadmap recommendations, or company-specific interview advice.
           </p>
         </div>
         <AiAssistantPanel />
@@ -684,10 +684,10 @@ export default function SmartPlannerPage() {
               <span>Today's Smart Practice Focus</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-              Today's High-Yield Problem Targets
+              Today's Recommended Problems
             </h2>
-            <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl leading-relaxed">
-              Curated daily challenges sequenced for maximum pattern mastery and direct alignment with your target companies.
+            <p className="text-slate-400 text-xs sm:text-sm mt-0.5 max-w-xl">
+              Recommended questions to solve today based on your active roadmap and target companies.
             </p>
           </div>
 

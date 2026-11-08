@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | LeetPrime",
   },
   description:
-    "Stop solving random problems in the dark. LeetPrime gives you the complete LeetCode Pro library mapped company-wise across Tier 1, 2 & 3 tech firms — armed with live 30-day interview recency signals, 15 core pattern frameworks, and personalized study roadmaps.",
+    "LeetPrime brings together all LeetCode Pro DSA questions mapped company-wise, with live 30-day interview recency signals and 15 pattern-first mastery roadmaps.",
   keywords: ["LeetPrime", "LeetCode Pro", "DSA", "interview prep", "LeetCode", "company wise dsa", "placement preparation", "coding interview", "data structures", "algorithms", "MAANG prep"],
   openGraph: {
     title: "LeetPrime — Beyond LeetCode Pro | Company-Wise DSA & Recency Engine",

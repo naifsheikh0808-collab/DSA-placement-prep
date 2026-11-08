@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-3xl space-y-3.5 sm:space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>LeetPrime · The Unfair Advantage in Placement Prep</span>
+            <span>LeetPrime · Company-Wise DSA & Recency Engine</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
@@ -45,7 +45,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-slate-300 text-xs sm:text-sm md:text-[15px] leading-relaxed max-w-2xl font-normal">
-            Stop grinding 1,000 random questions in the dark. <strong>LeetPrime</strong> organizes the entire LeetCode Pro collection company-wise across Tier 1, 2 & 3 tech leaders—armed with live 30-day interview recency signals, 15 core pattern frameworks, and personalized study roadmaps so every hour of prep turns into offers.
+            <strong>LeetPrime</strong> brings together all LeetCode Pro questions mapped company-wise across Tier 1, 2 & 3 tech companies. Filter by fresh 30-day interview recency, learn 15 core patterns, and follow a clear day-by-day roadmap tailored to your target companies.
           </p>
 
           {/* Value comparison pills */}
@@ -187,7 +187,7 @@ export default function HomePage() {
               <GitBranch className="w-5 h-5 text-violet-400" /> Core Pattern Roadmap
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Learn how top candidates clear rounds — master 15 reusable patterns instead of memorizing 1,000 disconnected solutions.
+              Master 15 core problem-solving patterns instead of trying to memorize hundreds of random solutions.
             </p>
           </div>
           <Link href="/dsa/patterns" className="text-xs text-violet-400 hover:text-violet-300 font-semibold">
