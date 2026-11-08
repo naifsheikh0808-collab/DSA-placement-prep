@@ -314,7 +314,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 1,
       title: "Foundations & High-Frequency Frameworks",
-      tagline: "Master Two Pointers, Sliding Window, Prefix Sum & Binary Search to build problem-solving intuition.",
+      tagline: "Build unbeatable algorithmic instinct. Rapidly internalize Two Pointers, Sliding Window, and Binary Search to breeze through round-1 online assessments.",
       dayRange: `Day 1 – Day ${daySplit1}`,
       focusPatterns: ["Two Pointers", "Sliding Window", "Prefix Sum", "Hash Maps", "Binary Search"],
       problems: p1Problems,
@@ -322,7 +322,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 2,
       title: "Hierarchical Structures & Traversal",
-      tagline: "Conquer Linked Lists, Stacks, Binary Trees & BFS/DFS — the bread & butter of technical rounds.",
+      tagline: "Conquer the core 40% of technical rounds. Master pointer manipulation, monotonic stacks, recursive tree DFS/BFS, and BST properties demanded by tech giants.",
       dayRange: `Day ${daySplit1 + 1} – Day ${daySplit2}`,
       focusPatterns: ["Linked Lists", "Stacks & Queues", "Binary Trees & BST", "Tree BFS / DFS"],
       problems: p2Problems,
@@ -330,7 +330,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 3,
       title: "Core Algorithmic Mastery & Optimization",
-      tagline: "Heaps, Backtracking, Graphs & Dynamic Programming — unlock Tier-1 and MAANG clearing questions.",
+      tagline: "Unlock Tier-1 and MAANG clearing status. Overcome advanced DP memoization, backtracking state spaces, greedy intervals, and graph connectivity under time pressure.",
       dayRange: `Day ${daySplit2 + 1} – Day ${daySplit3}`,
       focusPatterns: ["Heaps / Priority Queue", "Backtracking", "Intervals & Greedy", "Graphs", "Dynamic Programming"],
       problems: p3Problems,
@@ -338,7 +338,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 4,
       title: "Target Company Recency & Mock Sprint",
-      tagline: "Fresh 30-day interview questions from your target companies + edge-case optimization.",
+      tagline: "Peak interview readiness sprint. Drill fresh 30-day company-reported questions and optimize space-time complexity to walk into interviews with total confidence.",
       dayRange: `Day ${daySplit3 + 1} – Day ${profile.durationDays}`,
       focusPatterns: ["Target Company 30d/3m", "Advanced DP", "Shortest Paths", "Mock Sprints"],
       problems: p4Problems,

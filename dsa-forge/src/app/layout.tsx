@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Suspense } from "react";
@@ -9,16 +10,18 @@ export const metadata: Metadata = {
     template: "%s | LeetPrime",
   },
   description:
-    "LeetPrime includes the complete collection of LeetCode Pro DSA problems organized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Supercharged with extra features that go beyond LeetCode Pro: real-time interview recency (30d/3m/6m), 15 pattern-first mastery roadmaps, and priority scoring.",
-  keywords: ["LeetPrime", "LeetCode Pro", "DSA", "interview prep", "LeetCode", "company wise dsa", "placement preparation", "coding interview", "data structures", "algorithms"],
+    "Stop solving random problems in the dark. LeetPrime gives you the complete LeetCode Pro library mapped company-wise across Tier 1, 2 & 3 tech firms — armed with live 30-day interview recency signals, 15 core pattern frameworks, and personalized study roadmaps.",
+  keywords: ["LeetPrime", "LeetCode Pro", "DSA", "interview prep", "LeetCode", "company wise dsa", "placement preparation", "coding interview", "data structures", "algorithms", "MAANG prep"],
   openGraph: {
     title: "LeetPrime — Beyond LeetCode Pro | Company-Wise DSA & Recency Engine",
-    description: "All LeetCode Pro company DSA questions supercharged with real-time recency, patterns & company tiers.",
+    description: "All LeetCode Pro questions mapped company-wise and supercharged with real-time 30-day recency signals and 15 core pattern frameworks.",
     type: "website",
   },
 };
 
 import { AuthProvider } from "@/context/auth-context";
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export default function RootLayout({
   children,
@@ -32,6 +35,26 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-zinc-950 text-zinc-100 antialiased">
+        {/* Google Analytics 4 (GA4) */}
+        {GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
+
         <AuthProvider>
           <div className="flex min-h-dvh">
             <Suspense fallback={<div className="w-64 bg-zinc-950 border-r border-zinc-800" />}>

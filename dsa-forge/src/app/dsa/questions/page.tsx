@@ -42,7 +42,7 @@ const TIMEFRAME_CARDS: Array<{
     id: "30d",
     label: "Last 30 Days",
     sublabel: "🔥 Urgent",
-    desc: "Freshly asked in recent rounds — highest interview signal",
+    desc: "Critical signal: Asked in real rounds over the last 30 days.",
     icon: Zap,
     activeGradient: "from-rose-950/60 to-[#101322]",
     activeBorder: "border-rose-500/60",
@@ -53,7 +53,7 @@ const TIMEFRAME_CARDS: Array<{
     id: "3m",
     label: "Last 3 Months",
     sublabel: "⚡ Hot",
-    desc: "Active pool from this quarter's hiring cycle",
+    desc: "High-yield: Core active pool from this quarter's hiring drives.",
     icon: Clock,
     activeGradient: "from-amber-950/50 to-[#101322]",
     activeBorder: "border-amber-500/60",
@@ -64,7 +64,7 @@ const TIMEFRAME_CARDS: Array<{
     id: "6m",
     label: "Last 6 Months",
     sublabel: "📅 Recent",
-    desc: "Medium-term question pool across top companies",
+    desc: "Established: Consistently tested across 6-month hiring seasons.",
     icon: CalendarDays,
     activeGradient: "from-indigo-950/50 to-[#101322]",
     activeBorder: "border-indigo-500/60",
@@ -75,7 +75,7 @@ const TIMEFRAME_CARDS: Array<{
     id: "8-12m",
     label: "Last Year",
     sublabel: "🗓️ Classic",
-    desc: "Evergreen problems — still regularly appearing",
+    desc: "Evergreen: Standard placement benchmarks that frequently reappear.",
     icon: CalendarRange,
     activeGradient: "from-violet-950/50 to-[#101322]",
     activeBorder: "border-violet-500/60",
@@ -86,7 +86,7 @@ const TIMEFRAME_CARDS: Array<{
     id: "ALL",
     label: "All Time",
     sublabel: "📚 Full Bank",
-    desc: "Complete question bank across all recency windows",
+    desc: "Comprehensive: Complete library of 3,400+ pattern-mapped problems.",
     icon: Code2,
     activeGradient: "from-slate-800/60 to-[#101322]",
     activeBorder: "border-slate-500/60",
@@ -211,15 +211,15 @@ function QuestionsPageContent() {
       {/* ── Header ─────────────────────────────────────────────── */}
       <div>
         <div className="flex items-center gap-2 text-violet-400 text-xs font-bold uppercase tracking-wider mb-1">
-          <Code2 className="w-4 h-4" /> LeetPrime Question Bank · Recency Engine
+          <Code2 className="w-4 h-4" /> High-Yield Placement Question Bank
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Question Explorer
+          Question Explorer & Recency Engine
         </h1>
-        <p className="text-slate-400 text-xs sm:text-sm mt-1">
-          The complete LeetCode Pro library filtered by{" "}
-          <span className="text-violet-300 font-semibold">interview recency</span>,
-          difficulty, and pattern — all in one place.
+        <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
+          The complete LeetCode Pro collection supercharged with{" "}
+          <span className="text-violet-300 font-semibold">real-time interview recency signals</span>.
+          Focus on problems interviewers are actually testing this week, not outdated trivia.
         </p>
       </div>
 

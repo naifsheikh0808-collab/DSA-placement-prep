@@ -312,13 +312,13 @@ export default function SmartPlannerPage() {
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>AI-Driven Smart Prep Planner</span>
+            <span>AI-Engineered Placement Strategy</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Personalize Your Placement Roadmap
+            Build Your Targeted Placement Roadmap
           </h1>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">
-            Tell us your target companies, remaining time, and current skill level. We'll generate a day-by-day roadmap with smart problem recommendations.
+          <p className="text-slate-300 text-sm max-w-xl mx-auto leading-relaxed">
+            Stop guessing what to solve next. Specify your target companies, timeline, and skill level — we'll engineer a calibrated day-by-day roadmap that maximizes your interview hit rate.
           </p>
         </div>
 
@@ -666,10 +666,10 @@ export default function SmartPlannerPage() {
             <span>Multi-Model Adaptive Strategist</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-            Prime AI Study Coach
+            Prime AI Placement Coach
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Adaptive multi-model mentor powered by Gemini & Groq for roadmap tuning, weak patterns & company prep.
+          <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl leading-relaxed">
+            Your 24/7 placement strategist. Ask for optimal question order, targeted company breakdowns, or custom plan modifications — calibrated directly to real interview standards.
           </p>
         </div>
         <AiAssistantPanel />
@@ -684,10 +684,10 @@ export default function SmartPlannerPage() {
               <span>Today's Smart Practice Focus</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-              Highest-Signal Questions for Today
+              Today's High-Yield Problem Targets
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Dynamically selected to push your roadmap forward based on your target companies and recency trends.
+            <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl leading-relaxed">
+              Curated daily challenges sequenced for maximum pattern mastery and direct alignment with your target companies.
             </p>
           </div>
 

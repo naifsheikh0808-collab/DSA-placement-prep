@@ -27,7 +27,7 @@ export const PATTERNS: Pattern[] = [
     name: "Two Pointers",
     slug: "two-pointers",
     description:
-      "Use two indices moving toward each other or in the same direction to reduce O(n²) solutions to O(n). Ideal for sorted arrays, pair problems, and partitioning.",
+      "Eliminate brute-force O(n²) bottlenecks in seconds. By marching two pointers inward or in tandem across sorted data, you resolve pairs, palindromes, and partitions in clean linear O(n) time — a mandatory round-1 screener at Meta and Amazon.",
     orderIndex: 1,
     color: "#6366f1",
     questionCount: 16,
@@ -315,7 +315,7 @@ export const PATTERNS: Pattern[] = [
     name: "Fast & Slow Pointers",
     slug: "fast-slow-pointers",
     description:
-      "Use two pointers at different speeds (Floyd's algorithm) to detect cycles, find midpoints, and solve linked-list problems efficiently.",
+      "The classic 'Hare & Tortoise' algorithm that turns tricky cyclic states into O(1) space triumphs. Instantly detect infinite loops, pinpoint list midpoints, and expose cycle origins without wasting memory on hash tables.",
     orderIndex: 2,
     color: "#8b5cf6",
     questionCount: 8,
@@ -465,7 +465,7 @@ export const PATTERNS: Pattern[] = [
     name: "Sliding Window",
     slug: "sliding-window",
     description:
-      "Maintain a window of elements that shrinks or expands based on conditions. Optimal for contiguous subarray/substring problems.",
+      "The ultimate framework for contiguous sub-array and sub-string dominance. Dynamically expand and shrink a continuous boundary to capture optimal metrics in a single O(n) pass, dodging clumsy nested loops in high-frequency Google rounds.",
     orderIndex: 3,
     color: "#0ea5e9",
     questionCount: 14,
@@ -717,7 +717,7 @@ export const PATTERNS: Pattern[] = [
     name: "Kadane's Algorithm",
     slug: "kadanes-algorithm",
     description:
-      "Dynamic programming for maximum subarray sum. Works in O(n) time by tracking local and global maximums.",
+      "The legendary linear-time formula for maximum contiguous subarray sums. By greedily deciding whether to extend an ongoing streak or start fresh, you solve maximum profit and subarray challenges in blazing O(n) time and O(1) space.",
     orderIndex: 4,
     color: "#f59e0b",
     questionCount: 6,
@@ -833,7 +833,7 @@ export const PATTERNS: Pattern[] = [
     name: "Prefix Sum",
     slug: "prefix-sum",
     description:
-      "Precompute cumulative sums to answer range-sum queries in O(1). Essential for subarray sum problems.",
+      "Trade tiny precomputation for instant O(1) range queries. Cumulative sum caches transform complex subarray sums and frequency slices into elementary math — indispensable for high-volume data streaming and matrix interview problems.",
     orderIndex: 5,
     color: "#10b981",
     questionCount: 8,
@@ -983,7 +983,7 @@ export const PATTERNS: Pattern[] = [
     name: "Merge Intervals",
     slug: "merge-intervals",
     description:
-      "Sort and merge overlapping intervals. Used in scheduling, calendar overlap, and range-based problems.",
+      "Master overlapping schedules, resource collisions, and calendar conflicts. By sorting boundaries and collapsing intersections in O(n log n), you solve real-world meeting rooms and range-merging challenges tested across Tier 1 tech.",
     orderIndex: 6,
     color: "#ef4444",
     questionCount: 12,
@@ -1201,7 +1201,7 @@ export const PATTERNS: Pattern[] = [
     name: "In-place Linked List Reversal",
     slug: "in-place-linked-list-reversal",
     description:
-      "Reverse linked lists or parts of them in-place without extra space. Fundamental for linked-list manipulation.",
+      "The quintessential test of pointer precision. Reverse entire lists, sub-segments, or k-groups directly in-place with zero extra memory allocation (O(1) space), proving bulletproof pointer discipline under pressure.",
     orderIndex: 7,
     color: "#ec4899",
     questionCount: 6,
@@ -1317,7 +1317,7 @@ export const PATTERNS: Pattern[] = [
     name: "Stack",
     slug: "stack",
     description:
-      "LIFO data structure for matching brackets, expression evaluation, monotonic sequences, and backtracking problems.",
+      "The gold standard for nested parsing, expression evaluation, and monotonic sequence lookups. Leverage Last-In-First-Out ordering to conquer next-greater-element challenges, histogram areas, and balanced brackets in optimal linear time.",
     orderIndex: 8,
     color: "#f97316",
     questionCount: 15,
@@ -1586,7 +1586,7 @@ export const PATTERNS: Pattern[] = [
     name: "Hash Maps / Hash Sets",
     slug: "hash-maps",
     description:
-      "Use hash maps for O(1) lookups, counting, grouping, and complement searches. Foundation of most array and string problems.",
+      "Turn slow O(n) linear scans into instantaneous O(1) average-time lookups. Unlocks two-sum complements, anagram grouping, and frequency maps — the single most relied-upon data structure in production and technical screens alike.",
     orderIndex: 9,
     color: "#14b8a6",
     questionCount: 11,
@@ -1787,7 +1787,7 @@ export const PATTERNS: Pattern[] = [
     name: "Binary Search",
     slug: "binary-search",
     description:
-      "Divide the search space in half each step. Works on sorted arrays and monotonic functions. O(log n) time.",
+      "Harness the exponential power of logarithmic halving. Beyond sorted lookups, apply binary search on answer spaces to pinpoint optimal thresholds and cut 10⁹ search spaces down to ~30 checks in strict O(log n) time.",
     orderIndex: 10,
     color: "#3b82f6",
     questionCount: 23,
@@ -2192,7 +2192,7 @@ export const PATTERNS: Pattern[] = [
     name: "Heap / Priority Queue",
     slug: "heap-priority-queue",
     description:
-      "Use min/max heaps for top-K problems, scheduling, and streaming data. O(log n) insertion and extraction.",
+      "Extract extreme values on the fly without repeatedly sorting entire datasets. Essential for top-K frequent elements, running median streams, and Dijkstra scheduling, balancing instant peak access with O(log n) updates.",
     orderIndex: 11,
     color: "#a855f7",
     questionCount: 18,
@@ -2512,7 +2512,7 @@ export const PATTERNS: Pattern[] = [
     name: "Backtracking",
     slug: "backtracking",
     description:
-      "Explore all possibilities recursively and prune invalid paths. Used for permutations, combinations, subsets, and constraint-satisfaction problems.",
+      "Systematic state exploration with surgical branch pruning. Generate permutations, subsets, Sudoku solvers, and N-Queens by exploring promising decision trees and gracefully backtracking the exact moment constraints fail.",
     orderIndex: 12,
     color: "#84cc16",
     questionCount: 14,
@@ -2770,7 +2770,7 @@ export const PATTERNS: Pattern[] = [
     name: "Trees",
     slug: "tree-pattern",
     description:
-      "Binary trees, BST operations, DFS/BFS traversals, LCA, and path problems. One of the most common interview topics.",
+      "Hierarchical problem-solving that underpins databases, file systems, and 40%+ of MAANG technical rounds. Master recursive DFS, level-order BFS, BST search properties, and Lowest Common Ancestor logic across binary trees.",
     orderIndex: 13,
     color: "#22c55e",
     questionCount: 32,
@@ -3328,7 +3328,7 @@ export const PATTERNS: Pattern[] = [
     name: "Graph DFS/BFS",
     slug: "graphs",
     description:
-      "Traverse graphs depth-first or breadth-first for connectivity, shortest path, islands, and component problems.",
+      "Model complex networks, roadmaps, and dependencies. Traverse vertices using BFS for shortest unweighted paths or DFS for connected components, topological course ordering, and cycle detection across multi-dimensional grids.",
     orderIndex: 14,
     color: "#64748b",
     questionCount: 19,
@@ -3665,7 +3665,7 @@ export const PATTERNS: Pattern[] = [
     name: "Dynamic Programming",
     slug: "dynamic-programming",
     description:
-      "Break problems into overlapping subproblems and cache results. Covers 1D DP, 2D DP, knapsack, LCS, and interval DP.",
+      "The undisputed summit of competitive interview rounds. Deconstruct exponential brute-force problems into overlapping subproblems, caching intermediate states via memoization or tabulation to unlock polynomial-time mastery.",
     orderIndex: 15,
     color: "#dc2626",
     questionCount: 6,

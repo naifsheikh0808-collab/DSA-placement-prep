@@ -171,13 +171,13 @@ export default function ProgressPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-violet-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <TrendingUp className="w-4 h-4" /> Personal Analytics & Cloud Progress
+            <TrendingUp className="w-4 h-4" /> Placement Readiness Command
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            My Progress
+            Placement Readiness Analytics
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Track solved problems, cloud synchronization, and pattern progression.
+          <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
+            Quantify your interview readiness. Track solved problems across difficulty tiers, monitor pattern coverage, and ensure cloud synchronization across all your devices.
           </p>
         </div>
 

@@ -10,11 +10,11 @@ interface PrimeAiLogoProps {
 
 export function PrimeAiLogo({ size = "md", className, animated = false }: PrimeAiLogoProps) {
   const sizeMap = {
-    xs: { box: "w-6 h-6", img: "w-4 h-4", round: "rounded-lg" },
-    sm: { box: "w-7 h-7", img: "w-5 h-5", round: "rounded-lg" },
-    md: { box: "w-9 h-9", img: "w-6 h-6", round: "rounded-xl" },
-    lg: { box: "w-11 h-11", img: "w-8 h-8", round: "rounded-xl" },
-    xl: { box: "w-14 h-14", img: "w-10 h-10", round: "rounded-2xl" },
+    xs: { box: "w-6 h-6", img: "w-[92%] h-[92%]", round: "rounded-lg" },
+    sm: { box: "w-7 h-7", img: "w-[92%] h-[92%]", round: "rounded-lg" },
+    md: { box: "w-9 h-9", img: "w-[92%] h-[92%]", round: "rounded-xl" },
+    lg: { box: "w-11 h-11", img: "w-[92%] h-[92%]", round: "rounded-xl" },
+    xl: { box: "w-14 h-14", img: "w-[92%] h-[92%]", round: "rounded-2xl" },
   };
 
   const { box, img, round } = sizeMap[size];
@@ -39,7 +39,7 @@ export function PrimeAiLogo({ size = "md", className, animated = false }: PrimeA
       {/* Cyber Prism Outer Frame */}
       <div
         className={cn(
-          "relative w-full h-full p-[1.5px] bg-gradient-to-b from-white/30 via-violet-500/40 to-cyan-500/20 shadow-xl overflow-hidden",
+          "relative w-full h-full p-[1px] bg-gradient-to-b from-white/30 via-violet-500/40 to-cyan-500/20 shadow-xl overflow-hidden",
           round
         )}
       >
