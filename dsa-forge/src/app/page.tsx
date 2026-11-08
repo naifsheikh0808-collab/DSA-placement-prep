@@ -22,13 +22,13 @@ export default function HomePage() {
           <Compass className="w-4 h-4 text-violet-400 shrink-0" />
           <span className="truncate">
             <strong className="text-slate-200">DSA Command Center</strong>
-            <span className="hidden sm:inline"> · Placement-first intelligence with live interview recency</span>
+            <span className="hidden sm:inline"> · company-wise prep with live recency signals</span>
           </span>
         </div>
         <UserAvatar size="md" />
       </div>
 
-      {/* Hero Section — Sleek & High-Impact */}
+      {/* Hero Section — Sleek & Large */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#16132b]/85 via-[#101322]/85 to-[#0c0e17]/85 border border-violet-500/25 p-5 sm:p-7 md:px-8 md:py-6 backdrop-blur-xl shadow-xl shadow-black/40">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-3xl space-y-3.5 sm:space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>LeetPrime · Company-Wise DSA & Recency Engine</span>
+            <span>LeetPrime · Beyond LeetCode Pro</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
@@ -45,7 +45,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-slate-300 text-xs sm:text-sm md:text-[15px] leading-relaxed max-w-2xl font-normal">
-            <strong>LeetPrime</strong> brings together all LeetCode Pro questions mapped company-wise across Tier 1, 2 & 3 tech companies. Filter by fresh 30-day interview recency, learn 15 core patterns, and follow a clear day-by-day roadmap tailored to your target companies.
+            <strong>LeetPrime</strong> brings together all LeetCode Pro DSA problems mapped company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Packed with extra intelligence you won&apos;t find on LeetCode Pro—including real-time 30-day interview recency filters, 15 pattern-first mastery roadmaps, and priority scoring.
           </p>
 
           {/* Value comparison pills */}
@@ -54,13 +54,13 @@ export default function HomePage() {
               <span className="text-emerald-400 font-bold">✓</span> 100% LeetCode Pro Bank
             </span>
             <span className="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
-              <span className="text-emerald-400 font-bold">✓</span> 30-Day Live Recency
+              <span className="text-emerald-400 font-bold">✓</span> 30-Day Interview Recency
             </span>
             <span className="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
               <span className="text-emerald-400 font-bold">✓</span> Tier 1, 2 & 3 Company Tiers
             </span>
             <span className="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
-              <span className="text-emerald-400 font-bold">✓</span> 15 Core Frameworks
+              <span className="text-emerald-400 font-bold">✓</span> 15 Pattern Frameworks
             </span>
           </div>
 
@@ -92,10 +92,10 @@ export default function HomePage() {
       {/* Stats Ribbon — Compact & Sleek */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: "Curated Patterns", val: patterns.length, desc: "15 interview-proven frameworks", color: "violet" },
-          { label: "Target Companies", val: companies.length, desc: "Live company interview pools", color: "indigo" },
-          { label: "Target Problems", val: stats.totalProblems, desc: "High-yield verified questions", color: "emerald" },
-          { label: "Company Filings", val: stats.totalCompanies, desc: "Fresh 30d/3m/6m verified", color: "amber" },
+          { label: "Curated Patterns", val: patterns.length, desc: "High-frequency frameworks", color: "violet" },
+          { label: "Target Companies", val: companies.length, desc: "Reporting live questions", color: "indigo" },
+          { label: "Target Problems", val: stats.totalProblems, desc: "Prioritized question bank", color: "emerald" },
+          { label: "Company Filings", val: stats.totalCompanies, desc: "Recency weighted reports", color: "amber" },
         ].map((item, i) => (
           <div key={i} className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md">
             <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</div>
@@ -187,7 +187,7 @@ export default function HomePage() {
               <GitBranch className="w-5 h-5 text-violet-400" /> Core Pattern Roadmap
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Master 15 core problem-solving patterns instead of trying to memorize hundreds of random solutions.
+              Master questions grouped by core algorithmic framework.
             </p>
           </div>
           <Link href="/dsa/patterns" className="text-xs text-violet-400 hover:text-violet-300 font-semibold">

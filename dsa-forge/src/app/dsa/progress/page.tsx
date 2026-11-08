@@ -171,13 +171,13 @@ export default function ProgressPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-violet-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <TrendingUp className="w-4 h-4" /> Personal Progress
+            <TrendingUp className="w-4 h-4" /> Personal Analytics & Cloud Progress
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             My Progress
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Track solved problems, pattern coverage, and cloud synchronization in one simple place.
+            Track solved problems, cloud synchronization, and pattern progression.
           </p>
         </div>
 

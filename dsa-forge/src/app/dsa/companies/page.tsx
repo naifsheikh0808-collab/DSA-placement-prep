@@ -301,8 +301,8 @@ export default function CompaniesPage() {
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Target Companies
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
-            Explore {allCompanies.length}+ companies sorted A–Z with verified question counts from recent interview rounds.
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">
+            Explore {allCompanies.length} companies sorted A–Z with reported interview question counts.
           </p>
         </div>
 

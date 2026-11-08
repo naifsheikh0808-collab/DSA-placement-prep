@@ -28,7 +28,7 @@ export default function PatternsPage() {
             DSA Pattern Explorer
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
-            Learn 15 core problem-solving patterns instead of memorizing hundreds of random questions.
+            Master the core algorithmic templates. Solve 15 patterns instead of 1,000 random problems.
           </p>
         </div>
 

@@ -314,7 +314,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 1,
       title: "Foundations & High-Frequency Frameworks",
-      tagline: "Build strong problem-solving fundamentals with Two Pointers, Sliding Window, Prefix Sum, and Binary Search.",
+      tagline: "Master Two Pointers, Sliding Window, Prefix Sum & Binary Search to build problem-solving intuition.",
       dayRange: `Day 1 – Day ${daySplit1}`,
       focusPatterns: ["Two Pointers", "Sliding Window", "Prefix Sum", "Hash Maps", "Binary Search"],
       problems: p1Problems,
@@ -322,7 +322,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 2,
       title: "Hierarchical Structures & Traversal",
-      tagline: "Master linked lists, stacks, queues, and tree traversals — the core of almost every coding round.",
+      tagline: "Conquer Linked Lists, Stacks, Binary Trees & BFS/DFS — the bread & butter of technical rounds.",
       dayRange: `Day ${daySplit1 + 1} – Day ${daySplit2}`,
       focusPatterns: ["Linked Lists", "Stacks & Queues", "Binary Trees & BST", "Tree BFS / DFS"],
       problems: p2Problems,
@@ -330,7 +330,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 3,
       title: "Core Algorithmic Mastery & Optimization",
-      tagline: "Level up to heaps, backtracking, greedy intervals, graphs, and dynamic programming.",
+      tagline: "Heaps, Backtracking, Graphs & Dynamic Programming — unlock Tier-1 and MAANG clearing questions.",
       dayRange: `Day ${daySplit2 + 1} – Day ${daySplit3}`,
       focusPatterns: ["Heaps / Priority Queue", "Backtracking", "Intervals & Greedy", "Graphs", "Dynamic Programming"],
       problems: p3Problems,
@@ -338,7 +338,7 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     {
       phaseNumber: 4,
       title: "Target Company Recency & Mock Sprint",
-      tagline: "Practice recently asked interview questions from your target companies to build peak confidence.",
+      tagline: "Fresh 30-day interview questions from your target companies + edge-case optimization.",
       dayRange: `Day ${daySplit3 + 1} – Day ${profile.durationDays}`,
       focusPatterns: ["Target Company 30d/3m", "Advanced DP", "Shortest Paths", "Mock Sprints"],
       problems: p4Problems,
