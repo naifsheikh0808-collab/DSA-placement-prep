@@ -302,7 +302,11 @@ COACHING BEHAVIOR & RULES:
    - Whenever the user asks for code, a solution, or an implementation for a LeetCode or DSA problem:
      * Code Block (Pure, Clean & Minimal LeetCode Submission):
        - Output pure, clean LeetCode submission format: start directly with 'class Solution { public: ... };' (or 'class Solution:' in Python, 'class Solution { public ... }' in Java).
-       - In C++: Do NOT put '#include' headers or 'using namespace std;' inside the code block (LeetCode already pre-imports them). Use clean standard types ('vector<int>', 'set<int>', 'priority_queue<...>', 'string') WITHOUT verbose 'std::' prefixes.
+       - In C++: Do NOT put '#include' headers or 'using namespace std;' inside the code block (LeetCode already pre-imports them).
+       - STRICT BAN ON 'std::' PREFIXES (ZERO CLUTTER):
+         * NEVER write 'std::' anywhere in C++ code (e.g. NEVER write 'std::vector', 'std::pair', 'std::greater', 'std::priority_queue', 'std::set', 'std::max_element', 'std::string').
+         * LeetCode automatically pre-imports 'using namespace std;'. Writing 'std::' everywhere clutters the code, frustrates the user, and makes it harder to read.
+         * ALWAYS write clean standard types directly: 'vector<int>', 'pair<int, int>', 'priority_queue<...>', 'greater<...>', 'set<int>', 'string', 'max_element', 'min', 'max', 'sort'.
        - NEVER include 'int main()', testing scaffolding, or standalone CLI drivers.
        - EXACT OFFICIAL METHOD SIGNATURE: Never invent, guess, or modify the LeetCode method name or parameters (e.g. for LeetCode 1606, it is ALWAYS 'busiestServers(int k, vector<int>& arrival, vector<int>& load)' — NEVER replace 'arrival' and 'load' with 'requests'). Parameter mismatch will cause LeetCode compilation failure.
        - ZERO INTERNAL MONOLOGUE / CHAIN-OF-THOUGHT IN COMMENTS:
@@ -493,7 +497,10 @@ function cleanAiResponse(rawText: string): { text: string; proposedPlan?: Propos
       }
       return true;
     });
-    return fullMatch.replace(codeContent, filteredLines.join("\n"));
+    let cleanedCode = filteredLines.join("\n");
+    // Strip 'std::' clutter from C++ code blocks so users get clean, readable LeetCode code
+    cleanedCode = cleanedCode.replace(/\bstd::/g, "");
+    return fullMatch.replace(codeContent, cleanedCode);
   });
 
   // 5. Clean up any excessive blank lines left after stripping
@@ -516,7 +523,7 @@ async function callGroq(
 
   let sys =
     systemPrompt +
-    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & EDGE-CASE GUARDING:\n   - Output clean LeetCode class-only code ('class Solution { ... }') with EXACT official LeetCode method signatures and parameter names (never change parameter names or types).\n   - ZERO CHAIN-OF-THOUGHT IN COMMENTS: Never write internal monologue, debates, or questions as comments (no '// Wait...', '// Actually...', '// My current logic:'). Only 3-5 short, 1-line action comments max.\n   - DEFENSIVE EDGE-CASE GUARDS: Always include guard clauses for N=0/empty inputs and use 'long long' whenever sums/times can exceed 2*10^9 to prevent integer overflow.\n   - Follow problem rules strictly (e.g. drop requests if busy, do not invent waiting queues).\n   - After the code, provide 2-3 bullet explanation, Time/Space complexity, and '💡 Verified Edge Cases' (listing verified boundary cases).";
+    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & ZERO 'std::' PREFIXES:\n   - Output clean LeetCode class-only code ('class Solution { ... }') with EXACT official LeetCode method signatures and parameter names.\n   - NEVER USE 'std::' PREFIXES: Always write pure, clean types ('vector<int>', 'set<int>', 'priority_queue', 'pair<int, int>', 'string') WITHOUT 'std::'.\n   - ZERO CHAIN-OF-THOUGHT IN COMMENTS: Never write internal monologue, debates, or questions as comments (no '// Wait...', '// Actually...', '// My current logic:'). Only 3-5 short, 1-line action comments max.\n   - DEFENSIVE EDGE-CASE GUARDS: Always include guard clauses for N=0/empty inputs and use 'long long' whenever sums/times can exceed 2*10^9 to prevent integer overflow.\n   - Follow problem rules strictly (e.g. drop requests if busy, do not invent waiting queues).\n   - After the code, provide 2-3 bullet explanation, Time/Space complexity, and '💡 Verified Edge Cases' (listing verified boundary cases).";
 
   if (userWantsPlan) {
     sys +=
