@@ -393,27 +393,27 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
         {/* Accordion Toggle Bar */}
         <button
           onClick={() => setShowPatternBreakdown(!showPatternBreakdown)}
-          className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+          className="w-full p-4 sm:p-6 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-600/15 border border-violet-500/30 flex items-center justify-center text-violet-400">
-              <BarChart3 className="w-5 h-5" />
+          <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1 mr-2">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-violet-600/15 border border-violet-500/30 flex items-center justify-center text-violet-400 flex-shrink-0 mt-0.5 sm:mt-0">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold text-white">Pattern Mastery Breakdown</h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/[0.05] text-slate-400 border border-white/10 font-mono">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-x-2.5 gap-y-1">
+                <h2 className="text-sm sm:text-lg font-bold text-white truncate">Pattern Mastery Breakdown</h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20 font-mono whitespace-nowrap">
                   {PATTERNS.length} Patterns
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {patternsMastered} of {PATTERNS.length} Mastered (50%+ solved) · {patternsInProgress} in progress · Click to {showPatternBreakdown ? "collapse" : "expand"}
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate sm:whitespace-normal">
+                {patternsMastered} of {PATTERNS.length} Mastered (50%+ solved) · {patternsInProgress} in progress
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-semibold text-violet-400 hover:text-violet-300">
-            <span>{showPatternBreakdown ? "Hide Breakdown" : "View Breakdown"}</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-violet-400 hover:text-violet-300 flex-shrink-0">
+            <span className="hidden sm:inline">{showPatternBreakdown ? "Hide Breakdown" : "View Breakdown"}</span>
             {showPatternBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </div>
         </button>

@@ -71,7 +71,9 @@ function QuestionContent({ slug }: { slug: string }) {
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className="text-zinc-500 font-mono text-sm">#{problem.externalId}</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/[0.08] text-slate-200 border border-white/15 font-mono text-xs font-bold tracking-tight shadow-sm">
+                    #{problem.externalId}
+                  </span>
                   <DifficultyBadge difficulty={problem.difficulty} />
                   {problem.primaryPattern && problem.primaryPattern.toLowerCase() !== "uncategorized" && (
                     <Badge variant="pattern">{problem.primaryPattern}</Badge>

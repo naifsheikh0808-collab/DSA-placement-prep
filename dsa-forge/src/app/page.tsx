@@ -202,7 +202,7 @@ export default function HomePage() {
               </p>
             </div>
             <Link href="/dsa/patterns" className="text-xs text-violet-400 hover:text-violet-300 font-semibold">
-              Explore All 15 Patterns →
+              Explore All 24 Patterns →
             </Link>
           </div>
 
