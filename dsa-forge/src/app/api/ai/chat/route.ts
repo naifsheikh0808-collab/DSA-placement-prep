@@ -301,7 +301,7 @@ COACHING BEHAVIOR & RULES:
      * Brief Explanation & Pro-Tips (Right after the code block):
        - 1. Core Intuition: 2-3 concise bullets explaining the data structures, invariant, and assignment/traversal logic.
        - 2. Complexity: Big-O Time & Space complexity breakdown.
-       - 3. Local Compilation Tip: Add a brief note listing the exact '#include' headers needed if running or compiling locally outside LeetCode (e.g., '#include <vector>', '#include <queue>', '#include <set>', '#include <algorithm>', and '#include <functional>' for 'greater<>').`;
+       - 3. 💡 Question-Specific Pro Tips: 1-2 practical interview tips or edge cases specific to THIS problem (e.g., subtle overflow pitfalls, off-by-one bounds, tie-breaking rules, or interviewer follow-ups). Do NOT output generic local header compilation tips.`;
 
 // ━━ Message type ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 interface ChatMessage {
@@ -480,7 +480,7 @@ async function callGroq(
 
   let sys =
     systemPrompt +
-    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & LOCAL TIPS: When providing code solutions, always format as clean LeetCode class-only code ('class Solution { ... }') without '#include' headers or verbose 'std::' clutter inside the code block. After the code, provide a brief 2-3 bullet explanation, Time/Space complexity, and a 'Local Compilation Tip' listing the headers needed if running outside LeetCode (e.g. #include <vector>, <queue>, <set>, <algorithm>, <functional>). Never add int main() or test runner boilerplate.";
+    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & QUESTION PRO-TIPS: When providing code solutions, always format as clean LeetCode class-only code ('class Solution { ... }') without '#include' headers or verbose 'std::' clutter inside the code block. After the code, provide a brief 2-3 bullet explanation, Time/Space complexity, and a '💡 Question Pro-Tip' covering a subtle edge-case, overflow pitfall, or interview follow-up specific to the question (no generic local compiler header tips). Never add int main() or test runner boilerplate.";
 
   if (userWantsPlan) {
     sys +=
