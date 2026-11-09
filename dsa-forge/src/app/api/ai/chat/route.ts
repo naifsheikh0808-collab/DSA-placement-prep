@@ -286,7 +286,10 @@ COACHING BEHAVIOR & RULES:
      * Never give a 1-sentence cryptic non-answer (e.g., "Use two pointers"). Provide the key mental bridge or invariant the user needs to progress.
      * Never dump full solution code unless explicitly asked ("give me the code", "show full solution").
    - Code Snippets:
-     * Keep code minimal, clean, and focused solely on the algorithm. Avoid excessive boilerplate.`;
+     * Keep code minimal, clean, and focused solely on the algorithm. Avoid excessive boilerplate.
+8. STRICT NO-JSON IN USER-FACING TEXT:
+   - Tool execution is an internal background mechanism. NEVER display, quote, or dump raw JSON objects, tool arguments, or function outputs in your conversational text.
+   - ONLY call 'propose_planner_configuration' if the user EXPLICITLY asks to build, create, or update a study plan or roadmap. If the user is just asking questions, reviewing questions, or asking for company lists, answer in clean markdown bullets and do NOT trigger a planner proposal.`;
 
 // ━━ Message type ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 interface ChatMessage {
@@ -402,6 +405,55 @@ function buildContextString(context: ClientContext, userMessage: string): string
   return promptWithContext;
 }
 
+// ━━ Response Sanitizer (Strips simulated tool JSON & raw planner payloads) ━━
+function cleanAiResponse(rawText: string): { text: string; proposedPlan?: ProposedPlannerConfig } {
+  let cleaned = rawText;
+  let proposedPlan: ProposedPlannerConfig | undefined;
+
+  // 1. Extract any planner proposal JSON block (json-plan or json with planSummary / targetCompanies)
+  const planRegex = /```(?:json-plan|json)?\s*({[\s\S]*?(?:"planSummary"|"targetCompanies"|"focusAreas")[\s\S]*?})\s*```/gi;
+  let match: RegExpExecArray | null;
+  while ((match = planRegex.exec(rawText)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      const validated = validateProposedPlannerConfig(parsed);
+      if (validated && !proposedPlan) {
+        proposedPlan = validated;
+      }
+    } catch {
+      // ignore JSON parse errors
+    }
+  }
+
+  // Strip ALL json-plan code blocks or blocks containing planner configurations from chat text
+  cleaned = cleaned.replace(
+    /```(?:json-plan|json)?\s*{[\s\S]*?(?:"planSummary"|"targetCompanies"|"focusAreas")[\s\S]*?}\s*```/gi,
+    ""
+  );
+
+  // 2. Strip any simulated tool-call JSON blocks (e.g. {"tool": "search_questions", ...})
+  cleaned = cleaned.replace(
+    /```(?:json)?\s*\{[\s\S]*?(?:"tool"\s*:\s*"search_questions"|"tool"\s*:\s*".*?"|"name"\s*:\s*"search_questions")[\s\S]*?\}\s*```/gi,
+    ""
+  );
+  // Also strip bare inline JSON tool calls
+  cleaned = cleaned.replace(
+    /\{[^{}]*?"tool"\s*:\s*"[a-zA-Z0-9_-]+"[^{}]*?\}/g,
+    ""
+  );
+
+  // 3. Strip any preamble talking about querying tools or databases
+  cleaned = cleaned.replace(
+    /[^\r\n]*?(?:I will query the database|querying the dataset|let me query the database|I am querying|calling tool|using tool)[^\r\n]*?\r?\n+/gim,
+    ""
+  );
+
+  // 4. Clean up any excessive blank lines left after stripping
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n").trim();
+
+  return { text: cleaned, proposedPlan };
+}
+
 // ━━ Groq handler (OpenAI-compatible REST) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function callGroq(
   apiKey: string,
@@ -410,11 +462,17 @@ async function callGroq(
   userMessage: string,
   isPlannerMode: boolean
 ): Promise<{ text: string; proposedPlan?: ProposedPlannerConfig }> {
+  const userWantsPlan =
+    isPlannerMode &&
+    /create|build|make|generate|plan|roadmap|schedule|adjust|update/i.test(userMessage);
+
   let sys =
     systemPrompt +
-    "\n\nCRITICAL CONCISENESS & LENGTH RULE FOR GROQ:\nAlways provide proportional answers matching question depth. Strictly avoid verbose intros, conversational filler, and repetitive concluding advice. Jump straight into the answer.";
-  if (isPlannerMode) {
-    sys += "\n\nPLANNER PROPOSAL INSTRUCTION:\nWhen recommending or generating a new study plan or roadmap adjustments, provide your coaching advice and include a JSON code block in this exact format at the very end of your response so the user can interactively apply it to their Smart Planner:\n```json-plan\n{\n  \"role\": \"sde1\",\n  \"level\": \"intermediate\",\n  \"durationDays\": 30,\n  \"dailyHours\": 2,\n  \"targetCompanies\": [\"Google\", \"Amazon\"],\n  \"planSummary\": \"1-2 sentence executive summary of this roadmap\",\n  \"focusAreas\": [\"Sliding Window\", \"Binary Tree\", \"Dynamic Programming\"]\n}\n```\nValid roles: 'intern', 'sde1', 'sde2', 'quant'. Valid levels: 'beginner', 'basics', 'intermediate', 'advanced'. Valid durationDays: 15, 30, 60, 90. Valid dailyHours: 1, 2, 4, 6.";
+    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.";
+
+  if (userWantsPlan) {
+    sys +=
+      "\n\nPLANNER PROPOSAL INSTRUCTION:\nThe user explicitly asked to create or adjust a study plan. Provide your coaching advice and include a JSON code block in this exact format at the very end of your response so the user can interactively apply it to their Smart Planner:\n```json-plan\n{\n  \"role\": \"sde1\",\n  \"level\": \"intermediate\",\n  \"durationDays\": 30,\n  \"dailyHours\": 2,\n  \"targetCompanies\": [\"Google\", \"Amazon\"],\n  \"planSummary\": \"1-2 sentence executive summary of this roadmap\",\n  \"focusAreas\": [\"Sliding Window\", \"Binary Tree\", \"Dynamic Programming\"]\n}\n```\nValid roles: 'intern', 'sde1', 'sde2', 'quant'. Valid levels: 'beginner', 'basics', 'intermediate', 'advanced'. Valid durationDays: 15, 30, 60, 90. Valid dailyHours: 1, 2, 4, 6.";
   }
 
   // Sanitize messages to guarantee non-empty content
@@ -494,20 +552,7 @@ async function callGroq(
 
   const rawText = data.choices?.[0]?.message?.content ?? "I couldn't generate a response. Please try again.";
 
-  let proposedPlan: ProposedPlannerConfig | undefined;
-  const planMatch = rawText.match(/```(?:json-plan|json)?\s*({[\s\S]*?"planSummary"[\s\S]*?})\s*```/);
-  let cleanedText = rawText;
-  if (planMatch) {
-    try {
-      const parsed = JSON.parse(planMatch[1]);
-      const validated = validateProposedPlannerConfig(parsed);
-      if (validated) {
-        proposedPlan = validated;
-        cleanedText = rawText.replace(planMatch[0], "").trim();
-      }
-    } catch {}
-  }
-
+  const { text: cleanedText, proposedPlan } = cleanAiResponse(rawText);
   return { text: cleanedText, proposedPlan };
 }
 
@@ -792,7 +837,11 @@ export async function POST(req: NextRequest) {
       functionCalls = result.response.functionCalls();
     }
 
-    const text = result.response.text();
+    const rawGeminiText = result.response.text();
+    const { text, proposedPlan: extractedPlan } = cleanAiResponse(rawGeminiText);
+    if (!proposedPlan && extractedPlan) {
+      proposedPlan = extractedPlan;
+    }
 
     // Update remaining for Gemini after decrement
     if (!isByok) {
