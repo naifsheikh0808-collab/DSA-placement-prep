@@ -2,8 +2,10 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { auth } from "@/lib/firebase";
+import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getIdToken } from "firebase/auth";
+import { loadPlannerProfile } from "@/lib/plan-storage";
 
 export type PrimeAiModel = "gemini" | "groq";
 
@@ -26,16 +28,20 @@ interface UsePrimeAiOptions {
 const LOCAL_STORAGE_MODEL_KEY = "prime_ai_active_model";
 
 // ── Chat persistence helpers ─────────────────────────────────────────────────
-// Key is scoped to mode + (problemId for question mode) so each problem page
-// keeps its own history and the planner keeps its own history.
-function getChatStorageKey(mode: string, contextPayload?: Record<string, unknown>): string {
+// Key is scoped to user UID + channel so Account A and Account B never mix.
+function getChatChannel(mode: string, contextPayload?: Record<string, unknown>): string {
   if (mode === "question" && contextPayload?.problemId) {
-    return `prime_ai_chat_question_${contextPayload.problemId}`;
+    return `question_${contextPayload.problemId}`;
   }
   if (mode === "general") {
-    return "prime_ai_chat_home";
+    return "home";
   }
-  return "prime_ai_chat_planner";
+  return "planner";
+}
+
+function getChatStorageKey(channel: string, uid?: string | null): string {
+  const prefix = uid ? `user_${uid}_` : "guest_";
+  return `prime_ai_chat_${prefix}${channel}`;
 }
 
 function loadPersistedMessages(key: string): AiChatMessage[] {
@@ -72,8 +78,8 @@ function persistMessages(key: string, messages: AiChatMessage[]): void {
 export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UsePrimeAiOptions = {}) {
   const { user } = useAuth();
 
-  // Compute the storage key once (stable across renders for same mode+problem)
-  const storageKey = getChatStorageKey(mode, contextPayload);
+  const channel = getChatChannel(mode, contextPayload);
+  const storageKey = getChatStorageKey(channel, user?.uid);
 
   // Load persisted messages on first mount
   const [messages, setMessagesRaw] = useState<AiChatMessage[]>(() =>
@@ -87,16 +93,79 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Wrapper: set messages AND persist to localStorage
+  // Synchronize chat when user, channel, or storageKey changes
+  useEffect(() => {
+    // 1. Instantly load local cache for this user + channel
+    const local = loadPersistedMessages(storageKey);
+    setMessagesRaw(local);
+
+    // 2. If logged in, fetch cloud history from Firestore so chats sync across laptop/phone
+    const currentUid = user?.uid;
+    const currentDb = db;
+    if (!currentUid || !currentDb || !isFirebaseConfigured) return;
+    // Capture as non-null for use inside async closure
+    const safeUid: string = currentUid;
+    const safeDb = currentDb;
+    let isCancelled = false;
+
+    async function loadCloudChat() {
+      try {
+        const chatDocRef = doc(safeDb, "users", safeUid, "aiChats", channel);
+        const snap = await getDoc(chatDocRef);
+        if (snap.exists() && !isCancelled) {
+          const cloudMessages = (snap.data()?.messages || []) as AiChatMessage[];
+          if (Array.isArray(cloudMessages) && cloudMessages.length > 0) {
+            setMessagesRaw(cloudMessages);
+            persistMessages(storageKey, cloudMessages);
+          }
+        }
+      } catch (err) {
+        console.warn("[Prime AI] Cloud chat fetch warning:", err);
+      }
+    }
+
+    loadCloudChat();
+
+    // Listen for logout or external chat update
+    const onChatUpdated = () => {
+      const updated = loadPersistedMessages(storageKey);
+      setMessagesRaw(updated);
+    };
+    window.addEventListener("leetprime:chat-updated", onChatUpdated);
+
+    return () => {
+      isCancelled = true;
+      window.removeEventListener("leetprime:chat-updated", onChatUpdated);
+    };
+  }, [user?.uid, storageKey, channel]);
+
+  // Wrapper: set messages AND persist to localStorage + Firestore
   const setMessages = useCallback(
     (updater: AiChatMessage[] | ((prev: AiChatMessage[]) => AiChatMessage[])) => {
       setMessagesRaw((prev) => {
         const next = typeof updater === "function" ? updater(prev) : updater;
         persistMessages(storageKey, next);
+
+        // Async cloud sync to Firestore
+        const currentUid = user?.uid;
+        const currentDb = db;
+        if (currentUid && currentDb && isFirebaseConfigured) {
+          const chatDocRef = doc(currentDb, "users", currentUid, "aiChats", channel);
+          setDoc(
+            chatDocRef,
+            {
+              channel,
+              messages: next.slice(-60),
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          ).catch((e) => console.warn("[Prime AI] Cloud chat sync warning:", e));
+        }
+
         return next;
       });
     },
-    [storageKey]
+    [storageKey, user?.uid, channel]
   );
 
   // Restore model preference from localStorage
@@ -151,16 +220,7 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
         } else {
           // Planner mode: harvest profile & progress context
           try {
-            const STORAGE_KEY = "leetprime_smart_plan_profile";
-            const rawProfile = localStorage.getItem(STORAGE_KEY);
-            let savedProfile: unknown;
-            if (rawProfile) {
-              try {
-                savedProfile = JSON.parse(rawProfile);
-              } catch {
-                // ignore parse errors
-              }
-            }
+            const savedProfile = loadPlannerProfile();
 
             const { loadProgress, getPatternMastery, isSolvedStatus } = await import("@/lib/db");
             const progress = loadProgress();
@@ -290,15 +350,23 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
     [input, loading, messages, user, mode, contextPayload, onMessage, activeModel, setMessages]
   );
 
-  // Clear chat: wipe state + localStorage
+  // Clear chat: wipe state + localStorage + Firestore
   const clearChat = useCallback(() => {
     setMessagesRaw([]);
     if (typeof window !== "undefined") {
       localStorage.removeItem(storageKey);
     }
+    if (user?.uid && db && isFirebaseConfigured) {
+      const chatDocRef = doc(db, "users", user.uid, "aiChats", channel);
+      setDoc(chatDocRef, {
+        channel,
+        messages: [],
+        updatedAt: new Date().toISOString(),
+      }).catch(() => {});
+    }
     setRemainingGemini(null);
     setRemainingGroq(null);
-  }, [storageKey]);
+  }, [storageKey, user?.uid, channel]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {

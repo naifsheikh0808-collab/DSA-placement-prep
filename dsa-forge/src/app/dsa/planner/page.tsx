@@ -33,7 +33,16 @@ import { DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useProgressStore } from "@/hooks/use-progress";
 import type { Difficulty, Problem, Timeframe } from "@/lib/types";
-import { loadPlan, savePlan, updateTaskStatus, rescheduleTask, deletePlan } from "@/lib/plan-storage";
+import {
+  loadPlan,
+  savePlan,
+  updateTaskStatus,
+  rescheduleTask,
+  deletePlan,
+  loadPlannerProfile,
+  savePlannerProfile,
+  deletePlannerProfile,
+} from "@/lib/plan-storage";
 import {
   generateStudyPlan,
   validateStudyPlan,
@@ -119,38 +128,42 @@ export default function SmartPlannerPage() {
 
   const { progress, markSolved, markAttempted, markRevise } = useProgressStore();
 
-  // Load profile from localStorage & listen for AI Coach applied plans
+  // Load profile from storage & listen for AI Coach applied plans or auth changes
   useEffect(() => {
     setMounted(true);
     const loadSaved = () => {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = loadPlannerProfile();
         if (saved) {
-          const parsed = JSON.parse(saved) as PlannerProfile;
-          setProfile(parsed);
+          setProfile(saved);
           setIsEditing(false);
           // Pre-fill form
-          setFormRole(parsed.role);
-          setFormStage(parsed.stage);
-          setFormLevel(parsed.level);
-          setFormCompanyPreset(parsed.companyPreset || "maang");
-          setFormCustomCompanies(parsed.targetCompanies || []);
-          setFormDuration(parsed.durationDays);
-          setFormDailyHours(parsed.dailyHours);
+          setFormRole(saved.role);
+          setFormStage(saved.stage);
+          setFormLevel(saved.level);
+          setFormCompanyPreset(saved.companyPreset || "maang");
+          setFormCustomCompanies(saved.targetCompanies || []);
+          setFormDuration(saved.durationDays);
+          setFormDailyHours(saved.dailyHours);
         } else {
+          setProfile(null);
           setIsEditing(true);
         }
       } catch (e) {
+        setProfile(null);
         setIsEditing(true);
       }
+      const savedPlan = loadPlan();
+      setStudyPlan(savedPlan);
     };
 
     loadSaved();
-    // Load study plan
-    const savedPlan = loadPlan();
-    if (savedPlan) setStudyPlan(savedPlan);
     window.addEventListener("leetprime:plan-updated", loadSaved);
-    return () => window.removeEventListener("leetprime:plan-updated", loadSaved);
+    window.addEventListener("storage", loadSaved);
+    return () => {
+      window.removeEventListener("leetprime:plan-updated", loadSaved);
+      window.removeEventListener("storage", loadSaved);
+    };
   }, []);
 
   // Smooth scroll to AI coach if navigated with #ai-coach
@@ -255,7 +268,7 @@ export default function SmartPlannerPage() {
     setProfile(newProfile);
     setIsEditing(false);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newProfile));
+      savePlannerProfile(newProfile);
       // ── Sync Study Plan & Notify all tabs & Active Roadmap ──
       try {
         const newPlan = generateStudyPlan(newProfile, progress);

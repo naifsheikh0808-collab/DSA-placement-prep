@@ -14,7 +14,20 @@ import {
   type User,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { loadProgress, saveProgress, type UserProgress } from "@/lib/db";
+import {
+  loadProgress,
+  saveProgress,
+  resetProgress,
+  PROGRESS_UPDATED_EVENT,
+  type UserProgress,
+} from "@/lib/db";
+import {
+  savePlan,
+  deletePlan,
+  savePlannerProfile,
+  deletePlannerProfile,
+  PLAN_UPDATED_EVENT,
+} from "@/lib/plan-storage";
 
 interface AuthContextType {
   user: User | null;
@@ -47,32 +60,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser && db) {
-        // Automatically sync & merge local storage with Firestore upon sign-in
+        // Automatically sync cloud data with local store upon sign-in
         try {
           const userDocRef = doc(db, "users", currentUser.uid);
           const docSnap = await getDoc(userDocRef);
-          const localData = loadProgress();
 
           if (docSnap.exists()) {
-            const cloudProgress = (docSnap.data()?.progress || {}) as Record<string, UserProgress>;
-            // Merge cloud + local (cloud wins on conflict unless local is newer)
-            const merged = { ...localData, ...cloudProgress };
-            saveProgress(merged);
-            // Write back merged to cloud
-            await setDoc(userDocRef, { progress: merged, updatedAt: new Date().toISOString() }, { merge: true });
-          } else if (Object.keys(localData).length > 0) {
-            // First time sign-in: push local progress to cloud
+            const data = docSnap.data();
+            const cloudProgress = (data?.progress || {}) as Record<string, UserProgress>;
+            saveProgress(cloudProgress, true);
+
+            if (data?.studyPlan) {
+              savePlan(data.studyPlan, true);
+            } else {
+              deletePlan(true);
+            }
+
+            if (data?.plannerProfile) {
+              savePlannerProfile(data.plannerProfile, true);
+            } else {
+              deletePlannerProfile(true);
+            }
+          } else {
+            // First time sign-in for this account: start fresh and initialize in Firestore
+            resetProgress(true);
+            deletePlan(true);
+            deletePlannerProfile(true);
+
             await setDoc(userDocRef, {
               displayName: currentUser.displayName,
               email: currentUser.email,
               photoURL: currentUser.photoURL,
-              progress: localData,
+              progress: {},
+              studyPlan: null,
+              plannerProfile: null,
               createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
             });
           }
         } catch (err) {
           console.error("Firestore sync error on login:", err);
         }
+      } else {
+        // Logged out / guest mode: ensure clean slate so previous user's data doesn't linger
+        resetProgress(true);
+        deletePlan(true);
+        deletePlannerProfile(true);
       }
       setLoading(false);
     });
@@ -99,7 +132,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     if (auth) {
-      await signOut(auth);
+      try {
+        await signOut(auth);
+      } catch (err) {
+        console.error("Sign-out error:", err);
+      }
+    }
+    // Clean local user data so guest mode or the next user doesn't inherit it
+    resetProgress(true);
+    deletePlan(true);
+    deletePlannerProfile(true);
+
+    if (typeof window !== "undefined") {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (
+          k &&
+          (k.startsWith("prime_ai_chat_") ||
+            k === "dsaforge_progress" ||
+            k === "leetprime_study_plan" ||
+            k === "leetprime_smart_plan_profile")
+        ) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+      window.dispatchEvent(new Event(PLAN_UPDATED_EVENT));
+      window.dispatchEvent(new Event("leetprime:plan-updated"));
+      window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
+      window.dispatchEvent(new Event("leetprime:chat-updated"));
+      window.dispatchEvent(new Event("storage"));
     }
     setUser(null);
   };

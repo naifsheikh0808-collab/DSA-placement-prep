@@ -63,14 +63,8 @@ export function useAiChat({ mode = "planner", contextPayload, onMessage }: UseAi
         } else {
           // Planner mode: harvest profile & progress context
           try {
-            const STORAGE_KEY = "leetprime_smart_plan_profile";
-            const rawProfile = localStorage.getItem(STORAGE_KEY);
-            let savedProfile: unknown;
-            if (rawProfile) {
-              try {
-                savedProfile = JSON.parse(rawProfile);
-              } catch {}
-            }
+            const { loadPlannerProfile } = await import("@/lib/plan-storage");
+            const savedProfile = loadPlannerProfile();
 
             const { loadProgress, getPatternMastery, isSolvedStatus } = await import("@/lib/db");
             const progress = loadProgress();

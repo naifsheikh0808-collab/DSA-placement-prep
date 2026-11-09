@@ -22,6 +22,7 @@ import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
 import { PrimeAiSettingsModal } from "@/components/ai/PrimeAiSettingsModal";
 import { PrimeAiMessageRenderer } from "@/components/ai/PrimeAiMessageRenderer";
 import { usePrimeAi } from "@/hooks/use-prime-ai";
+import { savePlannerProfile } from "@/lib/plan-storage";
 import type { ProposedPlannerConfig } from "@/lib/question-search";
 
 // ── Proposed Plan Card ────────────────────────────────────────────────────────
@@ -142,7 +143,6 @@ export function AiAssistantPanel() {
   const handleApplyPlan = useCallback(
     async (msgId: string, plan: ProposedPlannerConfig) => {
       try {
-        const STORAGE_KEY = "leetprime_smart_plan_profile";
         const newProfile = {
           role: plan.role,
           level: plan.level,
@@ -150,11 +150,10 @@ export function AiAssistantPanel() {
           dailyHours: plan.dailyHours,
           targetCompanies: plan.targetCompanies ?? [],
           companyPreset: "custom",
-          stage: "Placement Prep",
+          stage: "Placement Prep" as const,
           createdAt: new Date().toISOString(),
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newProfile));
-        window.dispatchEvent(new Event("leetprime:plan-updated"));
+        savePlannerProfile(newProfile as any);
 
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, planApplied: true } : m))
