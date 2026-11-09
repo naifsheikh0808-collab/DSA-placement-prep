@@ -322,7 +322,16 @@ function parseMarkdownBlocks(markdown?: string): Block[] {
         i++;
       }
       if (i < lines.length) i++; // consume closing fence
-      blocks.push({ type: "code", lang, code: codeLines.join("\n") });
+      const codeStr = codeLines.join("\n");
+      const isInternalToolOrPlan =
+        lang.toLowerCase() === "json-plan" ||
+        codeStr.includes('"tool": "search_questions"') ||
+        (codeStr.includes('"tool":') && codeStr.includes('"args":')) ||
+        (codeStr.includes('"planSummary"') && codeStr.includes('"targetCompanies"'));
+
+      if (!isInternalToolOrPlan) {
+        blocks.push({ type: "code", lang, code: codeStr });
+      }
       continue;
     }
 
