@@ -5,6 +5,8 @@ import { X, Key, Zap, ExternalLink, CheckCircle2, AlertCircle, Loader2, Trash2, 
 import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
 import { useAuth } from "@/context/auth-context";
 import { getIdToken } from "firebase/auth";
+import { db, isFirebaseConfigured } from "@/lib/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import type { PrimeAiModel } from "@/hooks/use-prime-ai";
 
 interface PrimeAiSettingsModalProps {
@@ -117,6 +119,45 @@ export function PrimeAiSettingsModal({
           }
         }
 
+        // Check Firestore for cloud-synced keys (e.g. added on laptop, now loading on mobile)
+        if (typeof window !== "undefined" && db && isFirebaseConfigured && (!gConfigured || !qConfigured)) {
+          try {
+            const userDocRef = doc(db, "users", user.uid);
+            const snap = await getDoc(userDocRef);
+            if (snap.exists()) {
+              const cloudByok = snap.data()?.byok;
+              if (!qConfigured && cloudByok?.groqKey) {
+                localStorage.setItem(`prime_ai_groq_key_${user.uid}`, cloudByok.groqKey);
+                localStorage.setItem("prime_ai_groq_key", cloudByok.groqKey);
+                fetch("/api/ai/config", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${idToken}`,
+                  },
+                  body: JSON.stringify({ apiKey: cloudByok.groqKey, provider: "groq", validate: false }),
+                }).catch(() => {});
+                qConfigured = true;
+              }
+              if (!gConfigured && cloudByok?.geminiKey) {
+                localStorage.setItem(`prime_ai_gemini_key_${user.uid}`, cloudByok.geminiKey);
+                localStorage.setItem("prime_ai_gemini_key", cloudByok.geminiKey);
+                fetch("/api/ai/config", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${idToken}`,
+                  },
+                  body: JSON.stringify({ apiKey: cloudByok.geminiKey, provider: "gemini", validate: false }),
+                }).catch(() => {});
+                gConfigured = true;
+              }
+            }
+          } catch (cloudErr) {
+            console.warn("[Prime AI Settings] Could not fetch BYOK from Firestore:", cloudErr);
+          }
+        }
+
         setGeminiConfigured(gConfigured);
         setGroqConfigured(qConfigured);
       }
@@ -129,6 +170,14 @@ export function PrimeAiSettingsModal({
     if (isOpen) {
       fetchConfigStatus();
     }
+
+    const onByokUpdate = () => {
+      if (isOpen) fetchConfigStatus();
+    };
+    window.addEventListener("leetprime:byok-updated", onByokUpdate);
+    return () => {
+      window.removeEventListener("leetprime:byok-updated", onByokUpdate);
+    };
   }, [isOpen, fetchConfigStatus]);
 
   const handleSaveKey = async (provider: PrimeAiModel) => {
@@ -168,6 +217,30 @@ export function PrimeAiSettingsModal({
           localStorage.setItem(`prime_ai_${provider}_key_${user.uid}`, trimmedKey);
           localStorage.setItem(`prime_ai_${provider}_key`, trimmedKey);
         }
+
+        // Persist to Firestore so keys sync across all devices (laptop <-> phone)
+        if (db && isFirebaseConfigured) {
+          try {
+            const userDocRef = doc(db, "users", user.uid);
+            await setDoc(
+              userDocRef,
+              {
+                byok: {
+                  [provider === "gemini" ? "geminiKey" : "groqKey"]: trimmedKey,
+                },
+                updatedAt: new Date().toISOString(),
+              },
+              { merge: true }
+            );
+          } catch (cloudErr) {
+            console.warn("[Prime AI] Could not sync BYOK to Firestore:", cloudErr);
+          }
+        }
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("leetprime:byok-updated"));
+        }
+
         setMsg("✓ API key verified & permanently saved! Unlimited queries enabled.");
         if (provider === "gemini") setGeminiKey("");
         else setGroqKey("");
@@ -192,6 +265,29 @@ export function PrimeAiSettingsModal({
       if (typeof window !== "undefined") {
         localStorage.removeItem(`prime_ai_${provider}_key_${user.uid}`);
         localStorage.removeItem(`prime_ai_${provider}_key`);
+      }
+
+      // Remove from Firestore so all devices switch back to Free Tier
+      if (db && isFirebaseConfigured) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          await setDoc(
+            userDocRef,
+            {
+              byok: {
+                [provider === "gemini" ? "geminiKey" : "groqKey"]: null,
+              },
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        } catch (cloudErr) {
+          console.warn("[Prime AI] Could not remove BYOK from Firestore:", cloudErr);
+        }
+      }
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("leetprime:byok-updated"));
       }
 
       const idToken = await getIdToken(user, true);

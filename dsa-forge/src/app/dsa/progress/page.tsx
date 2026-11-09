@@ -213,6 +213,8 @@ export default function ProgressPage() {
               <img
                 src={user.photoURL}
                 alt={user.displayName || "User"}
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
                 className="w-16 h-16 rounded-2xl border-2 border-violet-500/40 object-cover shadow-lg shadow-violet-500/20"
               />
             ) : (

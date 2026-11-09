@@ -41,7 +41,17 @@ function initials(name?: string | null, email?: string | null): string {
 /** Google/Firebase may surface the profile picture on the provider data instead of the top-level user.photoURL. */
 function getUserPhotoURL(user: { photoURL?: string | null; providerData?: { photoURL?: string | null }[] } | null): string | undefined {
   if (!user) return undefined;
-  return user.photoURL ?? user.providerData?.[0]?.photoURL ?? undefined;
+  if (user.photoURL && user.photoURL.trim()) {
+    return user.photoURL.trim();
+  }
+  if (Array.isArray(user.providerData)) {
+    for (const p of user.providerData) {
+      if (p?.photoURL && p.photoURL.trim()) {
+        return p.photoURL.trim();
+      }
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -65,6 +75,12 @@ export function UserAvatar({
   const { user, loading, signInWithGoogle, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  // Reset img error on account switch
+  useEffect(() => {
+    setImgError(false);
+  }, [user?.uid, user?.photoURL]);
 
   const anchorRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -176,11 +192,14 @@ export function UserAvatar({
       {/* Identity */}
       <div className="p-4 border-b border-white/10 bg-gradient-to-br from-violet-950/50 to-transparent">
         <div className="flex items-center gap-3">
-          {getUserPhotoURL(user) ? (
+          {!imgError && getUserPhotoURL(user) ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={getUserPhotoURL(user)!}
-              alt=""
+              alt={user?.displayName || "Profile"}
+              referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
+              onError={() => setImgError(true)}
               className="w-10 h-10 rounded-xl object-cover border border-violet-500/30"
             />
           ) : (
@@ -305,11 +324,14 @@ export function UserAvatar({
       >
         {loading ? (
           <Loader2 className={cn("animate-spin text-white", ICON_CLASSES[size])} />
-        ) : getUserPhotoURL(user) ? (
+        ) : !imgError && getUserPhotoURL(user) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={getUserPhotoURL(user)!}
             alt={user?.displayName || "Profile"}
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
+            onError={() => setImgError(true)}
             className="w-full h-full object-cover"
           />
         ) : user ? (
