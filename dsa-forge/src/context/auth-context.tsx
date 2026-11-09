@@ -125,9 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await setDoc(
               userDocRef,
               {
-                displayName: currentUser.displayName,
-                email: currentUser.email,
-                photoURL: currentUser.photoURL,
+                displayName: currentUser.displayName ?? null,
+                email: currentUser.email ?? null,
+                photoURL: currentUser.photoURL ?? null,
                 updatedAt: new Date().toISOString(),
               },
               { merge: true }
@@ -163,9 +163,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             deletePlannerProfile(true);
 
             await setDoc(userDocRef, {
-              displayName: currentUser.displayName,
-              email: currentUser.email,
-              photoURL: currentUser.photoURL,
+              displayName: currentUser.displayName ?? null,
+              email: currentUser.email ?? null,
+              photoURL: currentUser.photoURL ?? null,
               progress: {},
               studyPlan: null,
               plannerProfile: null,
