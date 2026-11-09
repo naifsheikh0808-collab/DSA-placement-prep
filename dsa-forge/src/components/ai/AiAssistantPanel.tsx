@@ -374,19 +374,18 @@ export function AiAssistantPanel() {
           <div className="p-3.5 pt-0 flex-shrink-0">
             <div className="rounded-2xl border border-white/[0.1] bg-[#141126]/90 backdrop-blur-md p-2.5 focus-within:border-violet-500/50 focus-within:ring-1 focus-within:ring-violet-500/30 transition-all shadow-inner">
               {/* Textarea */}
-              {/* Smart Auto-Suggestion Pill (Only when asking for full code on Llama) */}
-              {activeModel === "groq" && /full solution|give me code|show code|write code|complete code|full code/i.test(input) && (
-                <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 mb-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-200">
-                  <span className="flex items-center gap-1.5 truncate text-[11px]">
-                    <span>💡</span>
-                    <span>Tip: <strong>⚡ Gemini</strong> is recommended for verified LeetCode code.</span>
+              {/* Smart Switch Tip (Crisp, 1-line, non-truncated) */}
+              {activeModel === "groq" && /(?:complete|full|optimal|entire|whole)\s*(?:solution|code)|(?:give|show|write|provide|need)\s*(?:me\s*)?(?:the\s*)?(?:code|solution|implementation)|code\s*for\s*this|solve\s*(?:this|it)|(?:c\+\+|cpp|python|java|javascript|typescript)\s*(?:code|solution)|leetcode\s*(?:code|solution|format)/i.test(input) && (
+                <div className="flex items-center justify-between gap-1.5 px-2.5 py-1 mb-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-200">
+                  <span className="text-[11px] font-medium truncate">
+                    💡 Use <strong>Gemini</strong> for full code
                   </span>
                   <button
                     type="button"
                     onClick={() => setActiveModel("gemini")}
-                    className="shrink-0 px-2 py-0.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 text-blue-100 font-bold text-[10px] transition-all cursor-pointer"
+                    className="shrink-0 px-2 py-0.5 rounded-lg bg-blue-500/25 hover:bg-blue-500/35 border border-blue-500/40 text-blue-100 font-bold text-[10px] transition-all cursor-pointer"
                   >
-                    Switch to Gemini
+                    Switch ⚡
                   </button>
                 </div>
               )}
@@ -398,8 +397,8 @@ export function AiAssistantPanel() {
                 onKeyDown={handleKeyDown}
                 placeholder={
                   activeModel === "groq"
-                    ? "Ask Llama for quick hints, switch to Gemini for complete code..."
-                    : "Ask Gemini for complete solutions, roadmaps, or explanations..."
+                    ? "Ask for quick hints & intuition..."
+                    : "Ask for full code & roadmaps..."
                 }
                 rows={1}
                 className="w-full bg-transparent text-white text-xs sm:text-sm placeholder:text-white/25 outline-none resize-none px-2 py-1 leading-relaxed max-h-24"
