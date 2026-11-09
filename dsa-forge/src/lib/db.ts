@@ -8,6 +8,8 @@ import { PATTERNS, TOP_COMPANIES, TOP_PROBLEMS, PLATFORM_STATS } from "./data/se
 import { TIMEFRAME_LABELS } from "./constants";
 import type { Pattern, PatternQuestion, Company, Problem, UserProgress, Timeframe, Difficulty, ProgressStatus } from "./types";
 import { slugify } from "./utils";
+import { auth, db as firestoreDb, isFirebaseConfigured } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
 import {
   getPatternProblems,
   matchesPatternValue,
@@ -221,20 +223,44 @@ export function invalidateProgressCache(): void {
   progressCache = null;
 }
 
-export function saveProgress(progress: Record<string, UserProgress>): void {
+export function saveProgress(progress: Record<string, UserProgress>, skipCloudSync = false): void {
   if (typeof window === "undefined") return;
   const canonical = canonicalizeProgress(progress);
   progressCache = canonical;
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(canonical));
   // Notify every mounted progress store so counts update without a reload.
   window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
+
+  if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && firestoreDb && isFirebaseConfigured) {
+    const userDocRef = doc(firestoreDb, "users", auth.currentUser.uid);
+    setDoc(
+      userDocRef,
+      {
+        progress: canonical,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch((err) => console.warn("[Firestore] Progress sync error:", err));
+  }
 }
 
-export function resetProgress(): void {
+export function resetProgress(skipCloudSync = false): void {
   if (typeof window === "undefined") return;
   progressCache = {};
   localStorage.removeItem(PROGRESS_KEY);
   window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
+
+  if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && firestoreDb && isFirebaseConfigured) {
+    const userDocRef = doc(firestoreDb, "users", auth.currentUser.uid);
+    setDoc(
+      userDocRef,
+      {
+        progress: {},
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch((err) => console.warn("[Firestore] Progress reset error:", err));
+  }
 }
 
 export function updateProblemStatus(

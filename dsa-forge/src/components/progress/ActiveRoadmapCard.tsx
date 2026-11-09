@@ -13,7 +13,7 @@ import {
   Building2,
 } from "lucide-react";
 import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
-import { loadPlan, PLAN_UPDATED_EVENT } from "@/lib/plan-storage";
+import { loadPlan, loadPlannerProfile, PLAN_UPDATED_EVENT } from "@/lib/plan-storage";
 import { generatePersonalizedRoadmap } from "@/lib/plan-generator";
 import { useProgressStore } from "@/hooks/use-progress";
 import { TOP_PROBLEMS } from "@/lib/db";
@@ -48,14 +48,7 @@ export function ActiveRoadmapCard() {
     const savedPlan = loadPlan();
 
     // 2. Load active smart plan profile (updated by Adjust Preferences)
-    let savedProfile: PlannerProfile | null = null;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) savedProfile = JSON.parse(raw);
-    } catch {
-      // ignore JSON parse errors
-    }
-
+    const savedProfile = loadPlannerProfile();
     setProfile(savedProfile);
 
     if (savedPlan) {

@@ -1,8 +1,11 @@
 // Plan storage layer - reuses existing localStorage + Firestore pattern
-import { StudyPlan, StudyTask, DailyPlan } from "@/lib/types";
+import { StudyPlan, StudyTask, DailyPlan, PlannerProfile } from "@/lib/types";
+import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
-const PLAN_STORAGE_KEY = "leetprime_study_plan";
-const PLAN_UPDATED_EVENT = "leetprime:plan-updated";
+export const PLAN_STORAGE_KEY = "leetprime_study_plan";
+export const PROFILE_STORAGE_KEY = "leetprime_smart_plan_profile";
+export const PLAN_UPDATED_EVENT = "leetprime:plan-updated";
 
 export function loadPlan(): StudyPlan | null {
   if (typeof window === "undefined") return null;
@@ -15,17 +18,92 @@ export function loadPlan(): StudyPlan | null {
   }
 }
 
-export function savePlan(plan: StudyPlan): void {
+export function savePlan(plan: StudyPlan, skipCloudSync = false): void {
   if (typeof window === "undefined") return;
   plan.updatedAt = new Date().toISOString();
   localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(plan));
   window.dispatchEvent(new Event(PLAN_UPDATED_EVENT));
+  window.dispatchEvent(new Event("storage"));
+
+  if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && db && isFirebaseConfigured) {
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    setDoc(
+      userDocRef,
+      {
+        studyPlan: plan,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch((err) => console.warn("[Firestore] Plan sync error:", err));
+  }
 }
 
-export function deletePlan(): void {
+export function deletePlan(skipCloudSync = false): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(PLAN_STORAGE_KEY);
   window.dispatchEvent(new Event(PLAN_UPDATED_EVENT));
+  window.dispatchEvent(new Event("storage"));
+
+  if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && db && isFirebaseConfigured) {
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    setDoc(
+      userDocRef,
+      {
+        studyPlan: null,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch((err) => console.warn("[Firestore] Plan delete error:", err));
+  }
+}
+
+export function loadPlannerProfile(): PlannerProfile | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PlannerProfile;
+  } catch {
+    return null;
+  }
+}
+
+export function savePlannerProfile(profile: PlannerProfile, skipCloudSync = false): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  window.dispatchEvent(new Event(PLAN_UPDATED_EVENT));
+  window.dispatchEvent(new Event("storage"));
+
+  if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && db && isFirebaseConfigured) {
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    setDoc(
+      userDocRef,
+      {
+        plannerProfile: profile,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch((err) => console.warn("[Firestore] Profile sync error:", err));
+  }
+}
+
+export function deletePlannerProfile(skipCloudSync = false): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(PROFILE_STORAGE_KEY);
+  window.dispatchEvent(new Event(PLAN_UPDATED_EVENT));
+  window.dispatchEvent(new Event("storage"));
+
+  if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && db && isFirebaseConfigured) {
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    setDoc(
+      userDocRef,
+      {
+        plannerProfile: null,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch((err) => console.warn("[Firestore] Profile delete error:", err));
+  }
 }
 
 export function updateTaskStatus(
@@ -91,5 +169,3 @@ export function rescheduleTask(
   savePlan(updated);
   return updated;
 }
-
-export { PLAN_UPDATED_EVENT };
