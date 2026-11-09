@@ -94,6 +94,7 @@ export function AiSidePanel({
     remainingGroq,
     isSettingsOpen,
     setIsSettingsOpen,
+    isByok,
   } = usePrimeAi({
     mode: "question",
     contextPayload: {
@@ -127,7 +128,6 @@ export function AiSidePanel({
   const toggleModel = () => setActiveModel(activeModel === "gemini" ? "groq" : "gemini");
 
   const remThisModel = activeModel === "gemini" ? remainingGemini : remainingGroq;
-  const isByok = remThisModel === null;
   const tierBadgeLabel = isByok
     ? "💎 BYOK Unlimited"
     : `⚡ Free: ${remThisModel !== undefined && remThisModel !== null ? remThisModel : 10}/10`;

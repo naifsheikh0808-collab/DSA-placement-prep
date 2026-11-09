@@ -81,6 +81,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } else {
               deletePlannerProfile(true);
             }
+
+            // Sync cloud BYOK keys across devices (laptop <-> phone)
+            const cloudByok = data?.byok;
+            const localGemini = typeof window !== "undefined"
+              ? localStorage.getItem(`prime_ai_gemini_key_${currentUser.uid}`) || localStorage.getItem("prime_ai_gemini_key")
+              : null;
+            const localGroq = typeof window !== "undefined"
+              ? localStorage.getItem(`prime_ai_groq_key_${currentUser.uid}`) || localStorage.getItem("prime_ai_groq_key")
+              : null;
+
+            const finalGemini = cloudByok?.geminiKey || localGemini || null;
+            const finalGroq = cloudByok?.groqKey || localGroq || null;
+
+            if (typeof window !== "undefined") {
+              if (finalGemini) {
+                localStorage.setItem(`prime_ai_gemini_key_${currentUser.uid}`, finalGemini);
+                localStorage.setItem("prime_ai_gemini_key", finalGemini);
+              }
+              if (finalGroq) {
+                localStorage.setItem(`prime_ai_groq_key_${currentUser.uid}`, finalGroq);
+                localStorage.setItem("prime_ai_groq_key", finalGroq);
+              }
+            }
+
+            // If keys existed locally on laptop but not in cloud, sync up to Firestore
+            const needsCloudSync = (!cloudByok?.geminiKey && localGemini) || (!cloudByok?.groqKey && localGroq);
+            if (needsCloudSync) {
+              await setDoc(
+                userDocRef,
+                {
+                  byok: {
+                    ...(finalGemini ? { geminiKey: finalGemini } : {}),
+                    ...(finalGroq ? { groqKey: finalGroq } : {}),
+                  },
+                  updatedAt: new Date().toISOString(),
+                },
+                { merge: true }
+              );
+            }
+
+            // Also keep user profile & photoURL fresh in Firestore
+            await setDoc(
+              userDocRef,
+              {
+                displayName: currentUser.displayName,
+                email: currentUser.email,
+                photoURL: currentUser.photoURL,
+                updatedAt: new Date().toISOString(),
+              },
+              { merge: true }
+            );
+
+            // Warm server BYOK memory cache in background
+            if (finalGemini || finalGroq) {
+              currentUser.getIdToken().then((token) => {
+                if (finalGemini) {
+                  fetch("/api/ai/config", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ apiKey: finalGemini, provider: "gemini", validate: false }),
+                  }).catch(() => {});
+                }
+                if (finalGroq) {
+                  fetch("/api/ai/config", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ apiKey: finalGroq, provider: "groq", validate: false }),
+                  }).catch(() => {});
+                }
+              }).catch(() => {});
+            }
+
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new Event("leetprime:byok-updated"));
+            }
           } else {
             // First time sign-in for this account: start fresh and initialize in Firestore
             resetProgress(true);
@@ -150,6 +225,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (
           k &&
           (k.startsWith("prime_ai_chat_") ||
+            k.startsWith("prime_ai_gemini_key_") ||
+            k.startsWith("prime_ai_groq_key_") ||
+            k === "prime_ai_gemini_key" ||
+            k === "prime_ai_groq_key" ||
             k === "dsaforge_progress" ||
             k === "leetprime_study_plan" ||
             k === "leetprime_smart_plan_profile")
@@ -162,6 +241,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.dispatchEvent(new Event("leetprime:plan-updated"));
       window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
       window.dispatchEvent(new Event("leetprime:chat-updated"));
+      window.dispatchEvent(new Event("leetprime:byok-updated"));
       window.dispatchEvent(new Event("storage"));
     }
     setUser(null);

@@ -12,6 +12,20 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        // Google profile pictures (OAuth sign-in via Google/Firebase)
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        // Firebase Storage avatars (if ever used)
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

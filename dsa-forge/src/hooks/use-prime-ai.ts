@@ -91,7 +91,27 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
   const [remainingGemini, setRemainingGemini] = useState<number | null>(null);
   const [remainingGroq, setRemainingGroq] = useState<number | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [byokTick, setByokTick] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Listen for BYOK key changes across tabs and cloud sync
+  useEffect(() => {
+    const onByok = () => setByokTick((t) => t + 1);
+    window.addEventListener("leetprime:byok-updated", onByok);
+    window.addEventListener("storage", onByok);
+    return () => {
+      window.removeEventListener("leetprime:byok-updated", onByok);
+      window.removeEventListener("storage", onByok);
+    };
+  }, []);
+
+  const isByok =
+    typeof window !== "undefined" && user?.uid
+      ? Boolean(
+          localStorage.getItem(`prime_ai_${activeModel}_key_${user.uid}`) ||
+          localStorage.getItem(`prime_ai_${activeModel}_key`)
+        )
+      : false;
 
   // Synchronize chat when user, channel, or storageKey changes
   useEffect(() => {
@@ -399,5 +419,6 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
     handleKeyDown,
     textareaRef,
     user,
+    isByok,
   };
 }
