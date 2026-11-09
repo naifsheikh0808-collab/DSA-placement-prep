@@ -292,16 +292,20 @@ COACHING BEHAVIOR & RULES:
    - ONLY call 'propose_planner_configuration' if the user EXPLICITLY asks to build, create, or update a study plan or roadmap. If the user is just asking questions, reviewing questions, or asking for company lists, answer in clean markdown bullets and do NOT trigger a planner proposal.
 9. CLEAN LEETCODE-STYLE CODE & EXPLANATION FORMAT (CRITICAL FOR ALL CODE SOLUTIONS):
    - Whenever the user asks for code, a solution, or an implementation for a LeetCode or DSA problem:
-     * Code Block (Pure & Clean LeetCode Submission):
+     * Code Block (Pure, Clean & Minimal LeetCode Submission):
        - Output pure, clean LeetCode submission format: start directly with 'class Solution { public: ... };' (or 'class Solution:' in Python, 'class Solution { public ... }' in Java).
        - In C++: Do NOT put '#include' headers or 'using namespace std;' inside the code block (LeetCode already pre-imports them). Use clean standard types ('vector<int>', 'set<int>', 'priority_queue<...>', 'string') WITHOUT verbose 'std::' prefixes.
-       - NEVER include 'int main()', testing scaffolding, or standalone CLI drivers unless explicitly requested by the user.
-       - Match the official LeetCode method signature, parameter names, and return types precisely.
-       - Use clean formatting, intuitive variable names, and concise comments.
+       - NEVER include 'int main()', testing scaffolding, or standalone CLI drivers.
+       - EXACT OFFICIAL METHOD SIGNATURE: Never invent, guess, or modify the LeetCode method name or parameters (e.g. for LeetCode 1606, it is ALWAYS 'busiestServers(int k, vector<int>& arrival, vector<int>& load)' — NEVER replace 'arrival' and 'load' with 'requests'). Parameter mismatch will cause LeetCode compilation failure.
+       - ZERO INTERNAL MONOLOGUE / CHAIN-OF-THOUGHT IN COMMENTS:
+         * NEVER write thinking out loud, debates, or questions as code comments (e.g. NEVER write "// Wait, the problem says...", "// Actually, we need to...", "// My current logic:", "// What if two servers...", "// Is it guaranteed that...", "// Let's re-read carefully").
+         * Comments inside code must ONLY be brief, 1-line action descriptions (e.g. "// Free all servers whose requests completed", "// Circular wrap-around").
+         * Keep comments sparse: at most 3-5 short 1-line comments in the entire code. Let clean code speak for itself.
+       - ADHERE STRICTLY TO THE PROBLEM RULES: Never invent conflicting logic (e.g. in LeetCode 1606, if all servers are busy, the request is dropped with 'continue;', NOT waited on or queued).
      * Brief Explanation & Pro-Tips (Right after the code block):
-       - 1. Core Intuition: 2-3 concise bullets explaining the data structures, invariant, and assignment/traversal logic.
+       - 1. Core Intuition: 2-3 concise bullets explaining data structures, invariant, and assignment logic.
        - 2. Complexity: Big-O Time & Space complexity breakdown.
-       - 3. 💡 Question-Specific Pro Tips: 1-2 practical interview tips or edge cases specific to THIS problem (e.g., subtle overflow pitfalls, off-by-one bounds, tie-breaking rules, or interviewer follow-ups). Do NOT output generic local header compilation tips.`;
+       - 3. 💡 Question-Specific Pro Tips: 1-2 practical interview tips or edge cases specific to THIS problem (e.g. subtle overflow pitfalls, off-by-one bounds, tie-breaking rules, or interviewer follow-ups). Do NOT output generic local header compilation tips.`;
 
 // ━━ Message type ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 interface ChatMessage {
@@ -460,7 +464,23 @@ function cleanAiResponse(rawText: string): { text: string; proposedPlan?: Propos
     ""
   );
 
-  // 4. Clean up any excessive blank lines left after stripping
+  // 4. Strip rambling chain-of-thought comments inside code blocks
+  cleaned = cleaned.replace(/```[a-zA-Z+]*\n([\s\S]*?)```/g, (fullMatch, codeContent) => {
+    const lines = codeContent.split(/\r?\n/);
+    const filteredLines = lines.filter((line: string) => {
+      const trimmed = line.trim();
+      if (
+        trimmed.startsWith("//") &&
+        /(?:wait,|actually,|is it guaranteed|what if|my current logic|let's re-read|the problem doesn't explicitly|so we should|however, standard interpretation|the rule applies|note: the problem states|if multiple servers become|i pop the top|this is correct|we only have one choice)/i.test(trimmed)
+      ) {
+        return false;
+      }
+      return true;
+    });
+    return fullMatch.replace(codeContent, filteredLines.join("\n"));
+  });
+
+  // 5. Clean up any excessive blank lines left after stripping
   cleaned = cleaned.replace(/\n{3,}/g, "\n\n").trim();
 
   return { text: cleaned, proposedPlan };
@@ -480,7 +500,7 @@ async function callGroq(
 
   let sys =
     systemPrompt +
-    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & QUESTION PRO-TIPS: When providing code solutions, always format as clean LeetCode class-only code ('class Solution { ... }') without '#include' headers or verbose 'std::' clutter inside the code block. After the code, provide a brief 2-3 bullet explanation, Time/Space complexity, and a '💡 Question Pro-Tip' covering a subtle edge-case, overflow pitfall, or interview follow-up specific to the question (no generic local compiler header tips). Never add int main() or test runner boilerplate.";
+    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & ZERO RAMBLING COMMENTS:\n   - Output clean LeetCode class-only code ('class Solution { ... }') with EXACT official LeetCode method signatures and parameter names (never change parameter names or types).\n   - ZERO CHAIN-OF-THOUGHT IN COMMENTS: Never write internal monologue, debates, or questions as comments (no '// Wait...', '// Actually...', '// My current logic:'). Only 3-5 short, 1-line action comments max.\n   - Follow problem rules strictly (e.g. drop requests if busy, do not invent waiting queues).\n   - After the code, provide 2-3 bullet explanation, Time/Space complexity, and a '💡 Question Pro-Tip'.";
 
   if (userWantsPlan) {
     sys +=
@@ -537,8 +557,8 @@ async function callGroq(
       body: JSON.stringify({
         model: modelId,
         messages: rawMessages,
-        max_tokens: 1500,
-        temperature: 0.5,
+        max_tokens: 2048,
+        temperature: 0.2,
       }),
     });
 
