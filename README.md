@@ -38,7 +38,7 @@
 | **Company-Wise Problem Bank** | ✅ Yes | ✅ **Complete Company-Wise Question Library (650+ Companies)** |
 | **Real-Time Interview Recency Engine** | ❌ Static / Cumbersome | ⚡ **Interactive 30d, 3m, 6m, 1yr+ timeframes** |
 | **Company Tier Classification** | ❌ None (mixed alphabetically) | 🎯 **Tier 1 (FAANG/HFT), Tier 2 (Banks/FinTech), Tier 3** |
-| **Algorithmic Pattern Frameworks** | ❌ Blind random lists | 🧩 **25+ Curated Patterns (Sliding Window, Two Pointers, etc.)** |
+| **Algorithmic Pattern Frameworks** | ❌ Blind random lists | 🧩 **24 Chronological Patterns (Two-Tier Core & Advanced) + Hybrid Tagging + Specialized SQL** |
 | **AI Problem Coach** | ⚠️ Generic / Rigid | 🧠 **Context-Aware Prime AI (Progressive hints, notes review)** |
 | **Multi-Model Intelligence** | ❌ Single locked model | 🔄 **Toggle between Google Gemini 2.5 Flash & Groq Llama 3.3 70B** |
 | **Professional Markdown & Big-O Badges** | ❌ Monospace plain text | 📊 **Formatted comparison tables & glowing Big-O badges** |
@@ -77,6 +77,7 @@ LeetPrime features **Prime AI**, a proprietary AI coaching engine designed speci
   * $O(1)$, $O(\log n)$ $\to$ **Emerald Green** (Optimal)
   * $O(n)$, $O(\min(n, m))$, $O(V + E)$ $\to$ **Cyan / Sky Blue** (Linear)
   * $O(n^2)$, $O(n^3)$, $O(2^n)$ $\to$ **Rose / Crimson** (Heavy)
+* **Interview-Standard Clean C++ Code**: Solutions strictly follow standard competitive programming & interview conventions with `using namespace std;`, eliminating noisy, distracting `std::` prefixes across vectors, strings, and maps.
 * **IDE Code Blocks**: Syntax containers with language labels and a 1-click **Copy** button with checkmark feedback.
 
 ### 4. Smart Planner & Interactive Plan Proposals
@@ -99,13 +100,13 @@ LeetPrime features **Prime AI**, a proprietary AI coaching engine designed speci
 * **6 Months (Recent)**: Medium-term hiring trend.
 * **All Time / Classic**: Evergreen benchmark problems.
 
-### 3. 🧩 25+ Algorithmic Pattern Frameworks
-Master algorithmic templates that solve 90%+ of technical rounds:
-* Two Pointers & Fast/Slow Pointers
-* Sliding Window & Monotonic Queue
-* Dynamic Programming & Kadane's Algorithm
-* Topological Sort & Graph BFS/DFS
-* Binary Search & Interval Merging
+### 3. 🧩 Two-Tier 24 Pattern Hierarchy & Hybrid Multi-Pattern Search
+Master algorithmic frameworks arranged in chronological learning order, complete with hybrid pattern matching:
+* **Tier 1: Core Foundations (#01 – #15)**: Two Pointers, Sliding Window, Fast & Slow Pointers, Linked List Reversal, Monotonic Stack & Queue, Top 'K' Elements / Heaps, Two Heaps, Subsets & Combinations, Modified Binary Search, Bitwise XOR, Tree DFS, Tree BFS, Graph BFS & DFS, 0/1 Knapsack & Dynamic Programming, Merge Intervals.
+* **Tier 2: Advanced Frameworks (#16 – #24)**: Prefix Sums & Difference Arrays, Trie (Prefix Tree), Topological Sort, Union-Find (DSU), Backtracking & Branch and Bound, Segment Trees & Fenwick Trees, Greedy Strategies, Matrix & Grid Navigation, Design & Hybrid Structures.
+* **Specialized Categories (SQL & Database)**: 197+ real-world tech interview SQL questions categorized into a dedicated SQL hub (Joins, Aggregates, Window Functions, and CTEs).
+* **Multi-Pattern / Hybrid Question Support**: Real-world interview problems rarely rely on a single technique. Problems support both `primaryPattern` and `secondaryPatterns` (e.g. *LRU Cache* = Design & Hybrid Structures + Hash Map + Doubly Linked List; *Longest Substring Without Repeating Characters* = Sliding Window + Hash Map). Filtering by any associated pattern immediately finds the problem.
+* **100% Deterministic Categorization**: 4,100+ official LeetCode topic tags pre-ingested offline into a verified classification matrix to eliminate generic `"Uncategorized"` tags entirely.
 
 ### 4. 🧭 Smart Planner & Active Placement Roadmap
 * **Personalized Mission Control**: Set target role, timeline (15, 30, 60, or 90 days), and daily hours.
