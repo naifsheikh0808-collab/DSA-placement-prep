@@ -86,14 +86,14 @@ export default function HomePage() {
                   <Dumbbell className="w-4 h-4 mr-1 text-violet-400" /> Company Wise DSA
                 </Button>
               </Link>
-              <Link href="/dsa/questions">
+              <Link href="/dsa/patterns">
                 <Button variant="glass" size="md">
-                  <Sparkles className="w-4 h-4 text-violet-400 mr-1" /> Question Bank + Recency
+                  <GitBranch className="w-4 h-4 mr-1 text-violet-400" /> 15 DSA Patterns
                 </Button>
               </Link>
-              <Link href="/dsa/patterns">
+              <Link href="/dsa/questions">
                 <Button variant="ghost" size="md" className="text-slate-300 hover:text-white">
-                  15 DSA Patterns <ArrowRight className="w-4 h-4 ml-1" />
+                  Question Bank + Recency <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
             </div>
