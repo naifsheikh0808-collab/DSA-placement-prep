@@ -44,10 +44,34 @@ interface AiSidePanelProps {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Give me a subtle hint", icon: Lightbulb, color: "text-amber-400", bg: "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20" },
-  { label: "Explain time & space complexity", icon: Clock, color: "text-blue-400", bg: "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20" },
-  { label: "Identify edge cases", icon: AlertTriangle, color: "text-rose-400", bg: "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20" },
-  { label: "Review my approach in notes", icon: Code, color: "text-violet-400", bg: "bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20" },
+  { 
+    label: "Give me a subtle hint", 
+    prompt: "Give me a subtle progressive hint for this problem without spoiling the full solution.",
+    icon: Lightbulb, 
+    color: "text-amber-400", 
+    bg: "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20" 
+  },
+  { 
+    label: "Explain time & space complexity", 
+    prompt: "What is the optimal time and space complexity for this problem, and why?",
+    icon: Clock, 
+    color: "text-blue-400", 
+    bg: "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20" 
+  },
+  { 
+    label: "Identify edge cases & traps", 
+    prompt: "Identify all critical edge cases, numerical overflow traps, and boundary conditions for this problem, and how to guard against them in code.",
+    icon: AlertTriangle, 
+    color: "text-rose-400", 
+    bg: "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20" 
+  },
+  { 
+    label: "Review my approach in notes", 
+    prompt: "Review the approach in my notes and tell me if it's optimal or if I'm missing any edge cases.",
+    icon: Code, 
+    color: "text-violet-400", 
+    bg: "bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20" 
+  },
 ];
 
 const MODEL_INFO = {
@@ -238,7 +262,7 @@ export function AiSidePanel({
                   return (
                     <button
                       key={action.label}
-                      onClick={() => sendMessage(action.label)}
+                      onClick={() => sendMessage(action.prompt || action.label)}
                       disabled={loading}
                       className={cn(
                         "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left text-xs font-medium transition-all",
@@ -321,6 +345,31 @@ export function AiSidePanel({
         {/* ── Chat Input Container with Toolbar INSIDE the box ── */}
         {user && isConfigured && (
           <div className="p-3 pt-0 flex-shrink-0">
+            {/* Quick Action Chips Bar when conversation is active */}
+            {messages.length > 0 && (
+              <div className="flex items-center gap-1.5 pb-2 overflow-x-auto no-scrollbar">
+                {QUICK_ACTIONS.map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <button
+                      key={action.label}
+                      onClick={() => sendMessage(action.prompt || action.label)}
+                      disabled={loading}
+                      type="button"
+                      className={cn(
+                        "flex-shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer shadow-sm",
+                        "text-white/70 hover:text-white",
+                        action.bg
+                      )}
+                    >
+                      <Icon className={cn("w-3 h-3 flex-shrink-0", action.color)} />
+                      <span>{action.label.replace("Give me a ", "").replace("Explain ", "")}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <div className="rounded-2xl border border-white/[0.1] bg-[#141126]/90 backdrop-blur-md p-2.5 focus-within:border-violet-500/50 focus-within:ring-1 focus-within:ring-violet-500/30 transition-all shadow-inner">
               <textarea
                 ref={textareaRef}

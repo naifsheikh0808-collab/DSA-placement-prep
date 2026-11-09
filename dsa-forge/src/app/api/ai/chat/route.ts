@@ -279,6 +279,14 @@ COACHING BEHAVIOR & RULES:
      * ZERO conversational fluff, pleasantries, or preamble ("Sure!", "Certainly!", "Great question! Here is the breakdown:").
      * ZERO concluding boilerplate ("I hope this helps!", "Happy coding!", "Let me know if you have more questions!").
      * Deliver high-density, scannable bullets or 1-3 focused paragraphs. No essays.
+   - "Identify Edge Cases" (Side Question 3 & Critical DSA Invariant):
+     * When asked to identify edge cases or traps (e.g. from the "Identify edge cases" action):
+       - Organize systematically into 4 high-impact, scannable categories:
+         1. ⚠️ Boundary & Trivial Inputs (e.g. N=0, N=1, empty string/array, k <= 0, single node, null root).
+         2. 💥 Numerical Extremes & Overflow (e.g. values up to 10^9 or -10^9, 32-bit integer overflow in a + b or arrival + duration requiring 64-bit 'long long', all duplicate/identical values).
+         3. 🔄 Structural & State Extremes (e.g. already sorted vs reverse sorted, cyclic dependencies, tie-breaking when two candidates have equal priority).
+         4. 🛑 LeetCode Submission Traps (e.g. off-by-one with <= vs <, strictly greater vs greater equal, forgetting to flush/clear finished states before checking availability).
+       - For each edge case, provide the exact 1-line guard condition or defensive fix to handle it in code.
    - In-depth / Conceptual Questions (e.g., "Explain Kadane's algorithm from intuition to code", "How does Sliding Window work?"):
      * Keep it structured and balanced: 2-4 concise sections (Mental Model -> Algorithm Invariant -> Complexity -> Example/Trap).
      * Avoid repeating the same concept in multiple paragraphs.
@@ -301,6 +309,12 @@ COACHING BEHAVIOR & RULES:
          * NEVER write thinking out loud, debates, or questions as code comments (e.g. NEVER write "// Wait, the problem says...", "// Actually, we need to...", "// My current logic:", "// What if two servers...", "// Is it guaranteed that...", "// Let's re-read carefully").
          * Comments inside code must ONLY be brief, 1-line action descriptions (e.g. "// Free all servers whose requests completed", "// Circular wrap-around").
          * Keep comments sparse: at most 3-5 short 1-line comments in the entire code. Let clean code speak for itself.
+       - MANDATORY DEFENSIVE EDGE-CASE GUARDING:
+         * Before generating code, mentally verify against the 5-point LeetCode edge-case matrix:
+           1. Empty / single-element boundary: Add guard clause if input can be empty or 0 (e.g. 'if (nums.empty()) return 0;', 'if (k == 0) return {};').
+           2. 64-bit Integer Overflow: If sums, durations, or products can exceed 2*10^9, ALWAYS use 'long long' / 64-bit integer types.
+           3. Duplicate / Tie-Breaker: Ensure deterministic ordering when keys are equal (e.g. secondary index comparison).
+           4. Extreme Constraints: Code must never TLE on maximum N (e.g. 10^5) or segfault on minimum N.
        - ADHERE STRICTLY TO THE PROBLEM RULES: Never invent conflicting logic (e.g. in LeetCode 1606, if all servers are busy, the request is dropped with 'continue;', NOT waited on or queued).
      * Brief Explanation & Pro-Tips (Right after the code block):
        - 1. Core Intuition: 2-3 concise bullets explaining data structures, invariant, and assignment logic.
@@ -425,6 +439,8 @@ function buildContextString(context: ClientContext, userMessage: string): string
 function cleanAiResponse(rawText: string): { text: string; proposedPlan?: ProposedPlannerConfig } {
   let cleaned = rawText;
   let proposedPlan: ProposedPlannerConfig | undefined;
+  // 0. Strip reasoning model <think>...</think> blocks (e.g. DeepSeek R1)
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "");
 
   // 1. Extract any planner proposal JSON block (json-plan or json with planSummary / targetCompanies)
   const planRegex = /```(?:json-plan|json)?\s*({[\s\S]*?(?:"planSummary"|"targetCompanies"|"focusAreas")[\s\S]*?})\s*```/gi;
@@ -500,7 +516,7 @@ async function callGroq(
 
   let sys =
     systemPrompt +
-    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & ZERO RAMBLING COMMENTS:\n   - Output clean LeetCode class-only code ('class Solution { ... }') with EXACT official LeetCode method signatures and parameter names (never change parameter names or types).\n   - ZERO CHAIN-OF-THOUGHT IN COMMENTS: Never write internal monologue, debates, or questions as comments (no '// Wait...', '// Actually...', '// My current logic:'). Only 3-5 short, 1-line action comments max.\n   - Follow problem rules strictly (e.g. drop requests if busy, do not invent waiting queues).\n   - After the code, provide 2-3 bullet explanation, Time/Space complexity, and a '💡 Question Pro-Tip'.";
+    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. CLEAN LEETCODE CODE & EDGE-CASE GUARDING:\n   - Output clean LeetCode class-only code ('class Solution { ... }') with EXACT official LeetCode method signatures and parameter names (never change parameter names or types).\n   - ZERO CHAIN-OF-THOUGHT IN COMMENTS: Never write internal monologue, debates, or questions as comments (no '// Wait...', '// Actually...', '// My current logic:'). Only 3-5 short, 1-line action comments max.\n   - DEFENSIVE EDGE-CASE GUARDS: Always include guard clauses for N=0/empty inputs and use 'long long' whenever sums/times can exceed 2*10^9 to prevent integer overflow.\n   - Follow problem rules strictly (e.g. drop requests if busy, do not invent waiting queues).\n   - After the code, provide 2-3 bullet explanation, Time/Space complexity, and '💡 Verified Edge Cases' (listing verified boundary cases).";
 
   if (userWantsPlan) {
     sys +=
@@ -523,6 +539,7 @@ async function callGroq(
   // We do NOT use dynamic discovery from /v1/models because that returns speech
   // synthesis, audio, guard, and vision models that are incompatible with text chat.
   const GROQ_TEXT_MODELS = [
+    "deepseek-r1-distill-llama-70b", // DeepSeek R1 — elite competitive programming & edge-case reasoning
     "llama-3.3-70b-versatile",
     "qwen/qwen3.8-27b",          // Qwen 3.8 27B — good free-tier model
     "llama-3.1-8b-instant",
