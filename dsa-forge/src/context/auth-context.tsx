@@ -22,8 +22,10 @@ import {
   type UserProgress,
 } from "@/lib/db";
 import {
+  loadPlan,
   savePlan,
   deletePlan,
+  loadPlannerProfile,
   savePlannerProfile,
   deletePlannerProfile,
   PLAN_UPDATED_EVENT,
@@ -157,18 +159,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               window.dispatchEvent(new Event("leetprime:byok-updated"));
             }
           } else {
-            // First time sign-in for this account: start fresh and initialize in Firestore
-            resetProgress(true);
-            deletePlan(true);
-            deletePlannerProfile(true);
+            // First time sign-in for this account:
+            // Seamlessly migrate guest mode activity (solved problems, roadmap, preferences) into their new cloud account!
+            const guestProgress = loadProgress();
+            const guestPlan = loadPlan();
+            const guestProfile = loadPlannerProfile();
 
             await setDoc(userDocRef, {
               displayName: currentUser.displayName ?? null,
               email: currentUser.email ?? null,
               photoURL: currentUser.photoURL ?? null,
-              progress: {},
-              studyPlan: null,
-              plannerProfile: null,
+              progress: guestProgress || {},
+              studyPlan: guestPlan || null,
+              plannerProfile: guestProfile || null,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             });
@@ -177,10 +180,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Firestore sync error on login:", err);
         }
       } else {
-        // Logged out / guest mode: ensure clean slate so previous user's data doesn't linger
-        resetProgress(true);
-        deletePlan(true);
-        deletePlannerProfile(true);
+        // Guest mode / not logged in: keep local activity intact across page reloads.
+        // Data is only wiped when an existing user explicitly clicks Logout.
       }
       setLoading(false);
     });
