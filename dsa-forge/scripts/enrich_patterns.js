@@ -3,7 +3,7 @@
  * Implements the 4-Tier Zero-Mistake Classification Architecture:
  *   Level 1: Curated Roadmap Priority (seed.ts)
  *   Level 2: Top 250 FAANG Classics Master Dictionary
- *   Level 3: Raw Scraped Tag Normalizer
+ *   Level 3: LeetCode Official Tags + Specificity Matrix (from local cache of 4,109 problems)
  *   Level 4: Compound Hybrid Rules Engine
  */
 
@@ -13,7 +13,16 @@ const path = require('path');
 const datasetPath = path.resolve(__dirname, '../src/lib/data/generated_dataset.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
 
-// ─── LEVEL 3: RAW SCRAPED TAG NORMALIZATION TABLE ─────────────────────────────
+const leetcodeCachePath = path.resolve(__dirname, 'data/leetcode_tags_cache.json');
+let leetcodeCache = {};
+if (fs.existsSync(leetcodeCachePath)) {
+  leetcodeCache = JSON.parse(fs.readFileSync(leetcodeCachePath, 'utf8'));
+  console.log(`[Level 3] Loaded official LeetCode topic tags cache with ${Object.keys(leetcodeCache).length} problems.`);
+} else {
+  console.warn('[Level 3] Warning: leetcode_tags_cache.json not found!');
+}
+
+// ─── RAW TAG NORMALIZATION MAP ────────────────────────────────────────────────
 const RAW_TAG_MAP = {
   '1. pattern: two pointers': 'Two Pointers',
   'two pointers': 'Two Pointers',
@@ -64,7 +73,6 @@ function normalizeKey(str) {
 }
 
 // ─── LEVEL 2: TOP 250 FAANG CLASSICS MASTER DICTIONARY ────────────────────────
-// Explicit, hand-verified Primary + Secondary patterns for top high-frequency problems
 const FAANG_CLASSICS = {
   // Top Design & Hybrid Classics
   '146': { primary: 'Design & Hybrid Structures', secondary: ['Hash Maps / Hash Sets', 'In-place Linked List Reversal'] }, // LRU Cache
@@ -199,7 +207,6 @@ const FAANG_CLASSICS = {
 const seedPath = path.resolve(__dirname, '../src/lib/data/seed.ts');
 const seedContent = fs.readFileSync(seedPath, 'utf8');
 
-// Match pattern blocks in seed.ts
 const CURATED_SEED_MAP = {};
 const patternRegex = /id:\s*"([^"]+)",\s*name:\s*"([^"]+)",[\s\S]*?questions:\s*\[([\s\S]*?)\]\s*\},/g;
 let pMatch;
@@ -216,6 +223,138 @@ while ((pMatch = patternRegex.exec(seedContent)) !== null) {
   }
 }
 console.log(`[Level 1] Extracted ${Object.keys(CURATED_SEED_MAP).length} curated questions from seed.ts`);
+
+// ─── LEVEL 3: SPECIFICITY MATRIX CLASSIFIER ──────────────────────────────────
+// Defines hierarchy: Algorithmic Patterns > Data Structures > Containers
+const TIER_1_ALGORITHMIC = {
+  'Sliding Window': 'Sliding Window',
+  'Two Pointers': 'Two Pointers',
+  'Binary Search': 'Binary Search',
+  'Topological Sort': 'Topological Sort',
+  'Union Find': 'Union-Find / Disjoint Set (DSU)',
+  'Trie': 'Trie (Prefix Tree)',
+  'Monotonic Stack': 'Monotonic Stack & Queue',
+  'Monotonic Queue': 'Monotonic Stack & Queue',
+  'Bit Manipulation': 'Bit Manipulation & Math',
+  'Prefix Sum': 'Prefix Sum',
+  'Backtracking': 'Backtracking',
+  'Dynamic Programming': 'Dynamic Programming',
+  'Greedy': 'Greedy Algorithms',
+  'Segment Tree': 'Segment & Fenwick Trees',
+  'Binary Indexed Tree': 'Segment & Fenwick Trees',
+  'Divide and Conquer': 'Dynamic Programming'
+};
+
+const TIER_2_STRUCTURES = {
+  'Tree': 'Binary Tree & BST',
+  'Binary Tree': 'Binary Tree & BST',
+  'Binary Search Tree': 'Binary Tree & BST',
+  'Graph': 'Graph DFS/BFS',
+  'Depth-First Search': 'Graph DFS/BFS',
+  'Breadth-First Search': 'Graph DFS/BFS',
+  'Heap (Priority Queue)': 'Heap / Priority Queue',
+  'Stack': 'Stack',
+  'Queue': 'Stack',
+  'Linked List': 'In-place Linked List Reversal',
+  'Doubly-Linked List': 'In-place Linked List Reversal',
+  'Hash Table': 'Hash Maps / Hash Sets'
+};
+
+const TIER_3_CONTAINERS = {
+  'Matrix': 'Matrix Traversal & Simulation',
+  'Simulation': 'Matrix Traversal & Simulation',
+  'Design': 'Design & Hybrid Structures',
+  'Math': 'Bit Manipulation & Math'
+};
+
+function classifyByLeetCodeTags(tags) {
+  if (!tags || tags.length === 0) return null;
+
+  const tagSet = new Set(tags);
+  let primary = null;
+  const secondaries = [];
+
+  // Compound Rule 1: Design + (Hash Table | Linked List | Stack | Queue)
+  if (tagSet.has('Design') && (tagSet.has('Hash Table') || tagSet.has('Linked List') || tagSet.has('Stack') || tagSet.has('Queue'))) {
+    primary = 'Design & Hybrid Structures';
+    if (tagSet.has('Hash Table')) secondaries.push('Hash Maps / Hash Sets');
+    if (tagSet.has('Linked List') || tagSet.has('Doubly-Linked List')) secondaries.push('In-place Linked List Reversal');
+    if (tagSet.has('Stack')) secondaries.push('Stack');
+  }
+
+  // Compound Rule 2: Tree + (DFS | BFS) -> Binary Tree & BST
+  else if (tagSet.has('Tree') || tagSet.has('Binary Tree') || tagSet.has('Binary Search Tree')) {
+    primary = 'Binary Tree & BST';
+    if (tagSet.has('Depth-First Search') || tagSet.has('Breadth-First Search')) {
+      secondaries.push('Graph DFS/BFS');
+    }
+  }
+
+  // Compound Rule 3: Topological Sort + Graph
+  else if (tagSet.has('Topological Sort')) {
+    primary = 'Topological Sort';
+    if (tagSet.has('Graph') || tagSet.has('Depth-First Search') || tagSet.has('Breadth-First Search')) {
+      secondaries.push('Graph DFS/BFS');
+    }
+  }
+
+  // Compound Rule 4: Union Find + Graph
+  else if (tagSet.has('Union Find')) {
+    primary = 'Union-Find / Disjoint Set (DSU)';
+    if (tagSet.has('Graph') || tagSet.has('Depth-First Search') || tagSet.has('Breadth-First Search')) {
+      secondaries.push('Graph DFS/BFS');
+    }
+  }
+
+  // Compound Rule 5: Sliding Window + Hash Table
+  else if (tagSet.has('Sliding Window')) {
+    primary = 'Sliding Window';
+    if (tagSet.has('Hash Table')) secondaries.push('Hash Maps / Hash Sets');
+    if (tagSet.has('Two Pointers')) secondaries.push('Two Pointers');
+  }
+
+  // General Priority Hierarchy Check: Tier 1 (Algorithmic Patterns win!)
+  if (!primary) {
+    for (const tag of tags) {
+      if (TIER_1_ALGORITHMIC[tag]) {
+        primary = TIER_1_ALGORITHMIC[tag];
+        break;
+      }
+    }
+  }
+
+  // Tier 2: Specific Data Structures
+  if (!primary) {
+    for (const tag of tags) {
+      if (TIER_2_STRUCTURES[tag]) {
+        primary = TIER_2_STRUCTURES[tag];
+        break;
+      }
+    }
+  }
+
+  // Tier 3: Containers & Simulations
+  if (!primary) {
+    for (const tag of tags) {
+      if (TIER_3_CONTAINERS[tag]) {
+        primary = TIER_3_CONTAINERS[tag];
+        break;
+      }
+    }
+  }
+
+  if (!primary) return null;
+
+  // Populate secondary patterns from all remaining relevant tags
+  for (const tag of tags) {
+    const candidate = TIER_1_ALGORITHMIC[tag] || TIER_2_STRUCTURES[tag] || TIER_3_CONTAINERS[tag];
+    if (candidate && candidate !== primary && !secondaries.includes(candidate)) {
+      secondaries.push(candidate);
+    }
+  }
+
+  return { primary, secondary: secondaries };
+}
 
 // ─── LEVEL 4: UNAMBIGUOUS TITLE & SLUG HEURISTICS ────────────────────────────
 function inferFromTitleAndSlug(problem) {
@@ -263,11 +402,12 @@ function inferFromTitleAndSlug(problem) {
   return null;
 }
 
-// ─── EXECUTE ENRICHMENT ON DATASET ───────────────────────────────────────────
+// ─── EXECUTE 4-TIER ENRICHMENT ───────────────────────────────────────────────
 let stats = {
   total: dataset.problems.length,
-  level1SeedCount: 0,
   level2ClassicCount: 0,
+  level1SeedCount: 0,
+  level3LeetCodeTagsCount: 0,
   level3RawTagCleaned: 0,
   level4InferredCount: 0,
   alreadyClean: 0,
@@ -291,25 +431,31 @@ for (const problem of dataset.problems) {
     assignedPrimary = CURATED_SEED_MAP[extId];
     stats.level1SeedCount++;
   }
-  // 3. Check Level 3: Raw Scraped Tag Normalizer
-  else if (problem.primaryPattern && problem.primaryPattern.toLowerCase() !== 'uncategorized') {
+  // 3. Check Level 3: LeetCode Official Topic Tags + Specificity Matrix
+  else if (leetcodeCache[extId] && leetcodeCache[extId].tags && leetcodeCache[extId].tags.length > 0) {
+    const classified = classifyByLeetCodeTags(leetcodeCache[extId].tags);
+    if (classified) {
+      assignedPrimary = classified.primary;
+      assignedSecondary = Array.from(new Set([...assignedSecondary, ...classified.secondary]));
+      stats.level3LeetCodeTagsCount++;
+    }
+  }
+
+  // 4. Check Raw Scraped Tag Normalizer (if tags not in LC cache or previously tagged)
+  if (!assignedPrimary && problem.primaryPattern && problem.primaryPattern.toLowerCase() !== 'uncategorized' && problem.primaryPattern !== 'General DSA') {
     const rawNorm = normalizeKey(problem.primaryPattern);
     const cleaned = RAW_TAG_MAP[rawNorm];
     if (cleaned) {
       assignedPrimary = cleaned;
-      if (cleaned !== problem.primaryPattern) {
-        stats.level3RawTagCleaned++;
-      } else {
-        stats.alreadyClean++;
-      }
+      stats.level3RawTagCleaned++;
     } else {
       assignedPrimary = problem.primaryPattern;
       stats.alreadyClean++;
     }
   }
 
-  // 4. If still missing or uncategorized, apply Level 4 Unambiguous Heuristics
-  if (!assignedPrimary || assignedPrimary.toLowerCase() === 'uncategorized') {
+  // 5. Level 4: Unambiguous Title & Slug Heuristics
+  if (!assignedPrimary || assignedPrimary === 'General DSA' || assignedPrimary.toLowerCase() === 'uncategorized') {
     const inferred = inferFromTitleAndSlug(problem);
     if (inferred) {
       assignedPrimary = inferred.primary;
@@ -353,14 +499,14 @@ for (const problem of dataset.problems) {
 // Write back to dataset
 fs.writeFileSync(datasetPath, JSON.stringify(dataset, null, 2), 'utf8');
 
-console.log('\n=== DATASET ENRICHMENT REPORT ===');
-console.log(`Total problems processed: ${stats.total}`);
+console.log('\n=== DATASET ENRICHMENT REPORT (STEP 2) ===');
+console.log(`Total problems in dataset: ${stats.total}`);
 console.log(`- Level 2 FAANG Classics matched: ${stats.level2ClassicCount}`);
 console.log(`- Level 1 Seed.ts curated matched: ${stats.level1SeedCount}`);
+console.log(`- Level 3 LeetCode Official Tags classified: ${stats.level3LeetCodeTagsCount}`);
 console.log(`- Level 3 Raw scraped tags normalized: ${stats.level3RawTagCleaned}`);
 console.log(`- Level 4 Unambiguous heuristics inferred: ${stats.level4InferredCount}`);
 console.log(`- Already clean standard patterns: ${stats.alreadyClean}`);
-console.log(`- Marked with clean 'General DSA': ${stats.uncategorizedRemaining}`);
+console.log(`- Remaining General DSA (mostly non-DSA/SQL): ${stats.uncategorizedRemaining}`);
 console.log(`- Total problems with secondary patterns: ${stats.secondaryPopulated}`);
 console.log('Successfully saved to generated_dataset.json!');
-
