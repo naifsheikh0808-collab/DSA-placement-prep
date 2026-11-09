@@ -89,6 +89,16 @@ function PatternContent({ slug }: { slug: string }) {
               {pattern.description}
             </p>
             <div className="flex flex-wrap gap-3">
+              <span
+                className={cn(
+                  "inline-flex items-center font-bold uppercase tracking-wider rounded-full border px-2.5 py-0.5 text-[11px]",
+                  pattern.tier === "advanced"
+                    ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                    : "bg-violet-500/15 text-violet-300 border-violet-500/30"
+                )}
+              >
+                #{String(pattern.orderIndex).padStart(2, "0")} · {pattern.tier === "advanced" ? "Tier 2: Advanced" : "Tier 1: Core"}
+              </span>
               <Badge variant="default">{pattern.questions.length} curated questions</Badge>
               <Badge variant="outline">{memberIds.size} in question bank</Badge>
               <Badge variant="default">

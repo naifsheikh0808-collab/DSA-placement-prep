@@ -66,6 +66,7 @@ export interface Pattern {
   id: string;
   name: string;
   slug: string;
+  tier: "core" | "advanced";
   description: string;
   orderIndex: number;
   color: string;

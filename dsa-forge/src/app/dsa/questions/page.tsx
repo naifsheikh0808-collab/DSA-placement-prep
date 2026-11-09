@@ -334,15 +334,26 @@ function QuestionsPageContent() {
             className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50"
           >
             <option value="">All Patterns</option>
-            <optgroup label="Pattern Roadmaps">
-              {patterns.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
+            <optgroup label="Tier 1: Core Foundations (15)">
+              {patterns
+                .filter((p) => p.tier === "core")
+                .map((p) => (
+                  <option key={p.id} value={p.name}>
+                    #{String(p.orderIndex).padStart(2, "0")} {p.name}
+                  </option>
+                ))}
+            </optgroup>
+            <optgroup label="Tier 2: Advanced Frameworks (9)">
+              {patterns
+                .filter((p) => p.tier === "advanced")
+                .map((p) => (
+                  <option key={p.id} value={p.name}>
+                    #{String(p.orderIndex).padStart(2, "0")} {p.name}
+                  </option>
+                ))}
             </optgroup>
             {extraPatterns.length > 0 && (
-              <optgroup label="Other Categories">
+              <optgroup label="Specialized Categories">
                 {extraPatterns.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -462,9 +473,19 @@ function QuestionsPageContent() {
 
                       {/* Pattern */}
                       <td className="py-4 px-5">
-                        <span className="text-slate-300 bg-white/[0.04] px-2.5 py-1 rounded-md border border-white/5 font-medium">
-                          {prob.primaryPattern || "General"}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5 max-w-xs">
+                          <span className="text-violet-300 bg-violet-500/10 px-2.5 py-0.5 rounded-md border border-violet-500/20 text-[11px] font-semibold whitespace-nowrap">
+                            {prob.primaryPattern || "General DSA"}
+                          </span>
+                          {prob.secondaryPatterns?.slice(0, 2).map((sec) => (
+                            <span
+                              key={sec}
+                              className="text-slate-400 bg-white/[0.04] px-1.5 py-0.5 rounded text-[10px] font-medium border border-white/5 whitespace-nowrap"
+                            >
+                              + {sec}
+                            </span>
+                          ))}
+                        </div>
                       </td>
 
                       {/* Companies */}

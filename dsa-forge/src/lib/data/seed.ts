@@ -26,6 +26,7 @@ export const PATTERNS: Pattern[] = [
     id: "two-pointers",
     name: "Two Pointers",
     slug: "two-pointers",
+    tier: "core",
     description:
       "Solve pair, palindrome, and sorting problems twice as fast by searching from both ends instead of nested loops.",
     orderIndex: 1,
@@ -314,6 +315,7 @@ export const PATTERNS: Pattern[] = [
     id: "fast-slow-pointers",
     name: "Fast & Slow Pointers",
     slug: "fast-slow-pointers",
+    tier: "core",
     description:
       "The famous 'tortoise and hare' trick to spot infinite loops and find middle elements in linked lists with zero extra memory.",
     orderIndex: 2,
@@ -464,6 +466,7 @@ export const PATTERNS: Pattern[] = [
     id: "sliding-window",
     name: "Sliding Window",
     slug: "sliding-window",
+    tier: "core",
     description:
       "Track sub-arrays and strings with an expanding and shrinking window — perfect for finding longest, shortest, or target sums effortlessly.",
     orderIndex: 3,
@@ -716,6 +719,7 @@ export const PATTERNS: Pattern[] = [
     id: "kadanes-algorithm",
     name: "Kadane's Algorithm",
     slug: "kadanes-algorithm",
+    tier: "core",
     description:
       "The clever one-pass trick to find the maximum sub-array sum without overcomplicating things.",
     orderIndex: 4,
@@ -832,6 +836,7 @@ export const PATTERNS: Pattern[] = [
     id: "prefix-sum",
     name: "Prefix Sum",
     slug: "prefix-sum",
+    tier: "core",
     description:
       "Pre-calculate running totals once, then answer any range sum query instantly in a single step.",
     orderIndex: 5,
@@ -982,6 +987,7 @@ export const PATTERNS: Pattern[] = [
     id: "merge-intervals",
     name: "Merge Intervals",
     slug: "merge-intervals",
+    tier: "core",
     description:
       "Sort and combine overlapping time blocks — the go-to technique for scheduling, calendar meetings, and range problems.",
     orderIndex: 6,
@@ -1200,6 +1206,7 @@ export const PATTERNS: Pattern[] = [
     id: "in-place-linked-list-reversal",
     name: "In-place Linked List Reversal",
     slug: "in-place-linked-list-reversal",
+    tier: "core",
     description:
       "Flip linked lists or reorder nodes neatly in-place without wasting any additional memory.",
     orderIndex: 7,
@@ -1316,6 +1323,7 @@ export const PATTERNS: Pattern[] = [
     id: "stack",
     name: "Stack",
     slug: "stack",
+    tier: "core",
     description:
       "Use simple Last-In-First-Out ordering to match parentheses, evaluate expressions, and find next-greater elements effortlessly.",
     orderIndex: 8,
@@ -1585,6 +1593,7 @@ export const PATTERNS: Pattern[] = [
     id: "hash-maps",
     name: "Hash Maps / Hash Sets",
     slug: "hash-maps",
+    tier: "core",
     description:
       "Store and find anything instantly. The everyday secret behind two-sum, counting frequencies, and grouping anagrams.",
     orderIndex: 9,
@@ -1786,6 +1795,7 @@ export const PATTERNS: Pattern[] = [
     id: "binary-search",
     name: "Binary Search",
     slug: "binary-search",
+    tier: "core",
     description:
       "Cut your search space in half with every guess. Rapidly pinpoint targets or find optimal answers in sorted data.",
     orderIndex: 10,
@@ -2191,6 +2201,7 @@ export const PATTERNS: Pattern[] = [
     id: "heap-priority-queue",
     name: "Heap / Priority Queue",
     slug: "heap-priority-queue",
+    tier: "core",
     description:
       "Always keep the smallest or largest item ready at the top — ideal for Top-K rankings and live data streams.",
     orderIndex: 11,
@@ -2511,6 +2522,7 @@ export const PATTERNS: Pattern[] = [
     id: "backtracking",
     name: "Backtracking",
     slug: "backtracking",
+    tier: "core",
     description:
       "Smart trial-and-error that explores all possibilities and quickly walks back when a path doesn't work out.",
     orderIndex: 12,
@@ -2769,6 +2781,7 @@ export const PATTERNS: Pattern[] = [
     id: "tree-pattern",
     name: "Trees",
     slug: "tree-pattern",
+    tier: "core",
     description:
       "Master binary trees and BSTs with intuitive recursive traversals — the bread and butter of technical interviews.",
     orderIndex: 13,
@@ -3327,6 +3340,7 @@ export const PATTERNS: Pattern[] = [
     id: "graphs",
     name: "Graph DFS/BFS",
     slug: "graphs",
+    tier: "core",
     description:
       "Explore networks, maps, and grids step-by-step to find connected islands, shortest routes, and dependencies.",
     orderIndex: 14,
@@ -3664,6 +3678,7 @@ export const PATTERNS: Pattern[] = [
     id: "dynamic-programming",
     name: "Dynamic Programming",
     slug: "dynamic-programming",
+    tier: "core",
     description:
       "Stop re-calculating the same work. Break big problems into smaller steps and save your answers to solve them effortlessly.",
     orderIndex: 15,
@@ -3775,7 +3790,1001 @@ export const PATTERNS: Pattern[] = [
         levelTag: "challenge",
       }
     ],
-  }
+  },
+  // ─── TIER 2: ADVANCED & SPECIALIZED PATTERNS ─────────────────────────────
+  {
+  "id": "monotonic-stack-queue",
+  "name": "Monotonic Stack & Queue",
+  "slug": "monotonic-stack-queue",
+  "tier": "advanced",
+  "description": "Maintain elements in strictly increasing or decreasing order to solve next greater element, stock spans, and sliding window extrema in O(n).",
+  "orderIndex": 16,
+  "color": "#f97316",
+  "questionCount": 6,
+  "companyCoverage": 48,
+  "difficulty": "advanced",
+  "questions": [
+    {
+      "id": "ms-1",
+      "externalId": "739",
+      "title": "Daily Temperatures",
+      "slug": "daily-temperatures",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/daily-temperatures",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/daily-temperatures"
+      ],
+      "companyCount": 52,
+      "frequency": 0.88,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "ms-2",
+      "externalId": "496",
+      "title": "Next Greater Element I",
+      "slug": "next-greater-element-i",
+      "difficulty": "Easy",
+      "canonicalUrl": "https://leetcode.com/problems/next-greater-element-i",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/next-greater-element-i"
+      ],
+      "companyCount": 38,
+      "frequency": 0.72,
+      "orderIndex": 2,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "ms-3",
+      "externalId": "901",
+      "title": "Online Stock Span",
+      "slug": "online-stock-span",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/online-stock-span",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/online-stock-span"
+      ],
+      "companyCount": 30,
+      "frequency": 0.65,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "ms-4",
+      "externalId": "84",
+      "title": "Largest Rectangle in Histogram",
+      "slug": "largest-rectangle-in-histogram",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/largest-rectangle-in-histogram",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/largest-rectangle-in-histogram"
+      ],
+      "companyCount": 65,
+      "frequency": 0.85,
+      "orderIndex": 4,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "ms-5",
+      "externalId": "239",
+      "title": "Sliding Window Maximum",
+      "slug": "sliding-window-maximum",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/sliding-window-maximum",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/sliding-window-maximum"
+      ],
+      "companyCount": 72,
+      "frequency": 0.9,
+      "orderIndex": 5,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "ms-6",
+      "externalId": "42",
+      "title": "Trapping Rain Water",
+      "slug": "trapping-rain-water",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/trapping-rain-water",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/trapping-rain-water"
+      ],
+      "companyCount": 110,
+      "frequency": 0.98,
+      "orderIndex": 6,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "trie",
+  "name": "Trie (Prefix Tree)",
+  "slug": "trie",
+  "tier": "advanced",
+  "description": "Tree-based data structure optimized for fast prefix lookup, dictionary search, autocomplete, and bitwise XOR queries in O(length).",
+  "orderIndex": 17,
+  "color": "#06b6d4",
+  "questionCount": 6,
+  "companyCoverage": 44,
+  "difficulty": "advanced",
+  "questions": [
+    {
+      "id": "tr-1",
+      "externalId": "208",
+      "title": "Implement Trie (Prefix Tree)",
+      "slug": "implement-trie-prefix-tree",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/implement-trie-prefix-tree",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/implement-trie-prefix-tree"
+      ],
+      "companyCount": 68,
+      "frequency": 0.86,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "tr-2",
+      "externalId": "14",
+      "title": "Longest Common Prefix",
+      "slug": "longest-common-prefix",
+      "difficulty": "Easy",
+      "canonicalUrl": "https://leetcode.com/problems/longest-common-prefix",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/longest-common-prefix"
+      ],
+      "companyCount": 85,
+      "frequency": 0.92,
+      "orderIndex": 2,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "tr-3",
+      "externalId": "211",
+      "title": "Design Add and Search Words Data Structure",
+      "slug": "design-add-and-search-words-data-structure",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/design-add-and-search-words-data-structure",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/design-add-and-search-words-data-structure"
+      ],
+      "companyCount": 42,
+      "frequency": 0.74,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "tr-4",
+      "externalId": "648",
+      "title": "Replace Words",
+      "slug": "replace-words",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/replace-words",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/replace-words"
+      ],
+      "companyCount": 28,
+      "frequency": 0.6,
+      "orderIndex": 4,
+      "levelTag": "core"
+    },
+    {
+      "id": "tr-5",
+      "externalId": "421",
+      "title": "Maximum XOR of Two Numbers in an Array",
+      "slug": "maximum-xor-of-two-numbers-in-an-array",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array"
+      ],
+      "companyCount": 24,
+      "frequency": 0.58,
+      "orderIndex": 5,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "tr-6",
+      "externalId": "212",
+      "title": "Word Search II",
+      "slug": "word-search-ii",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/word-search-ii",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/word-search-ii"
+      ],
+      "companyCount": 56,
+      "frequency": 0.84,
+      "orderIndex": 6,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "topological-sort",
+  "name": "Topological Sort",
+  "slug": "topological-sort",
+  "tier": "advanced",
+  "description": "Linear ordering of vertices in a Directed Acyclic Graph (DAG) using Kahn's BFS in-degree algorithm or DFS post-order traversal.",
+  "orderIndex": 18,
+  "color": "#8b5cf6",
+  "questionCount": 5,
+  "companyCoverage": 46,
+  "difficulty": "advanced",
+  "questions": [
+    {
+      "id": "ts-1",
+      "externalId": "207",
+      "title": "Course Schedule",
+      "slug": "course-schedule",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/course-schedule",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/course-schedule"
+      ],
+      "companyCount": 88,
+      "frequency": 0.94,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "ts-2",
+      "externalId": "210",
+      "title": "Course Schedule II",
+      "slug": "course-schedule-ii",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/course-schedule-ii",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/course-schedule-ii"
+      ],
+      "companyCount": 65,
+      "frequency": 0.86,
+      "orderIndex": 2,
+      "levelTag": "core"
+    },
+    {
+      "id": "ts-3",
+      "externalId": "310",
+      "title": "Minimum Height Trees",
+      "slug": "minimum-height-trees",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/minimum-height-trees",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/minimum-height-trees"
+      ],
+      "companyCount": 32,
+      "frequency": 0.68,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "ts-4",
+      "externalId": "802",
+      "title": "Find Eventual Safe States",
+      "slug": "find-eventual-safe-states",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/find-eventual-safe-states",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/find-eventual-safe-states"
+      ],
+      "companyCount": 22,
+      "frequency": 0.55,
+      "orderIndex": 4,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "ts-5",
+      "externalId": "269",
+      "title": "Alien Dictionary",
+      "slug": "alien-dictionary",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/alien-dictionary",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/alien-dictionary"
+      ],
+      "companyCount": 45,
+      "frequency": 0.82,
+      "orderIndex": 5,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "union-find",
+  "name": "Union-Find / Disjoint Set (DSU)",
+  "slug": "union-find",
+  "tier": "advanced",
+  "description": "Near O(1) dynamic connectivity queries using path compression and union by rank. Key for connected components, Kruskal's MST, and cycle detection.",
+  "orderIndex": 19,
+  "color": "#10b981",
+  "questionCount": 5,
+  "companyCoverage": 42,
+  "difficulty": "advanced",
+  "questions": [
+    {
+      "id": "uf-1",
+      "externalId": "684",
+      "title": "Redundant Connection",
+      "slug": "redundant-connection",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/redundant-connection",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/redundant-connection"
+      ],
+      "companyCount": 36,
+      "frequency": 0.7,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "uf-2",
+      "externalId": "547",
+      "title": "Number of Provinces",
+      "slug": "number-of-provinces",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/number-of-provinces",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/number-of-provinces"
+      ],
+      "companyCount": 48,
+      "frequency": 0.78,
+      "orderIndex": 2,
+      "levelTag": "core"
+    },
+    {
+      "id": "uf-3",
+      "externalId": "721",
+      "title": "Accounts Merge",
+      "slug": "accounts-merge",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/accounts-merge",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/accounts-merge"
+      ],
+      "companyCount": 54,
+      "frequency": 0.8,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "uf-4",
+      "externalId": "128",
+      "title": "Longest Consecutive Sequence",
+      "slug": "longest-consecutive-sequence",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/longest-consecutive-sequence",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/longest-consecutive-sequence"
+      ],
+      "companyCount": 76,
+      "frequency": 0.9,
+      "orderIndex": 4,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "uf-5",
+      "externalId": "200",
+      "title": "Number of Islands",
+      "slug": "number-of-islands",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/number-of-islands",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/number-of-islands"
+      ],
+      "companyCount": 130,
+      "frequency": 0.99,
+      "orderIndex": 5,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "bit-manipulation",
+  "name": "Bit Manipulation & Math",
+  "slug": "bit-manipulation",
+  "tier": "advanced",
+  "description": "Constant-time bitwise operations (AND, OR, XOR, shifts) for subset generation, parity checking, arithmetic without operators, and bitmask DP.",
+  "orderIndex": 20,
+  "color": "#ec4899",
+  "questionCount": 6,
+  "companyCoverage": 38,
+  "difficulty": "core",
+  "questions": [
+    {
+      "id": "bm-1",
+      "externalId": "136",
+      "title": "Single Number",
+      "slug": "single-number",
+      "difficulty": "Easy",
+      "canonicalUrl": "https://leetcode.com/problems/single-number",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/single-number"
+      ],
+      "companyCount": 62,
+      "frequency": 0.85,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "bm-2",
+      "externalId": "191",
+      "title": "Number of 1 Bits",
+      "slug": "number-of-1-bits",
+      "difficulty": "Easy",
+      "canonicalUrl": "https://leetcode.com/problems/number-of-1-bits",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/number-of-1-bits"
+      ],
+      "companyCount": 45,
+      "frequency": 0.72,
+      "orderIndex": 2,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "bm-3",
+      "externalId": "338",
+      "title": "Counting Bits",
+      "slug": "counting-bits",
+      "difficulty": "Easy",
+      "canonicalUrl": "https://leetcode.com/problems/counting-bits",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/counting-bits"
+      ],
+      "companyCount": 38,
+      "frequency": 0.68,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "bm-4",
+      "externalId": "268",
+      "title": "Missing Number",
+      "slug": "missing-number",
+      "difficulty": "Easy",
+      "canonicalUrl": "https://leetcode.com/problems/missing-number",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/missing-number"
+      ],
+      "companyCount": 50,
+      "frequency": 0.76,
+      "orderIndex": 4,
+      "levelTag": "core"
+    },
+    {
+      "id": "bm-5",
+      "externalId": "78",
+      "title": "Subsets",
+      "slug": "subsets",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/subsets",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/subsets"
+      ],
+      "companyCount": 70,
+      "frequency": 0.88,
+      "orderIndex": 5,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "bm-6",
+      "externalId": "371",
+      "title": "Sum of Two Integers",
+      "slug": "sum-of-two-integers",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/sum-of-two-integers",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/sum-of-two-integers"
+      ],
+      "companyCount": 28,
+      "frequency": 0.6,
+      "orderIndex": 6,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "greedy",
+  "name": "Greedy Algorithms",
+  "slug": "greedy",
+  "tier": "advanced",
+  "description": "Make locally optimal choices at each step to reach a global optimum. Common in activity selection, gas stations, jump games, and task schedulers.",
+  "orderIndex": 21,
+  "color": "#eab308",
+  "questionCount": 6,
+  "companyCoverage": 50,
+  "difficulty": "core",
+  "questions": [
+    {
+      "id": "gr-1",
+      "externalId": "55",
+      "title": "Jump Game",
+      "slug": "jump-game",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/jump-game",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/jump-game"
+      ],
+      "companyCount": 82,
+      "frequency": 0.92,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "gr-2",
+      "externalId": "45",
+      "title": "Jump Game II",
+      "slug": "jump-game-ii",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/jump-game-ii",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/jump-game-ii"
+      ],
+      "companyCount": 60,
+      "frequency": 0.84,
+      "orderIndex": 2,
+      "levelTag": "core"
+    },
+    {
+      "id": "gr-3",
+      "externalId": "134",
+      "title": "Gas Station",
+      "slug": "gas-station",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/gas-station",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/gas-station"
+      ],
+      "companyCount": 55,
+      "frequency": 0.8,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "gr-4",
+      "externalId": "763",
+      "title": "Partition Labels",
+      "slug": "partition-labels",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/partition-labels",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/partition-labels"
+      ],
+      "companyCount": 42,
+      "frequency": 0.72,
+      "orderIndex": 4,
+      "levelTag": "core"
+    },
+    {
+      "id": "gr-5",
+      "externalId": "435",
+      "title": "Non-overlapping Intervals",
+      "slug": "non-overlapping-intervals",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/non-overlapping-intervals",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/non-overlapping-intervals"
+      ],
+      "companyCount": 48,
+      "frequency": 0.76,
+      "orderIndex": 5,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "gr-6",
+      "externalId": "621",
+      "title": "Task Scheduler",
+      "slug": "task-scheduler",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/task-scheduler",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/task-scheduler"
+      ],
+      "companyCount": 68,
+      "frequency": 0.86,
+      "orderIndex": 6,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "matrix-traversal",
+  "name": "Matrix Traversal & Simulation",
+  "slug": "matrix-traversal",
+  "tier": "advanced",
+  "description": "Grid-based simulation, boundary walks, 2D in-place rotations, state-machine transitions, and multi-source flood-fill algorithms.",
+  "orderIndex": 22,
+  "color": "#14b8a6",
+  "questionCount": 6,
+  "companyCoverage": 46,
+  "difficulty": "core",
+  "questions": [
+    {
+      "id": "mx-1",
+      "externalId": "54",
+      "title": "Spiral Matrix",
+      "slug": "spiral-matrix",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/spiral-matrix",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/spiral-matrix"
+      ],
+      "companyCount": 78,
+      "frequency": 0.91,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "mx-2",
+      "externalId": "73",
+      "title": "Set Matrix Zeroes",
+      "slug": "set-matrix-zeroes",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/set-matrix-zeroes",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/set-matrix-zeroes"
+      ],
+      "companyCount": 64,
+      "frequency": 0.85,
+      "orderIndex": 2,
+      "levelTag": "core"
+    },
+    {
+      "id": "mx-3",
+      "externalId": "48",
+      "title": "Rotate Image",
+      "slug": "rotate-image",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/rotate-image",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/rotate-image"
+      ],
+      "companyCount": 72,
+      "frequency": 0.88,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "mx-4",
+      "externalId": "79",
+      "title": "Word Search",
+      "slug": "word-search",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/word-search",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/word-search"
+      ],
+      "companyCount": 86,
+      "frequency": 0.93,
+      "orderIndex": 4,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "mx-5",
+      "externalId": "994",
+      "title": "Rotting Oranges",
+      "slug": "rotting-oranges",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/rotting-oranges",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/rotting-oranges"
+      ],
+      "companyCount": 94,
+      "frequency": 0.95,
+      "orderIndex": 5,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "mx-6",
+      "externalId": "289",
+      "title": "Game of Life",
+      "slug": "game-of-life",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/game-of-life",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/game-of-life"
+      ],
+      "companyCount": 40,
+      "frequency": 0.7,
+      "orderIndex": 6,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "design-hybrid-structures",
+  "name": "Design & Hybrid Structures",
+  "slug": "design-hybrid-structures",
+  "tier": "advanced",
+  "description": "Composite data structures combining Hash Maps, Doubly Linked Lists, Heaps, and Binary Trees to achieve strict O(1) or O(log n) performance.",
+  "orderIndex": 23,
+  "color": "#3b82f6",
+  "questionCount": 6,
+  "companyCoverage": 62,
+  "difficulty": "advanced",
+  "questions": [
+    {
+      "id": "dh-1",
+      "externalId": "146",
+      "title": "LRU Cache",
+      "slug": "lru-cache",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/lru-cache",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/lru-cache"
+      ],
+      "companyCount": 120,
+      "frequency": 1,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "dh-2",
+      "externalId": "155",
+      "title": "Min Stack",
+      "slug": "min-stack",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/min-stack",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/min-stack"
+      ],
+      "companyCount": 80,
+      "frequency": 0.9,
+      "orderIndex": 2,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "dh-3",
+      "externalId": "380",
+      "title": "Insert Delete GetRandom O(1)",
+      "slug": "insert-delete-getrandom-o1",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/insert-delete-getrandom-o1",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/insert-delete-getrandom-o1"
+      ],
+      "companyCount": 65,
+      "frequency": 0.85,
+      "orderIndex": 3,
+      "levelTag": "core"
+    },
+    {
+      "id": "dh-4",
+      "externalId": "981",
+      "title": "Time Based Key-Value Store",
+      "slug": "time-based-key-value-store",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/time-based-key-value-store",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/time-based-key-value-store"
+      ],
+      "companyCount": 58,
+      "frequency": 0.82,
+      "orderIndex": 4,
+      "levelTag": "core"
+    },
+    {
+      "id": "dh-5",
+      "externalId": "460",
+      "title": "LFU Cache",
+      "slug": "lfu-cache",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/lfu-cache",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/lfu-cache"
+      ],
+      "companyCount": 50,
+      "frequency": 0.78,
+      "orderIndex": 5,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "dh-6",
+      "externalId": "295",
+      "title": "Find Median from Data Stream",
+      "slug": "find-median-from-data-stream",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/find-median-from-data-stream",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/find-median-from-data-stream"
+      ],
+      "companyCount": 75,
+      "frequency": 0.89,
+      "orderIndex": 6,
+      "levelTag": "challenge"
+    }
+  ]
+},
+  {
+  "id": "segment-tree",
+  "name": "Segment & Fenwick Trees",
+  "slug": "segment-tree",
+  "tier": "advanced",
+  "description": "Binary tree and prefix sum trees supporting dynamic range queries (sum, min, max) and point/range updates in O(log n) time.",
+  "orderIndex": 24,
+  "color": "#d946ef",
+  "questionCount": 5,
+  "companyCoverage": 25,
+  "difficulty": "advanced",
+  "questions": [
+    {
+      "id": "st-1",
+      "externalId": "307",
+      "title": "Range Sum Query - Mutable",
+      "slug": "range-sum-query-mutable",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/range-sum-query-mutable",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/range-sum-query-mutable"
+      ],
+      "companyCount": 25,
+      "frequency": 0.6,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "st-2",
+      "externalId": "315",
+      "title": "Count of Smaller Numbers After Self",
+      "slug": "count-of-smaller-numbers-after-self",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/count-of-smaller-numbers-after-self",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/count-of-smaller-numbers-after-self"
+      ],
+      "companyCount": 35,
+      "frequency": 0.72,
+      "orderIndex": 2,
+      "levelTag": "core"
+    },
+    {
+      "id": "st-3",
+      "externalId": "218",
+      "title": "The Skyline Problem",
+      "slug": "the-skyline-problem",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/the-skyline-problem",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/the-skyline-problem"
+      ],
+      "companyCount": 30,
+      "frequency": 0.68,
+      "orderIndex": 3,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "st-4",
+      "externalId": "699",
+      "title": "Falling Squares",
+      "slug": "falling-squares",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/falling-squares",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/falling-squares"
+      ],
+      "companyCount": 15,
+      "frequency": 0.45,
+      "orderIndex": 4,
+      "levelTag": "advanced"
+    },
+    {
+      "id": "st-5",
+      "externalId": "327",
+      "title": "Count of Range Sum",
+      "slug": "count-of-range-sum",
+      "difficulty": "Hard",
+      "canonicalUrl": "https://leetcode.com/problems/count-of-range-sum",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/count-of-range-sum"
+      ],
+      "companyCount": 20,
+      "frequency": 0.5,
+      "orderIndex": 5,
+      "levelTag": "challenge"
+    }
+  ]
+}
 ];
 
 import generatedData from "./generated_dataset.json";

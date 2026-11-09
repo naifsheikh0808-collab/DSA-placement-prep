@@ -53,9 +53,9 @@ export const CURRICULUM_TOPICS = [
   { id: "dp-foundations", name: "Dynamic Programming Foundations", phase: 3 as const, keywords: ["dynamic programming", "dp", "coin change", "climbing stairs"] },
 
   // ─── Phase 4: Advanced Frameworks & Target Company Sprints ───
-  { id: "advanced-dp", name: "Advanced DP & Sequences", phase: 4 as const, keywords: ["knapsack", "subsequence", "edit distance", "burst balloons"] },
-  { id: "shortest-paths", name: "Shortest Paths & Disjoint Sets", phase: 4 as const, keywords: ["dijkstra", "network delay", "minimum effort", "union find"] },
-  { id: "specialized-ds", name: "Specialized Structures (Trie, Monotonic)", phase: 4 as const, keywords: ["trie", "segment tree", "monotonic"] },
+  { id: "advanced-dp", name: "Advanced DP & Sequences", phase: 4 as const, keywords: ["knapsack", "subsequence", "edit distance", "burst balloons", "longest increasing"] },
+  { id: "shortest-paths", name: "Shortest Paths & Disjoint Sets", phase: 4 as const, keywords: ["dijkstra", "network delay", "minimum effort", "union find", "union-find", "dsu", "topological"] },
+  { id: "specialized-ds", name: "Specialized Structures (Trie, Monotonic, Design)", phase: 4 as const, keywords: ["trie", "segment tree", "fenwick", "monotonic", "monotonic stack", "design", "lru", "lfu", "bit manipulation"] },
   { id: "company-recency", name: "Target Company High-Yield 30d/3m", phase: 4 as const, keywords: ["30d", "company"] },
 ];
 

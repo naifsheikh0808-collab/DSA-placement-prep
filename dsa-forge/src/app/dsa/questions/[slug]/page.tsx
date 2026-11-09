@@ -73,14 +73,16 @@ function QuestionContent({ slug }: { slug: string }) {
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   <span className="text-zinc-500 font-mono text-sm">#{problem.externalId}</span>
                   <DifficultyBadge difficulty={problem.difficulty} />
-                  {problem.primaryPattern && (
+                  {problem.primaryPattern && problem.primaryPattern.toLowerCase() !== "uncategorized" && (
                     <Badge variant="pattern">{problem.primaryPattern}</Badge>
                   )}
-                  {!problem.primaryPattern && (
-                    <Badge variant="muted">Uncategorized</Badge>
+                  {(!problem.primaryPattern || problem.primaryPattern.toLowerCase() === "uncategorized") && (
+                    <Badge variant="muted">General DSA</Badge>
                   )}
-                  {problem.secondaryPatterns.map((p) => (
-                    <Badge key={p} variant="outline">{p}</Badge>
+                  {problem.secondaryPatterns?.map((p) => (
+                    <Badge key={p} variant="outline" className="border-violet-500/30 text-violet-300">
+                      + {p}
+                    </Badge>
                   ))}
                 </div>
                 <h1 className="text-2xl font-bold text-white mb-2">{problem.title}</h1>

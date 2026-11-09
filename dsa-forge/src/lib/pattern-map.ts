@@ -25,21 +25,88 @@ import type { Pattern, PatternQuestion, Problem } from "./types";
  * entry falls back to its own display name.
  */
 export const CURATED_PATTERN_ALIASES: Record<string, string[]> = {
-  "two-pointers": ["Two Pointers"],
-  "fast-slow-pointers": ["Fast & Slow Pointers"],
-  "sliding-window": ["Sliding Window"],
-  "kadanes-algorithm": ["Kadane's Algorithm"],
+  // ─── Tier 1: Core Fundamentals (15 Patterns) ──────────────────────────
+  "two-pointers": ["Two Pointers", "1. Pattern: Two Pointers"],
+  "fast-slow-pointers": ["Fast & Slow Pointers", "Fast and Slow Pointers"],
+  "sliding-window": ["Sliding Window", "3. Pattern: Sliding Window"],
+  "kadanes-algorithm": ["Kadane's Algorithm", "Pattern: Kadane pattern", "Kadane", "Kadanes Algorithm"],
   "prefix-sum": ["Prefix Sum"],
-  "merge-intervals": ["Merge Intervals"],
-  "in-place-linked-list-reversal": ["In-place Reversal of Linked List"],
-  "stack": ["Stack"],
-  "hash-maps": ["Hash Map / Hash Set", "HashMap / HashSet"],
-  "binary-search": ["Binary Search"],
-  "heap-priority-queue": ["Heap / Priority Queue"],
-  "backtracking": ["Backtracking"],
-  "tree-pattern": ["Binary Tree / BST"],
-  "graphs": ["Graph (DFS/BFS)"],
-  "dynamic-programming": ["Dynamic Programming"],
+  "merge-intervals": ["Merge Intervals", "4. Pattern: Merge Intervals", "Intervals"],
+  "in-place-linked-list-reversal": [
+    "In-place Linked List Reversal",
+    "In-place Reversal of Linked List",
+    "Linked List Reversal",
+    "Linked List",
+  ],
+  "stack": ["Stack", "7. Pattern: Stack"],
+  "hash-maps": [
+    "Hash Maps / Hash Sets",
+    "Hash Map / Hash Set",
+    "HashMap / HashSet",
+    "Hash Table",
+    "Hash Maps",
+    "Hash Sets",
+  ],
+  "binary-search": ["Binary Search", "10. Pattern : Binary Search"],
+  "heap-priority-queue": [
+    "Heap / Priority Queue",
+    "HEAP PATTERN",
+    "Heap",
+    "Priority Queue",
+  ],
+  "backtracking": [
+    "Backtracking",
+    "Recursion and Backtracking Pattern",
+    "Recursion",
+  ],
+  "tree-pattern": [
+    "Binary Tree & BST",
+    "Binary Tree / BST",
+    "Trees",
+    "Tree",
+    "BST",
+  ],
+  "graphs": ["Graph DFS/BFS", "Graph (DFS/BFS)", "GRAPHS", "Graph", "Graphs"],
+  "dynamic-programming": ["Dynamic Programming", "DP"],
+
+  // ─── Tier 2: Advanced & Specialized Frameworks (9 Patterns) ───────────
+  "monotonic-stack-queue": [
+    "Monotonic Stack & Queue",
+    "Monotonic Stack",
+    "Monotonic Queue",
+    "Monotonic",
+  ],
+  "trie": ["Trie (Prefix Tree)", "Trie", "Prefix Tree"],
+  "topological-sort": ["Topological Sort", "Topo Sort"],
+  "union-find": [
+    "Union-Find / Disjoint Set (DSU)",
+    "Union Find",
+    "DSU",
+    "Disjoint Set",
+  ],
+  "bit-manipulation": [
+    "Bit Manipulation & Math",
+    "Bit Manipulation",
+    "Bitmask",
+  ],
+  "greedy": ["Greedy Algorithms", "Greedy"],
+  "matrix-traversal": [
+    "Matrix Traversal & Simulation",
+    "Matrix Traversal",
+    "Matrix",
+  ],
+  "design-hybrid-structures": [
+    "Design & Hybrid Structures",
+    "Design",
+    "Design & Data Structures",
+    "Hybrid Data Structures",
+  ],
+  "segment-tree": [
+    "Segment & Fenwick Trees",
+    "Segment Tree",
+    "Fenwick Tree",
+    "Binary Indexed Tree",
+  ],
 };
 
 /** Lowercase + strip everything that is not alphanumeric, for fuzzy compares. */
@@ -112,27 +179,57 @@ export function getPatternByNameOrSlug(value: string): Pattern | undefined {
 
 /** The curated pattern that owns a dataset problem, if any. */
 export function resolveProblemPattern(problem: Problem): Pattern | undefined {
-  const slug = primaryPatternToSlug.get(normalizePatternKey(problem.primaryPattern));
-  if (slug) return curatedByKey.get(normalizePatternKey(slug));
+  if (problem.primaryPattern && normalizePatternKey(problem.primaryPattern) !== "uncategorized") {
+    const slug = primaryPatternToSlug.get(normalizePatternKey(problem.primaryPattern));
+    if (slug) return curatedByKey.get(normalizePatternKey(slug));
+  }
   const curatedSlug = curatedMembership.get(problem.id);
-  return curatedSlug ? curatedByKey.get(normalizePatternKey(curatedSlug)) : undefined;
+  if (curatedSlug) return curatedByKey.get(normalizePatternKey(curatedSlug));
+
+  // Fallback to primary matching secondary pattern if primary was missing/uncategorized
+  if (problem.secondaryPatterns?.length) {
+    for (const sec of problem.secondaryPatterns) {
+      const secSlug = primaryPatternToSlug.get(normalizePatternKey(sec));
+      if (secSlug) return curatedByKey.get(normalizePatternKey(secSlug));
+    }
+  }
+
+  return undefined;
 }
 
 /**
  * Does a problem belong to the given pattern?
  * Accepts a curated pattern name/slug or a raw dataset label.
+ * Checks both primary and secondary patterns, plus curated membership.
  */
 export function matchesPatternValue(problem: Problem, value: string): boolean {
   const key = normalizePatternKey(value);
   if (!key) return true;
 
+  // 1. Direct match on primary pattern
   if (normalizePatternKey(problem.primaryPattern) === key) return true;
+
+  // 2. Direct match on any secondary pattern
+  if (problem.secondaryPatterns?.some((p) => normalizePatternKey(p) === key)) return true;
 
   const canonical = canonicalByKey.get(key);
   if (!canonical) return false;
 
+  // 3. Canonical resolution on primary or curated membership
   if (resolveProblemPattern(problem)?.slug === canonical.slug) return true;
-  return curatedMembership.get(problem.id) === canonical.slug;
+  if (curatedMembership.get(problem.id) === canonical.slug) return true;
+
+  // 4. Canonical resolution on any secondary pattern
+  if (
+    problem.secondaryPatterns?.some((p) => {
+      const secSlug = primaryPatternToSlug.get(normalizePatternKey(p));
+      return secSlug === canonical.slug;
+    })
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 /* ─── Membership ──────────────────────────────────────────────────────────── */
@@ -143,8 +240,26 @@ for (const pattern of PATTERNS) {
   const members = new Map<string, Problem>();
 
   for (const problem of TOP_PROBLEMS) {
-    const slug = primaryPatternToSlug.get(normalizePatternKey(problem.primaryPattern));
-    if (slug === pattern.slug) members.set(problem.id, problem);
+    const primarySlug = primaryPatternToSlug.get(normalizePatternKey(problem.primaryPattern));
+    if (primarySlug === pattern.slug) {
+      members.set(problem.id, problem);
+      continue;
+    }
+
+    if (curatedMembership.get(problem.id) === pattern.slug) {
+      members.set(problem.id, problem);
+      continue;
+    }
+
+    // Also include problems matching via secondary patterns!
+    if (
+      problem.secondaryPatterns?.some((sec) => {
+        const secSlug = primaryPatternToSlug.get(normalizePatternKey(sec));
+        return secSlug === pattern.slug;
+      })
+    ) {
+      members.set(problem.id, problem);
+    }
   }
 
   // Curated roadmap questions the dataset left unlabeled still belong here.
@@ -185,9 +300,11 @@ export function getDatasetPatternValues(): string[] {
  * Exposing them keeps every question reachable from the pattern filter.
  */
 export function getExtraDatasetPatterns(): string[] {
-  return getDatasetPatternValues().filter(
-    (label) => !primaryPatternToSlug.has(normalizePatternKey(label))
-  );
+  return getDatasetPatternValues().filter((label) => {
+    const key = normalizePatternKey(label);
+    if (!key || key === "uncategorized") return false;
+    return !primaryPatternToSlug.has(key);
+  });
 }
 
 /* ─── Progress keys ───────────────────────────────────────────────────────── */

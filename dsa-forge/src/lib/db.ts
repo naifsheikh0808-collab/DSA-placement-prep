@@ -14,10 +14,11 @@ import {
   getPatternProblems,
   matchesPatternValue,
   resolveProblemId,
+  resolveProblemPattern,
 } from "./pattern-map";
 
 export { PATTERNS, TOP_COMPANIES, TOP_PROBLEMS, PLATFORM_STATS, TIMEFRAME_LABELS };
-export { getPatternProblems, matchesPatternValue, resolveProblemId };
+export { getPatternProblems, matchesPatternValue, resolveProblemId, resolveProblemPattern };
 export type { UserProgress, Pattern, Company, Problem, Timeframe, Difficulty };
 
 // ─── Patterns ─────────────────────────────────────────────────────────────────
@@ -62,7 +63,21 @@ export function getAllProblems(): Problem[] {
 }
 
 export function getProblemBySlug(slug: string): Problem | undefined {
-  return TOP_PROBLEMS.find((p) => p.slug === slug);
+  const problem = TOP_PROBLEMS.find((p) => p.slug === slug);
+  if (!problem) return undefined;
+
+  // Runtime fallback: If primaryPattern is missing or "Uncategorized", resolve dynamically
+  if (!problem.primaryPattern || problem.primaryPattern.toLowerCase() === "uncategorized") {
+    const resolved = resolveProblemPattern(problem);
+    if (resolved) {
+      return {
+        ...problem,
+        primaryPattern: resolved.name,
+      };
+    }
+  }
+
+  return problem;
 }
 
 export function getProblemsForPattern(patternName: string): PatternQuestion[] {
@@ -323,14 +338,16 @@ export interface PatternMastery {
 export function getPatternMastery(
   progress: Record<string, UserProgress>
 ): PatternMastery[] {
-  return PATTERNS.map((pattern) => {
-    const problems = getPatternProblems(pattern);
-    const solved = problems.filter((p) =>
-      isSolvedStatus(progress[p.id]?.status)
-    ).length;
-    const pct = problems.length ? Math.round((solved / problems.length) * 100) : 0;
-    return { pattern, solved, total: problems.length, pct };
-  });
+  return [...PATTERNS]
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map((pattern) => {
+      const problems = getPatternProblems(pattern);
+      const solved = problems.filter((p) =>
+        isSolvedStatus(progress[p.id]?.status)
+      ).length;
+      const pct = problems.length ? Math.round((solved / problems.length) * 100) : 0;
+      return { pattern, solved, total: problems.length, pct };
+    });
 }
 
 // ─── Platform Stats ───────────────────────────────────────────────────────────
