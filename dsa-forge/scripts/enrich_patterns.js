@@ -24,37 +24,36 @@ if (fs.existsSync(leetcodeCachePath)) {
 
 // ─── RAW TAG NORMALIZATION MAP ────────────────────────────────────────────────
 const RAW_TAG_MAP = {
-  '1. pattern: two pointers': 'Two Pointers',
+  '1 pattern two pointers': 'Two Pointers',
   'two pointers': 'Two Pointers',
-  '3. pattern: sliding window': 'Sliding Window',
+  '3 pattern sliding window': 'Sliding Window',
   'sliding window': 'Sliding Window',
-  'pattern: kadane pattern': "Kadane's Algorithm",
-  'kadane\'s algorithm': "Kadane's Algorithm",
+  'pattern kadane pattern': "Kadane's Algorithm",
+  'kadane s algorithm': "Kadane's Algorithm",
+  'kadanes algorithm': "Kadane's Algorithm",
   'kadane': "Kadane's Algorithm",
   'prefix sum': 'Prefix Sum',
-  '4. pattern: merge intervals': 'Merge Intervals',
+  '4 pattern merge intervals': 'Merge Intervals',
   'merge intervals': 'Merge Intervals',
-  'in-place reversal of linked list': 'In-place Linked List Reversal',
-  'in-place linked list reversal': 'In-place Linked List Reversal',
+  'in place reversal of linked list': 'In-place Linked List Reversal',
+  'in place linked list reversal': 'In-place Linked List Reversal',
   'linked list': 'In-place Linked List Reversal',
-  'fast & slow pointers': 'Fast & Slow Pointers',
-  '7. pattern: stack': 'Stack',
+  'fast slow pointers': 'Fast & Slow Pointers',
+  '7 pattern stack': 'Stack',
   'stack': 'Stack',
-  'hashmap / hashset': 'Hash Maps / Hash Sets',
-  'hash map / hash set': 'Hash Maps / Hash Sets',
-  'hash maps / hash sets': 'Hash Maps / Hash Sets',
+  'hashmap hashset': 'Hash Maps / Hash Sets',
+  'hash map hash set': 'Hash Maps / Hash Sets',
+  'hash maps hash sets': 'Hash Maps / Hash Sets',
   'hash table': 'Hash Maps / Hash Sets',
-  '10. pattern : binary search': 'Binary Search',
+  '10 pattern binary search': 'Binary Search',
   'binary search': 'Binary Search',
   'heap pattern': 'Heap / Priority Queue',
-  'heap / priority queue': 'Heap / Priority Queue',
-  'binary tree / bst': 'Binary Tree & BST',
-  'binary tree & bst': 'Binary Tree & BST',
+  'heap priority queue': 'Heap / Priority Queue',
+  'binary tree bst': 'Binary Tree & BST',
   'recursion and backtracking pattern': 'Backtracking',
   'backtracking': 'Backtracking',
   'graphs': 'Graph DFS/BFS',
-  'graph (dfs/bfs)': 'Graph DFS/BFS',
-  'graph dfs/bfs': 'Graph DFS/BFS',
+  'graph dfs bfs': 'Graph DFS/BFS',
   'dynamic programming': 'Dynamic Programming',
   'monotonic queue': 'Monotonic Stack & Queue',
   'trie': 'Trie (Prefix Tree)',
@@ -64,6 +63,7 @@ const RAW_TAG_MAP = {
   'greedy': 'Greedy Algorithms',
   'matrix': 'Matrix Traversal & Simulation',
   'sorting': 'Sorting & Search',
+  'sorting search': 'Sorting & Search',
   'cyclic sort': 'Cyclic Sort'
 };
 
@@ -242,7 +242,11 @@ const TIER_1_ALGORITHMIC = {
   'Greedy': 'Greedy Algorithms',
   'Segment Tree': 'Segment & Fenwick Trees',
   'Binary Indexed Tree': 'Segment & Fenwick Trees',
-  'Divide and Conquer': 'Dynamic Programming'
+  'Divide and Conquer': 'Dynamic Programming',
+  'Sorting': 'Sorting & Search',
+  'Counting Sort': 'Sorting & Search',
+  'Bucket Sort': 'Sorting & Search',
+  'Radix Sort': 'Sorting & Search'
 };
 
 const TIER_2_STRUCTURES = {
@@ -273,6 +277,11 @@ function classifyByLeetCodeTags(tags) {
   const tagSet = new Set(tags);
   let primary = null;
   const secondaries = [];
+
+  // SQL / Database Questions (Highest Priority for Database)
+  if (tagSet.has('Database') || tagSet.has('SQL')) {
+    return { primary: 'SQL', secondary: ['Database'] };
+  }
 
   // Compound Rule 1: Design + (Hash Table | Linked List | Stack | Queue)
   if (tagSet.has('Design') && (tagSet.has('Hash Table') || tagSet.has('Linked List') || tagSet.has('Stack') || tagSet.has('Queue'))) {
@@ -468,6 +477,12 @@ for (const problem of dataset.problems) {
   if (!assignedPrimary || assignedPrimary.toLowerCase() === 'uncategorized') {
     assignedPrimary = 'General DSA';
     stats.uncategorizedRemaining++;
+  }
+
+  // Ensure strict canonical naming
+  const normKey = normalizeKey(assignedPrimary);
+  if (RAW_TAG_MAP[normKey]) {
+    assignedPrimary = RAW_TAG_MAP[normKey];
   }
 
   // Attach co-occurring secondary patterns for classic patterns if secondary is empty
