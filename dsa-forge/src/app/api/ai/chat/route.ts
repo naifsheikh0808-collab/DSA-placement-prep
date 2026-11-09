@@ -289,7 +289,15 @@ COACHING BEHAVIOR & RULES:
      * Keep code minimal, clean, and focused solely on the algorithm. Avoid excessive boilerplate.
 8. STRICT NO-JSON IN USER-FACING TEXT:
    - Tool execution is an internal background mechanism. NEVER display, quote, or dump raw JSON objects, tool arguments, or function outputs in your conversational text.
-   - ONLY call 'propose_planner_configuration' if the user EXPLICITLY asks to build, create, or update a study plan or roadmap. If the user is just asking questions, reviewing questions, or asking for company lists, answer in clean markdown bullets and do NOT trigger a planner proposal.`;
+   - ONLY call 'propose_planner_configuration' if the user EXPLICITLY asks to build, create, or update a study plan or roadmap. If the user is just asking questions, reviewing questions, or asking for company lists, answer in clean markdown bullets and do NOT trigger a planner proposal.
+9. LEETCODE-READY CODE FORMAT (CRITICAL FOR ALL CODE SOLUTIONS):
+   - When the user asks for code, a solution, or an implementation for a LeetCode or DSA problem:
+     * Output 100% plug-and-play LeetCode format ready to copy-paste directly into LeetCode's code editor without modification.
+     * C++: Wrap inside 'class Solution { public: ... };'. If including headers, ALWAYS include ALL required headers — especially '#include <functional>' whenever 'greater', 'less', or comparator functors are used; '#include <numeric>' for 'accumulate'/'iota'; '#include <climits>' for 'INT_MAX'/'INT_MIN'; '#include <algorithm>', '<vector>', '<queue>', '<set>', '<unordered_map>'.
+     * Python: ALWAYS wrap inside 'class Solution:' with 'self' as the first argument in method definitions and standard typing ('List', 'Optional', 'Tuple') or 'collections' / 'heapq' imports.
+     * Java: ALWAYS wrap inside 'class Solution { public ... }'.
+     * NEVER include 'int main()', testing scaffolding, or standalone CLI drivers unless explicitly requested by the user.
+     * Match the official LeetCode method signature, parameter names, and return types precisely.`;
 
 // ━━ Message type ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 interface ChatMessage {
@@ -468,7 +476,7 @@ async function callGroq(
 
   let sys =
     systemPrompt +
-    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.";
+    "\n\nCRITICAL CONVERSATIONAL & LENGTH RULES FOR GROQ:\n1. DIRECT ANSWER ONLY: You do NOT have external search tools in this session. NEVER simulate or output raw JSON tool calls like '{\"tool\": \"search_questions\", ...}'. Answer questions directly from your knowledge base.\n2. CONCISENESS: Match answer length strictly to the user's question. For lists and direct questions, provide a clean, high-impact markdown list immediately without conversational filler.\n3. NO RAW JSON: Never output raw JSON objects in your chat unless explicitly instructed.\n4. LEETCODE-READY CODE FORMAT: When providing code solutions, always format as a clean LeetCode submission (class Solution { ... }). In C++, never omit necessary headers like <functional> when using std::greater, and never add int main() or test runner boilerplate.";
 
   if (userWantsPlan) {
     sys +=
