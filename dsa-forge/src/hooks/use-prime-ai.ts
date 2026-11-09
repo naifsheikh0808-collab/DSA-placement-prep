@@ -133,10 +133,23 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
         const chatDocRef = doc(safeDb, "users", safeUid, "aiChats", channel);
         const snap = await getDoc(chatDocRef);
         if (snap.exists() && !isCancelled) {
-          const cloudMessages = (snap.data()?.messages || []) as AiChatMessage[];
-          if (Array.isArray(cloudMessages) && cloudMessages.length > 0) {
-            setMessagesRaw(cloudMessages);
-            persistMessages(storageKey, cloudMessages);
+          const rawCloud = snap.data()?.messages;
+          if (Array.isArray(rawCloud)) {
+            const validCloud: AiChatMessage[] = rawCloud
+              .filter((m: any) => m && (typeof m.content === "string" || m.content))
+              .map((m: any) => ({
+                id: String(m.id || genId()),
+                role: m.role === "model" ? ("model" as const) : ("user" as const),
+                content: typeof m.content === "string" ? m.content : String(m.content ?? ""),
+                ...(m.proposedPlan ? { proposedPlan: m.proposedPlan } : {}),
+                ...(m.error ? { error: Boolean(m.error) } : {}),
+                ...(m.model ? { model: m.model } : {}),
+              }));
+
+            if (validCloud.length > 0) {
+              setMessagesRaw(validCloud);
+              persistMessages(storageKey, validCloud);
+            }
           }
         }
       } catch (err) {
@@ -166,16 +179,28 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
         const next = typeof updater === "function" ? updater(prev) : updater;
         persistMessages(storageKey, next);
 
-        // Async cloud sync to Firestore
+        // Async cloud sync to Firestore (sanitizing undefined fields which Firestore rejects)
         const currentUid = user?.uid;
         const currentDb = db;
         if (currentUid && currentDb && isFirebaseConfigured) {
           const chatDocRef = doc(currentDb, "users", currentUid, "aiChats", channel);
+          const sanitizedMessages = next.slice(-60).map((m) => {
+            const clean: Record<string, any> = {
+              id: m.id || genId(),
+              role: m.role === "model" ? "model" : "user",
+              content: typeof m.content === "string" ? m.content : String(m.content ?? ""),
+            };
+            if (m.proposedPlan) clean.proposedPlan = m.proposedPlan;
+            if (m.error) clean.error = m.error;
+            if (m.model) clean.model = m.model;
+            return clean;
+          });
+
           setDoc(
             chatDocRef,
             {
               channel,
-              messages: next.slice(-60),
+              messages: sanitizedMessages,
               updatedAt: new Date().toISOString(),
             },
             { merge: true }
@@ -334,10 +359,17 @@ export function usePrimeAi({ mode = "planner", contextPayload, onMessage }: UseP
           throw new Error(data.error ?? `Request failed (${res.status})`);
         }
 
+        const replyContent =
+          typeof data.reply === "string"
+            ? data.reply
+            : data.reply
+            ? String(data.reply)
+            : "I'm sorry, I couldn't generate a response. Please try again.";
+
         const modelMsg: AiChatMessage = {
           id: genId(),
           role: "model",
-          content: data.reply as string,
+          content: replyContent,
           proposedPlan: data.proposedPlan,
           model: (data.activeModel as PrimeAiModel) ?? activeModel,
         };

@@ -121,6 +121,8 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
 
 // ━━ Inline Tokenizer & Renderer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export function renderPrimeAiInline(text: string): React.ReactNode {
+  if (!text || typeof text !== "string") return text || "";
+
   // Pattern matches:
   // 1. `inline code`
   // 2. **bold**
@@ -299,7 +301,8 @@ type Block =
   | { type: "ol"; items: string[] }
   | { type: "paragraph"; text: string };
 
-function parseMarkdownBlocks(markdown: string): Block[] {
+function parseMarkdownBlocks(markdown?: string): Block[] {
+  if (!markdown || typeof markdown !== "string") return [];
   const lines = markdown.split(/\r?\n/);
   const blocks: Block[] = [];
   let i = 0;
@@ -423,10 +426,11 @@ export function PrimeAiMessageRenderer({
   content,
   className,
 }: {
-  content: string;
+  content?: string | null;
   className?: string;
 }) {
-  const blocks = parseMarkdownBlocks(content);
+  const safeContent = typeof content === "string" ? content : (content ? String(content) : "");
+  const blocks = parseMarkdownBlocks(safeContent);
 
   return (
     <div className={cn("space-y-2 text-xs sm:text-sm text-white/90 leading-relaxed", className)}>
