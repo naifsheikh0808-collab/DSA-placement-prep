@@ -15,6 +15,7 @@ import {
 import { getAllPatterns, TOP_PROBLEMS } from "@/lib/db";
 import {
   getExtraDatasetPatterns,
+  getPatternByNameOrSlug,
   matchesPatternValue,
 } from "@/lib/pattern-map";
 import { DifficultyBadge } from "@/components/ui/badge";
@@ -141,9 +142,9 @@ function QuestionsPageContent() {
   const [search, setSearch] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty[]>([]);
   const [selectedPattern, setSelectedPattern] = useState("");
-  const [sortBy, setSortBy] = useState<"priority" | "difficulty" | "title" | "recency">(
-    "priority"
-  );
+  const [sortBy, setSortBy] = useState<
+    "priority" | "difficulty" | "title" | "recency" | "pedagogical"
+  >(patternParam ? "pedagogical" : "priority");
 
   const patterns = getAllPatterns();
   const extraPatterns = getExtraDatasetPatterns();
@@ -163,6 +164,7 @@ function QuestionsPageContent() {
       } else {
         setSelectedPattern(decoded);
       }
+      setSortBy("pedagogical");
     }
   }, [patternParam, patterns]);
 
@@ -187,7 +189,45 @@ function QuestionsPageContent() {
     return Math.min(...tf.map((t) => recencyOrder[t] ?? 99));
   }
 
-  if (sortBy === "priority") {
+  if (sortBy === "pedagogical") {
+    const diffOrder: Record<Difficulty, number> = { Easy: 1, Medium: 2, Hard: 3 };
+    const activePattern = selectedPattern
+      ? getPatternByNameOrSlug(selectedPattern)
+      : undefined;
+    const curatedRank = new Map<string, number>();
+
+    if (activePattern) {
+      for (const q of activePattern.questions) {
+        curatedRank.set(String(q.externalId), q.orderIndex);
+        curatedRank.set(q.slug, q.orderIndex);
+      }
+    } else {
+      for (const pat of patterns) {
+        for (const q of pat.questions) {
+          const rank = pat.orderIndex * 1000 + q.orderIndex;
+          if (!curatedRank.has(String(q.externalId))) {
+            curatedRank.set(String(q.externalId), rank);
+            curatedRank.set(q.slug, rank);
+          }
+        }
+      }
+    }
+
+    const rankOf = (p: (typeof TOP_PROBLEMS)[0]) =>
+      curatedRank.get(String(p.externalId)) ??
+      curatedRank.get(p.slug) ??
+      Number.MAX_SAFE_INTEGER;
+
+    problems = [...problems].sort((a, b) => {
+      const ra = rankOf(a);
+      const rb = rankOf(b);
+      if (ra !== rb) return ra - rb;
+      const da = diffOrder[a.difficulty] ?? 99;
+      const db = diffOrder[b.difficulty] ?? 99;
+      if (da !== db) return da - db;
+      return b.priorityScore - a.priorityScore;
+    });
+  } else if (sortBy === "priority") {
     problems = [...problems].sort((a, b) => b.priorityScore - a.priorityScore);
   } else if (sortBy === "title") {
     problems = [...problems].sort((a, b) => a.title.localeCompare(b.title));
@@ -371,6 +411,7 @@ function QuestionsPageContent() {
             className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50"
           >
             <option value="priority">Sort: Priority Score</option>
+            <option value="pedagogical">Sort: Pedagogical Order</option>
             <option value="recency">Sort: Recency</option>
             <option value="difficulty">Sort: Difficulty</option>
             <option value="title">Sort: Title</option>

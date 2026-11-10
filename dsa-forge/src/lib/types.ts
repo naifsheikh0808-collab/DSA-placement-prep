@@ -90,6 +90,7 @@ export interface PatternQuestion {
   frequency: number;
   orderIndex: number;
   levelTag: "beginner" | "core" | "advanced" | "challenge";
+  subPattern?: string;
 }
 
 // ─── User Progress ────────────────────────────────────────────────────────────

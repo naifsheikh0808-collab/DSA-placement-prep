@@ -38,13 +38,10 @@ function PatternContent({ slug }: { slug: string }) {
     ? Math.round((solvedCount / pattern.questions.length) * 100)
     : 0;
 
-  const DIFF_ORDER: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
+  // Follow the prerequisite-first chronological roadmap sequence defined by orderIndex
+  // instead of re-shuffling sub-topics by raw platform difficulty.
   const sortPedagogical = (qs: typeof pattern.questions) =>
-    [...qs].sort(
-      (a, b) =>
-        (DIFF_ORDER[a.difficulty] ?? 99) - (DIFF_ORDER[b.difficulty] ?? 99) ||
-        a.orderIndex - b.orderIndex
-    );
+    [...qs].sort((a, b) => a.orderIndex - b.orderIndex);
 
   const groups = {
     beginner: sortPedagogical(pattern.questions.filter((q) => q.levelTag === "beginner")),
@@ -153,7 +150,7 @@ function PatternContent({ slug }: { slug: string }) {
             </h2>
 
             <div className="space-y-2">
-              {questions.map((q, i) => {
+              {questions.map((q) => {
                 const status = statusOf(q.id);
                 const linkedProblem =
                   getProblemByReference(q.slug) ||
@@ -205,8 +202,8 @@ function PatternContent({ slug }: { slug: string }) {
                       {statusIcon(q.id)}
                     </button>
 
-                    {/* Number */}
-                    <span className="text-xs text-zinc-700 font-mono w-5 flex-shrink-0">{i + 1}</span>
+                    {/* Chronological step number */}
+                    <span className="text-xs text-zinc-500 font-mono w-6 flex-shrink-0">{q.orderIndex}</span>
 
                     {/* Title & Link to Question Bank */}
                     <div className="flex-1 min-w-0">
@@ -235,6 +232,11 @@ function PatternContent({ slug }: { slug: string }) {
 
                     {/* Metadata */}
                     <div className="flex items-center gap-2 flex-shrink-0">
+                      {q.subPattern && (
+                        <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/10 text-[11px] font-medium text-zinc-400 whitespace-nowrap">
+                          {q.subPattern}
+                        </span>
+                      )}
                       <DifficultyBadge difficulty={q.difficulty} />
                       {q.companyCount > 0 && (
                         <span className="text-xs text-zinc-600 hidden sm:block">{q.companyCount} co</span>

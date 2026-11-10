@@ -274,48 +274,109 @@ assert(selfSec.length === 0, `Zero problems repeat primaryPattern in secondaryPa
 assert(dupSec.length === 0, `Zero duplicate secondaryPatterns across all ${problems.length} problems (${dupSec.length})`);
 console.log('');
 
-// ─── STAGE 5: PEDAGOGICAL & CHRONOLOGICAL ORDERING ACROSS ALL 24 PATTERNS ─────
-console.log('─── Stage 5: Pedagogical Ordering Proof (All 24 Patterns in seed.ts) ───');
+// ─── STAGE 5: PEDAGOGICAL & CHRONOLOGICAL ORDERING + PREREQUISITE DAG PROOF ──
+console.log('─── Stage 5: Pedagogical Ordering & Prerequisite DAG Proof (24 Patterns) ─');
 const LEVEL_RANK = { beginner: 1, core: 2, advanced: 3, challenge: 4 };
-const DIFF_RANK = { Easy: 1, Medium: 2, Hard: 3 };
 
 let orderViolations = 0;
 let levelViolations = 0;
-let diffViolations = 0;
 let countViolations = 0;
+let duplicateIdViolations = 0;
+
+const seenCuratedIds = new Set();
+const patternIndexLookup = new Map();
 
 for (const pat of PATTERNS) {
   const qs = pat.questions || [];
+  const extToOrder = new Map();
   if (pat.questionCount !== qs.length) {
     countViolations++;
     console.log(`  ❌ [${pat.id}] questionCount=${pat.questionCount} != questions.length=${qs.length}`);
   }
   let prevLvl = 0;
-  let prevDiff = 0;
   qs.forEach((q, idx) => {
+    if (seenCuratedIds.has(q.id)) {
+      duplicateIdViolations++;
+      console.log(`  ❌ [${pat.id}] duplicate curated question.id "${q.id}" (#${q.externalId})`);
+    }
+    seenCuratedIds.add(q.id);
+    extToOrder.set(String(q.externalId), q.orderIndex);
+
     if (q.orderIndex !== idx + 1) {
       orderViolations++;
       console.log(`  ❌ [${pat.id}] #${q.externalId} orderIndex=${q.orderIndex} expected ${idx + 1}`);
     }
     const lr = LEVEL_RANK[q.levelTag] || 99;
-    const dr = DIFF_RANK[q.difficulty] || 99;
     if (lr < prevLvl) {
       levelViolations++;
       console.log(`  ❌ [${pat.id}] levelTag backward at #${q.externalId} (${q.levelTag})`);
     }
-    if (dr < prevDiff) {
-      diffViolations++;
-      console.log(`  ❌ [${pat.id}] difficulty backward at #${q.externalId} (${q.difficulty})`);
-    }
     prevLvl = lr;
-    prevDiff = dr;
   });
+  patternIndexLookup.set(pat.id, extToOrder);
+}
+
+// Explicit prerequisite edges [patternId, prerequisiteExternalId, dependentExternalId]
+const PREREQUISITE_EDGES = [
+  ['two-pointers', '125', '167'], ['two-pointers', '167', '15'], ['two-pointers', '15', '16'],
+  ['two-pointers', '16', '3977'], ['two-pointers', '3977', '18'], ['two-pointers', '26', '80'],
+  ['two-pointers', '11', '42'],
+  ['fast-slow-pointers', '876', '234'], ['fast-slow-pointers', '234', '143'],
+  ['fast-slow-pointers', '141', '142'], ['fast-slow-pointers', '142', '287'],
+  ['sliding-window', '643', '209'], ['sliding-window', '904', '340'], ['sliding-window', '1004', '424'],
+  ['sliding-window', '567', '438'], ['sliding-window', '930', '992'], ['sliding-window', '3', '76'],
+  ['sliding-window', '76', '30'],
+  ['kadanes-algorithm', '53', '3979'], ['kadanes-algorithm', '3979', '1749'], ['kadanes-algorithm', '1749', '918'],
+  ['prefix-sum', '1480', '303'], ['prefix-sum', '724', '560'], ['prefix-sum', '560', '525'],
+  ['merge-intervals', '252', '56'], ['merge-intervals', '56', '57'], ['merge-intervals', '57', '986'],
+  ['merge-intervals', '435', '452'], ['merge-intervals', '253', '3982'],
+  ['in-place-linked-list-reversal', '206', '92'], ['in-place-linked-list-reversal', '24', '25'],
+  ['in-place-linked-list-reversal', '25', '2074'],
+  ['stack', '20', '71'], ['stack', '1047', '1209'], ['stack', '71', '739'],
+  ['stack', '739', '503'], ['stack', '503', '901'], ['stack', '901', '84'],
+  ['hash-maps', '217', '1'], ['hash-maps', '242', '49'],
+  ['binary-search', '704', '3985'], ['binary-search', '3985', '34'], ['binary-search', '34', '3986'],
+  ['binary-search', '852', '162'], ['binary-search', '153', '3988'], ['binary-search', '3988', '33'],
+  ['binary-search', '74', '240'], ['binary-search', '240', '378'], ['binary-search', '875', '1011'],
+  ['binary-search', '1011', '3990'], ['binary-search', '3990', '410'],
+  ['heap-priority-queue', '1046', '215'], ['heap-priority-queue', '215', '347'],
+  ['heap-priority-queue', '347', '692'], ['heap-priority-queue', '767', '621'],
+  ['heap-priority-queue', '23', '3992'], ['heap-priority-queue', '3992', '378'],
+  ['heap-priority-queue', '295', '480'],
+  ['backtracking', '78', '77'], ['backtracking', '77', '39'], ['backtracking', '51', '37'],
+  ['tree-pattern', '144', '94'], ['tree-pattern', '104', '111'], ['tree-pattern', '104', '110'],
+  ['tree-pattern', '100', '101'], ['tree-pattern', '100', '572'], ['tree-pattern', '112', '113'],
+  ['tree-pattern', '543', '124'], ['tree-pattern', '98', '99'], ['tree-pattern', '235', '236'],
+  ['graphs', '3997', '3998'], ['graphs', '4001', '4002'], ['graphs', '4002', '207'],
+  ['graphs', '4003', '4004'], ['graphs', '4004', '743'], ['graphs', '743', '1631'],
+  ['dynamic-programming', '70', '198'], ['dynamic-programming', '416', '322'], ['dynamic-programming', '1143', '72'],
+  ['monotonic-stack-queue', '496', '739'], ['monotonic-stack-queue', '739', '901'], ['monotonic-stack-queue', '84', '42'],
+  ['trie', '14', '208'], ['trie', '208', '648'], ['trie', '648', '211'], ['trie', '421', '212'],
+  ['topological-sort', '207', '210'], ['topological-sort', '802', '310'],
+  ['union-find', '547', '684'], ['union-find', '684', '200'],
+  ['bit-manipulation', '136', '268'], ['bit-manipulation', '191', '338'],
+  ['greedy', '455', '55'], ['greedy', '860', '55'], ['greedy', '55', '45'],
+  ['matrix-traversal', '48', '54'], ['matrix-traversal', '54', '73'],
+  ['design-hybrid-structures', '155', '380'], ['design-hybrid-structures', '380', '146'], ['design-hybrid-structures', '146', '460'],
+  ['segment-tree', '307', '315'], ['segment-tree', '315', '327'], ['segment-tree', '699', '218'],
+];
+
+let dagViolations = 0;
+for (const [patId, preExt, depExt] of PREREQUISITE_EDGES) {
+  const map = patternIndexLookup.get(patId);
+  const preIdx = map && map.get(preExt);
+  const depIdx = map && map.get(depExt);
+  if (!preIdx || !depIdx || preIdx >= depIdx) {
+    dagViolations++;
+    console.log(`  ❌ [${patId}] prerequisite violation: #${preExt} (idx=${preIdx}) must precede #${depExt} (idx=${depIdx})`);
+  }
 }
 
 assert(countViolations === 0, `24/24 pattern questionCount metadata matches actual questions.length`);
 assert(orderViolations === 0, `24/24 patterns have strictly sequential orderIndex (1..N)`);
+assert(duplicateIdViolations === 0, `Zero duplicate curated question IDs across all 24 patterns (${seenCuratedIds.size} unique IDs)`);
 assert(levelViolations === 0, `24/24 patterns follow strictly non-decreasing levelTag (beginner -> core -> advanced -> challenge)`);
-assert(diffViolations === 0, `24/24 patterns follow strictly non-decreasing difficulty (Easy -> Medium -> Hard)`);
+assert(dagViolations === 0, `All ${PREREQUISITE_EDGES.length}/${PREREQUISITE_EDGES.length} explicit prerequisite DAG edges satisfied across 24 patterns`);
 
 console.log('\n════════════════════════════════════════════════════════════════════════');
 if (globalPass) {
