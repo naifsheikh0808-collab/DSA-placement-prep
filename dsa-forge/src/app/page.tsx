@@ -6,11 +6,12 @@ import {
   GitBranch, Building2, Map, ArrowRight,
   Zap, Target, Clock, Dumbbell, Play, Sparkles, TrendingUp, Compass
 } from "lucide-react";
-import { getAllPatterns, getAllCompanies, getPlatformStats, getSmartNextProblem, TOP_PROBLEMS } from "@/lib/db";
+import { getAllPatterns, getAllCompanies, getPlatformStats, TOP_PROBLEMS } from "@/lib/db";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/layout/user-avatar";
 import { HomeAiButton } from "@/components/ai/HomeAiButton";
+import { MarketIntelligenceCard } from "@/components/home/market-intelligence-card";
 
 export default function HomePage() {
   const [isAiOpen, setIsAiOpen] = useState(false);
@@ -18,7 +19,6 @@ export default function HomePage() {
   const patterns = getAllPatterns();
   const companies = getAllCompanies();
   const stats = getPlatformStats();
-  const smartProblem = getSmartNextProblem();
 
   return (
     // Outer flex row: main content shrinks when AI docks on the right
@@ -116,47 +116,10 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Main Grid: Smart Next + Top Companies */}
+        {/* Main Grid: Interactive Market Radar + Top Companies */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-          {/* Recommended Next Card */}
-          <div className="lg:col-span-2 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-violet-950/30 via-[#101322] to-[#0c0e17] border border-violet-500/30 backdrop-blur-md flex flex-col justify-between space-y-4 sm:space-y-5">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-violet-500/15 text-violet-300 text-xs font-semibold border border-violet-500/30">
-                  <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> Recommended For You
-                </span>
-                <span className="text-xs text-slate-400 font-mono">Priority Engine</span>
-              </div>
-
-              {smartProblem && (
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2">
-                    <DifficultyBadge difficulty={smartProblem.difficulty} />
-                    <span className="text-xs text-slate-400 font-mono">Priority Score: {smartProblem.priorityScore}</span>
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-bold text-white hover:text-violet-300 transition-colors">
-                    <Link href={`/dsa/questions/${smartProblem.slug}`}>{smartProblem.title}</Link>
-                  </h2>
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                    High-yield interview question frequently tested in current technical rounds with maximum pattern reinforcement.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-3.5 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs text-slate-400">
-                Target companies: <strong className="text-slate-200">{smartProblem?.companies.slice(0, 3).join(", ")}</strong>
-              </span>
-              {smartProblem && (
-                <Link href={`/dsa/questions/${smartProblem.slug}`}>
-                  <Button size="sm">
-                    Solve Question <Play className="w-3 h-3 fill-current ml-1" />
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
+          {/* Interactive Market & Pattern Intelligence Card */}
+          <MarketIntelligenceCard />
 
           {/* Quick Company Targets */}
           <div className="p-5 sm:p-6 rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md flex flex-col justify-between space-y-4">
