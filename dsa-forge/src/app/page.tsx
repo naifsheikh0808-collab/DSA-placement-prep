@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/layout/user-avatar";
 import { HomeAiButton } from "@/components/ai/HomeAiButton";
 import { MarketIntelligenceCard } from "@/components/home/market-intelligence-card";
+import { formatCompanyName } from "@/lib/market-stats";
 
 export default function HomePage() {
   const [isAiOpen, setIsAiOpen] = useState(false);
@@ -121,27 +122,27 @@ export default function HomePage() {
           {/* Interactive Market & Pattern Intelligence Card */}
           <MarketIntelligenceCard />
 
-          {/* Quick Company Targets */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-3">
+          {/* Quick Company Targets (Balanced Height & 6 Target Companies) */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md flex flex-col justify-between space-y-4 h-full">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
                 <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-violet-400" /> Top Target Companies
                 </h3>
-                <Link href="/dsa/companies" className="text-xs text-violet-400 hover:text-violet-300">
+                <Link href="/dsa/companies" className="text-xs text-violet-400 hover:text-violet-300 font-semibold">
                   View All
                 </Link>
               </div>
 
-              <div className="space-y-2">
-                {companies.slice(0, 4).map((c) => (
+              <div className="space-y-1.5 sm:space-y-2">
+                {companies.slice(0, 6).map((c) => (
                   <Link
                     key={c.id}
                     href={`/dsa/companies/${c.normalizedName}`}
-                    className="p-2.5 sm:p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-violet-500/30 flex items-center justify-between transition-all group"
+                    className="p-2 sm:p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-violet-500/30 flex items-center justify-between transition-all group"
                   >
                     <span className="text-xs font-bold text-slate-200 group-hover:text-violet-300">
-                      {c.name}
+                      {formatCompanyName(c.name)}
                     </span>
                     <span className="text-[11px] text-slate-400 bg-slate-800/60 px-2 py-0.5 rounded font-mono">
                       {c.problemCount} Qs
@@ -149,6 +150,16 @@ export default function HomePage() {
                   </Link>
                 ))}
               </div>
+            </div>
+
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+              <span className="truncate">659 Companies Tracked</span>
+              <Link
+                href="/dsa/companies"
+                className="text-violet-400 hover:text-violet-300 font-semibold flex items-center gap-1 group shrink-0"
+              >
+                All Targets <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
             </div>
           </div>
         </div>

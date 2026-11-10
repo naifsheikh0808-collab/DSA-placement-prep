@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   BarChart,
@@ -74,10 +74,74 @@ export function MarketIntelligenceCard() {
   const [selectedCompany, setSelectedCompany] = useState<string>("google");
   const [selectedPattern, setSelectedPattern] = useState<string>("Dynamic Programming");
   const [activeBarIndex, setActiveBarIndex] = useState<number | null>(null);
+  const [showTooltip, setShowTooltip] = useState(true);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear timer helper
+  const clearTooltipTimer = useCallback(() => {
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Check if touch device / mobile screen (< 768px or touch enabled)
+  const isTouchDevice = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    return (
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth < 768
+    );
+  }, []);
+
+  // Handles mobile tap & desktop hover with 3-second auto-dismiss on mobile
+  const handleBarInteraction = useCallback(
+    (index: number | null) => {
+      clearTooltipTimer();
+      setActiveBarIndex(index);
+      setShowTooltip(true);
+
+      // On mobile / touch devices: auto-dismiss after 3000ms
+      if (index !== null && isTouchDevice()) {
+        tooltipTimeoutRef.current = setTimeout(() => {
+          setShowTooltip(false);
+          setActiveBarIndex(null);
+        }, 3000);
+      }
+    },
+    [clearTooltipTimer, isTouchDevice]
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => clearTooltipTimer();
+  }, [clearTooltipTimer]);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const switchMode = (newMode: ViewMode) => {
+    clearTooltipTimer();
+    setShowTooltip(true);
+    setMode(newMode);
+    setActiveBarIndex(null);
+  };
+
+  const switchCompany = (compId: string) => {
+    clearTooltipTimer();
+    setShowTooltip(true);
+    setSelectedCompany(compId);
+    setActiveBarIndex(null);
+  };
+
+  const switchPattern = (pat: string) => {
+    clearTooltipTimer();
+    setShowTooltip(true);
+    setSelectedPattern(pat);
+    setActiveBarIndex(null);
+  };
 
   // Compute dataset based on active mode
   const chartData = useMemo(() => {
@@ -174,10 +238,7 @@ export function MarketIntelligenceCard() {
           <div className="inline-flex items-center p-1 rounded-xl bg-black/40 border border-white/10 self-start sm:self-auto">
             <button
               type="button"
-              onClick={() => {
-                setMode("company");
-                setActiveBarIndex(null);
-              }}
+              onClick={() => switchMode("company")}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                 mode === "company"
                   ? "bg-violet-600 text-white shadow-sm shadow-violet-600/30"
@@ -188,10 +249,7 @@ export function MarketIntelligenceCard() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setMode("pattern");
-                setActiveBarIndex(null);
-              }}
+              onClick={() => switchMode("pattern")}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                 mode === "pattern"
                   ? "bg-violet-600 text-white shadow-sm shadow-violet-600/30"
@@ -202,10 +260,7 @@ export function MarketIntelligenceCard() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setMode("global");
-                setActiveBarIndex(null);
-              }}
+              onClick={() => switchMode("global")}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                 mode === "global"
                   ? "bg-violet-600 text-white shadow-sm shadow-violet-600/30"
@@ -226,10 +281,7 @@ export function MarketIntelligenceCard() {
                 <button
                   key={comp.id}
                   type="button"
-                  onClick={() => {
-                    setSelectedCompany(comp.id);
-                    setActiveBarIndex(null);
-                  }}
+                  onClick={() => switchCompany(comp.id)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all border ${
                     active
                       ? "bg-violet-500/20 border-violet-500/50 text-violet-200 shadow-sm shadow-violet-500/20"
@@ -248,10 +300,7 @@ export function MarketIntelligenceCard() {
                 <button
                   key={pat}
                   type="button"
-                  onClick={() => {
-                    setSelectedPattern(pat);
-                    setActiveBarIndex(null);
-                  }}
+                  onClick={() => switchPattern(pat)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all border ${
                     active
                       ? "bg-violet-500/20 border-violet-500/50 text-violet-200 shadow-sm shadow-violet-500/20"
@@ -293,13 +342,29 @@ export function MarketIntelligenceCard() {
               margin={{ top: 8, right: 10, left: -22, bottom: 0 }}
               onMouseMove={(state) => {
                 if (state && state.activeTooltipIndex !== undefined) {
-                  const idx = typeof state.activeTooltipIndex === "number"
-                    ? state.activeTooltipIndex
-                    : parseInt(String(state.activeTooltipIndex), 10);
-                  setActiveBarIndex(Number.isNaN(idx) ? null : idx);
+                  const idx =
+                    typeof state.activeTooltipIndex === "number"
+                      ? state.activeTooltipIndex
+                      : parseInt(String(state.activeTooltipIndex), 10);
+                  handleBarInteraction(Number.isNaN(idx) ? null : idx);
                 }
               }}
-              onMouseLeave={() => setActiveBarIndex(null)}
+              onClick={(state) => {
+                if (state && state.activeTooltipIndex !== undefined) {
+                  const idx =
+                    typeof state.activeTooltipIndex === "number"
+                      ? state.activeTooltipIndex
+                      : parseInt(String(state.activeTooltipIndex), 10);
+                  handleBarInteraction(Number.isNaN(idx) ? null : idx);
+                }
+              }}
+              onMouseLeave={() => {
+                if (!isTouchDevice()) {
+                  clearTooltipTimer();
+                  setShowTooltip(true);
+                  setActiveBarIndex(null);
+                }
+              }}
             >
               <defs>
                 <linearGradient id="primaryBarGradient" x1="0" y1="0" x2="0" y2="1">
@@ -329,14 +394,24 @@ export function MarketIntelligenceCard() {
               />
 
               <Tooltip
+                active={showTooltip ? undefined : false}
                 cursor={{ fill: "rgba(139, 92, 246, 0.08)", radius: 6 }}
                 content={({ active, payload }) => {
+                  if (!showTooltip) return null;
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
                     return (
-                      <div className="p-3 rounded-xl bg-[#0e111c]/95 border border-violet-500/30 text-white shadow-2xl backdrop-blur-md space-y-1.5 min-w-[170px]">
-                        <div className="font-bold text-xs text-violet-300 border-b border-white/10 pb-1">
-                          {data.fullName}
+                      <div
+                        onClick={() => {
+                          clearTooltipTimer();
+                          setShowTooltip(false);
+                          setActiveBarIndex(null);
+                        }}
+                        className="p-3 rounded-xl bg-[#0e111c]/95 border border-violet-500/30 text-white shadow-2xl backdrop-blur-md space-y-1.5 min-w-[170px] select-none cursor-pointer"
+                        title="Click to dismiss"
+                      >
+                        <div className="font-bold text-xs text-violet-300 border-b border-white/10 pb-1 flex items-center justify-between">
+                          <span>{data.fullName}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-slate-400">Total Questions:</span>
