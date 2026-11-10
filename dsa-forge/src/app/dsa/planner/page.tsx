@@ -234,56 +234,53 @@ export default function SmartPlannerPage() {
      RENDER: Questionnaire / Profile Wizard
   ────────────────────────────────────────────────────────────── */
   const wizardView = (
-    <div className="flex-1 min-w-0 max-w-4xl mx-auto space-y-8 pb-24">
-        {/* Header */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
+    <div className="flex-1 min-w-0 max-w-4xl mx-auto space-y-6 pb-24">
+        {/* Clean Header */}
+        <div className="text-center space-y-2.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>AI-Driven Smart Prep Planner</span>
+            <span>Smart Plan Setup</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Personalize Your Placement Roadmap
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Personalize Your Study Roadmap
           </h1>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">
-            Tell us your target companies, remaining time, and current skill level. We'll generate a day-by-day roadmap with smart problem recommendations.
+          <p className="text-slate-400 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
+            Pick your target role, skill level, companies, and daily schedule—we&apos;ll organize your exact prep plan.
           </p>
         </div>
 
-        {/* Wizard Card */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#10131f]/80 border border-white/10 backdrop-blur-xl shadow-2xl space-y-8">
-          {/* ── Caution Notice Banner When Adjusting Existing Preferences ── */}
+        {/* Sleek Wizard Card */}
+        <div className="p-4 sm:p-7 rounded-2xl sm:rounded-3xl bg-[#10131f]/85 border border-white/10 backdrop-blur-xl shadow-2xl space-y-6">
+          {/* Sleek Caution Banner When Updating Existing Plan */}
           {profile && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/35 flex items-start gap-3.5 shadow-lg shadow-amber-950/20">
-              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <div className="text-xs sm:text-sm font-bold text-amber-200 flex items-center gap-2">
-                  <span>Caution: Updating Preferences Will Recalibrate Your Roadmap</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold uppercase tracking-wider">
-                    Notice
-                  </span>
+            <div className="p-3.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <div className="text-xs sm:text-sm font-bold text-amber-200">
+                  Updating preferences rebuilds your Study Roadmap
                 </div>
-                <p className="text-xs text-amber-300/80 leading-relaxed">
-                  Modifying your target role, timeline, or target companies will generate a new preparation roadmap and update or reset your <strong>Active Placement Roadmap</strong> in &quot;My Progress&quot; to match your new target goals.
+                <p className="text-[11px] sm:text-xs text-amber-200/75 leading-relaxed">
+                  Your solved problems stay safely saved—only your upcoming roadmap questions and My Progress targets refresh to match your new plan.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Step 1: Target Role & Year */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-white font-bold text-base">
-              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold">
+          {/* Step 1: Target Role & Career Stage */}
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 text-white font-bold text-sm sm:text-base">
+              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold shrink-0">
                 1
               </span>
-              <span>Target Role & Current Stage</span>
+              <span>Target Role &amp; Career Stage</span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
               {[
-                { id: "intern", label: "Summer Intern", icon: GraduationCap, desc: "On-campus / Off-campus internship" },
-                { id: "sde1", label: "SDE-1 / New Grad", icon: Briefcase, desc: "Final year campus placements" },
-                { id: "sde2", label: "SDE-2 / Switch", icon: Zap, desc: "1-4 YOE product company switch" },
-                { id: "quant", label: "Quant / HFT", icon: Award, desc: "Elite trading & ultra-hard rounds" },
+                { id: "intern", label: "Summer Intern", icon: GraduationCap, desc: "Campus or off-campus internships" },
+                { id: "sde1", label: "SDE-1 / New Grad", icon: Briefcase, desc: "Entry-level & campus placements" },
+                { id: "sde2", label: "SDE-2 / Switch", icon: Zap, desc: "1–4 YOE product switch" },
+                { id: "quant", label: "Quant / HFT", icon: Award, desc: "High-difficulty algorithmic rounds" },
               ].map((item) => {
                 const active = formRole === item.id;
                 const Icon = item.icon;
@@ -292,38 +289,42 @@ export default function SmartPlannerPage() {
                     key={item.id}
                     type="button"
                     onClick={() => setFormRole(item.id as RoleTarget)}
-                    className={`p-4 rounded-2xl border text-left transition-all ${
+                    className={cn(
+                      "p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer",
                       active
-                        ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/50 shadow-[0_4px_20px_rgba(124,58,237,0.2)]"
+                        ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/40 shadow-md shadow-violet-950/30"
                         : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.04]"
-                    }`}
+                    )}
                   >
-                    <Icon className={`w-5 h-5 mb-2 ${active ? "text-violet-300" : "text-slate-400"}`} />
-                    <div className="font-bold text-xs sm:text-sm">{item.label}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2">{item.desc}</div>
+                    <Icon className={cn("w-4 h-4 sm:w-5 sm:h-5 mb-1.5 sm:mb-2", active ? "text-violet-300" : "text-slate-400")} />
+                    <div className="font-bold text-xs sm:text-sm text-white">{item.label}</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-2 leading-snug">{item.desc}</div>
                   </button>
                 );
               })}
             </div>
 
-            <div className="pt-2">
-              <label className="text-xs font-semibold text-slate-400 block mb-2">Current Career Stage:</label>
+            <div className="pt-1">
+              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                Current Stage
+              </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { id: "1st_2nd", label: "1st / 2nd Year" },
-                  { id: "3rd_4th", label: "3rd / 4th Year (Placements)" },
-                  { id: "recent_grad", label: "Recent Graduate" },
-                  { id: "working", label: "Working Professional" },
+                  { id: "3rd_4th", label: "3rd / 4th Year" },
+                  { id: "recent_grad", label: "Recent Grad" },
+                  { id: "working", label: "Working Pro" },
                 ].map((s) => (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => setFormStage(s.id as CareerStage)}
-                    className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all ${
+                    className={cn(
+                      "py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all cursor-pointer",
                       formStage === s.id
-                        ? "bg-violet-500/20 text-violet-300 border-violet-500/50 font-bold"
-                        : "bg-white/[0.02] text-slate-400 border-white/5 hover:text-white"
-                    }`}
+                        ? "bg-violet-500/20 text-violet-200 border-violet-500/50 font-bold"
+                        : "bg-white/[0.02] text-slate-400 border-white/5 hover:text-white hover:border-white/15"
+                    )}
                   >
                     {s.label}
                   </button>
@@ -332,42 +333,42 @@ export default function SmartPlannerPage() {
             </div>
           </div>
 
-          <div className="border-t border-white/10" />
+          <div className="border-t border-white/[0.08]" />
 
           {/* Step 2: Skill Level */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-white font-bold text-base">
-              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold">
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 text-white font-bold text-sm sm:text-base">
+              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold shrink-0">
                 2
               </span>
-              <span>Current DSA Foundation Level</span>
+              <span>Current DSA Level</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               {[
                 {
                   id: "beginner",
-                  badge: "Level 1: Absolute Beginner",
+                  badge: "Level 1 · Beginner",
                   title: "Starting from scratch",
-                  desc: "Need practice on basic syntax, Arrays, Strings, Loops & basic math recursion.",
+                  desc: "Focus on core Arrays, Strings & foundational Easy problems.",
                 },
                 {
                   id: "basics",
-                  badge: "Level 2: Know Fundamentals",
-                  title: "Comfortable with basics",
-                  desc: "Familiar with Two Pointers, Stacks, Linked Lists & Binary Search. Need pattern mastery.",
+                  badge: "Level 2 · Fundamentals",
+                  title: "Know the basics",
+                  desc: "Ready for Two Pointers, Sliding Window & core Mediums.",
                 },
                 {
                   id: "intermediate",
-                  badge: "Level 3: Intermediate",
-                  title: "Can solve Trees & Graphs",
-                  desc: "Comfortable with medium problems; struggle with Dynamic Programming & tricky graphs.",
+                  badge: "Level 3 · Intermediate",
+                  title: "Comfortable with mediums",
+                  desc: "Strengthen Trees, Graphs, Dynamic Programming & speed.",
                 },
                 {
                   id: "advanced",
-                  badge: "Level 4: Advanced",
-                  title: "Ready for Tier 1 Hard",
-                  desc: "Targeting Hard DP, complex graphs, segment trees, speed optimization & mock interviews.",
+                  badge: "Level 4 · Advanced",
+                  title: "Targeting Tier-1 Hard",
+                  desc: "Prioritize Hard DP, complex graphs & top company questions.",
                 },
               ].map((lvl) => {
                 const active = formLevel === lvl.id;
@@ -376,38 +377,39 @@ export default function SmartPlannerPage() {
                     key={lvl.id}
                     type="button"
                     onClick={() => setFormLevel(lvl.id as SkillLevel)}
-                    className={`p-4 rounded-2xl border text-left transition-all ${
+                    className={cn(
+                      "p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer",
                       active
-                        ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/50"
+                        ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/40"
                         : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.04]"
-                    }`}
+                    )}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className={`text-[11px] font-bold uppercase tracking-wider ${active ? "text-violet-300" : "text-slate-400"}`}>
+                      <span className={cn("text-[10px] font-bold uppercase tracking-wider", active ? "text-violet-300" : "text-slate-400")}>
                         {lvl.badge}
                       </span>
                       {active && <CheckCircle2 className="w-4 h-4 text-violet-400" />}
                     </div>
-                    <div className="font-bold text-sm text-white">{lvl.title}</div>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{lvl.desc}</p>
+                    <div className="font-bold text-xs sm:text-sm text-white">{lvl.title}</div>
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-snug">{lvl.desc}</p>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="border-t border-white/10" />
+          <div className="border-t border-white/[0.08]" />
 
           {/* Step 3: Target Companies */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-white font-bold text-base">
-              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold">
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 text-white font-bold text-sm sm:text-base">
+              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold shrink-0">
                 3
               </span>
-              <span>Target Companies & Tiers</span>
+              <span>Target Companies</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
               {Object.entries(COMPANY_PRESETS).map(([key, item]) => {
                 const active = formCompanyPreset === key;
                 return (
@@ -415,54 +417,58 @@ export default function SmartPlannerPage() {
                     key={key}
                     type="button"
                     onClick={() => setFormCompanyPreset(key)}
-                    className={`p-4 rounded-2xl border text-left transition-all ${
+                    className={cn(
+                      "p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer",
                       active
-                        ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/50"
+                        ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/40"
                         : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.04]"
-                    }`}
+                    )}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold text-xs sm:text-sm text-white">{item.label}</span>
-                      {active && <CheckCircle2 className="w-3.5 h-3.5 text-violet-400" />}
+                      {active && <CheckCircle2 className="w-3.5 h-3.5 text-violet-400 shrink-0" />}
                     </div>
-                    <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">{item.desc}</p>
+                    <p className="text-[11px] text-slate-400 line-clamp-1 leading-snug">{item.desc}</p>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="border-t border-white/10" />
+          <div className="border-t border-white/[0.08]" />
 
           {/* Step 4: Duration & Daily Hours */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-white font-bold text-base">
-              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold">
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 text-white font-bold text-sm sm:text-base">
+              <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-extrabold shrink-0">
                 4
               </span>
-              <span>Timeframe & Daily Commitment</span>
+              <span>Timeline &amp; Daily Pace</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* Duration */}
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-2">Total Preparation Window:</label>
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                  Target Window
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { days: 15, label: "15-Day Sprint", desc: "Urgent interview round" },
-                    { days: 30, label: "30-Day Crash Course", desc: "Recommended balance" },
-                    { days: 60, label: "60-Day Comprehensive", desc: "Solid depth & speed" },
-                    { days: 90, label: "90-Day Mastery", desc: "Deep multi-tier prep" },
+                    { days: 15, label: "15 Days", desc: "Quick interview sprint" },
+                    { days: 30, label: "30 Days", desc: "Balanced prep" },
+                    { days: 60, label: "60 Days", desc: "Solid pattern depth" },
+                    { days: 90, label: "90 Days", desc: "Complete mastery" },
                   ].map((d) => (
                     <button
                       key={d.days}
                       type="button"
                       onClick={() => setFormDuration(d.days as DurationOption)}
-                      className={`p-3 rounded-xl border text-left transition-all ${
+                      className={cn(
+                        "p-3 rounded-xl border text-left transition-all cursor-pointer",
                         formDuration === d.days
                           ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/40"
                           : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20"
-                      }`}
+                      )}
                     >
                       <div className="font-bold text-xs">{d.label}</div>
                       <div className="text-[10px] text-slate-400 mt-0.5">{d.desc}</div>
@@ -473,23 +479,26 @@ export default function SmartPlannerPage() {
 
               {/* Daily Hours */}
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-2">Daily Study Commitment:</label>
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                  Daily Study Time
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { hrs: 1, label: "1 hr / day", desc: "~1 problem daily" },
-                    { hrs: 2, label: "2-3 hrs / day", desc: "~2 problems daily" },
-                    { hrs: 4, label: "4-5 hrs / day", desc: "~3-4 problems daily" },
-                    { hrs: 6, label: "6+ hrs / day (Full-time)", desc: "~5+ problems daily" },
+                    { hrs: 2, label: "2–3 hrs / day", desc: "~2 problems daily" },
+                    { hrs: 4, label: "4–5 hrs / day", desc: "~3–4 problems daily" },
+                    { hrs: 6, label: "6+ hrs / day", desc: "Full-time sprint" },
                   ].map((h) => (
                     <button
                       key={h.hrs}
                       type="button"
                       onClick={() => setFormDailyHours(h.hrs as DailyHourOption)}
-                      className={`p-3 rounded-xl border text-left transition-all ${
+                      className={cn(
+                        "p-3 rounded-xl border text-left transition-all cursor-pointer",
                         formDailyHours === h.hrs
                           ? "bg-violet-600/20 border-violet-500 text-white ring-1 ring-violet-500/40"
                           : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20"
-                      }`}
+                      )}
                     >
                       <div className="font-bold text-xs">{h.label}</div>
                       <div className="text-[10px] text-slate-400 mt-0.5">{h.desc}</div>
@@ -500,10 +509,10 @@ export default function SmartPlannerPage() {
             </div>
           </div>
 
-          {/* Action Button */}
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/[0.08]">
+          {/* Action Row */}
+          <div className="pt-4 flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 sm:gap-3 border-t border-white/[0.08]">
             {profile && (
-              <Button variant="ghost" onClick={() => setIsEditing(false)}>
+              <Button variant="ghost" onClick={() => setIsEditing(false)} className="w-full sm:w-auto">
                 Cancel
               </Button>
             )}
@@ -513,7 +522,7 @@ export default function SmartPlannerPage() {
               className="w-full sm:w-auto px-8 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-violet-600/30"
             >
               <Sparkles className="w-4 h-4 mr-2" />
-              Generate My Smart Roadmap
+              {profile ? "Update Study Roadmap" : "Build My Study Roadmap"}
             </Button>
           </div>
         </div>
@@ -688,12 +697,12 @@ export default function SmartPlannerPage() {
                   </div>
 
                   {/* Progress + Chevron */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="hidden xs:flex sm:flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                    <div className="flex flex-col items-end gap-1">
                       <span className="text-[11px] font-bold text-slate-300 font-mono">
                         {phaseSolved}/{phase.problems.length}
                       </span>
-                      <div className="w-16 sm:w-24 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-14 sm:w-24 bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div
                           className="bg-emerald-400 h-full rounded-full transition-all duration-300"
                           style={{ width: `${phasePct}%` }}
@@ -703,7 +712,7 @@ export default function SmartPlannerPage() {
 
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-xl border flex items-center justify-center transition-all",
+                        "w-7 h-7 sm:w-8 sm:h-8 rounded-xl border flex items-center justify-center transition-all",
                         isExpanded
                           ? "bg-violet-500/20 border-violet-500/40 text-violet-200"
                           : "bg-white/[0.04] border-white/10 text-slate-400 group-hover:text-white group-hover:border-white/20"
@@ -719,9 +728,9 @@ export default function SmartPlannerPage() {
                   </div>
                 </button>
 
-                {/* Expanded Content: Short Tagline + Focus Pills + Questions */}
+                {/* Expanded Content: Short Tagline + Focus Pills + Sleek Horizontal Table */}
                 {isExpanded && (
-                  <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-3 border-t border-white/10 space-y-4 animate-in fade-in duration-200">
+                  <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-3 border-t border-white/10 space-y-3.5 animate-in fade-in duration-200">
                     {/* Phase Details */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                       <p className="text-xs text-slate-400 leading-relaxed">{phase.tagline}</p>
@@ -737,98 +746,39 @@ export default function SmartPlannerPage() {
                       </div>
                     </div>
 
-                    {/* Mobile Problem List (Sleek Cards, Zero Horizontal Scroll) */}
-                    <div className="block md:hidden space-y-2">
-                      {phase.problems.map((prob) => {
-                        const userProg = progress[prob.id]?.status || "todo";
-                        const isNext = prob.id === nextUpId;
-                        return (
-                          <div
-                            key={prob.id}
-                            className={cn(
-                              "p-3 rounded-xl border transition-all flex items-center justify-between gap-2.5",
-                              userProg === "solved"
-                                ? "bg-emerald-950/15 border-emerald-500/20"
-                                : isNext
-                                ? "bg-violet-950/20 border-violet-500/35"
-                                : "bg-white/[0.02] border-white/5"
-                            )}
-                          >
-                            <div className="flex items-start gap-2.5 min-w-0">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  userProg === "solved" ? markAttempted(prob.id) : markSolved(prob.id)
-                                }
-                                className="mt-0.5 text-slate-500 hover:text-emerald-400 transition-colors shrink-0"
-                                title="Toggle Status"
-                              >
-                                {userProg === "solved" ? (
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                ) : (
-                                  <Circle className="w-4 h-4 text-slate-600 hover:text-slate-400" />
-                                )}
-                              </button>
-
-                              <div className="min-w-0 space-y-1">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <Link
-                                    href={`/dsa/questions/${prob.slug}`}
-                                    className="text-xs font-bold text-white hover:text-violet-300 transition-colors leading-snug"
-                                  >
-                                    {prob.title}
-                                  </Link>
-                                  {isNext && (
-                                    <span className="px-1.5 py-0.5 rounded bg-violet-500/25 border border-violet-400/40 text-violet-200 text-[9px] font-bold uppercase tracking-wider">
-                                      Next
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <DifficultyBadge difficulty={prob.difficulty} />
-                                  <span className="text-[10px] text-slate-400 bg-white/[0.04] px-1.5 py-0.5 rounded border border-white/5 truncate max-w-[140px]">
-                                    {prob.primaryPattern || "General"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <Link
-                              href={`/dsa/questions/${prob.slug}`}
-                              className="px-2.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-violet-600/80 border border-white/10 hover:border-violet-400/50 text-[11px] font-bold text-white flex items-center gap-1 shrink-0 transition-all"
-                            >
-                              <span>Solve</span>
-                              <ArrowRight className="w-3 h-3" />
-                            </Link>
-                          </div>
-                        );
-                      })}
+                    {/* Subtle mobile swipe cue */}
+                    <div className="flex sm:hidden items-center justify-end gap-1 text-[10px] text-slate-500">
+                      <span>Swipe table for pattern &amp; companies</span>
+                      <ArrowRight className="w-3 h-3" />
                     </div>
 
-                    {/* Desktop Problems Table */}
-                    <div className="hidden md:block overflow-x-auto">
-                      <table className="w-full text-left text-xs">
-                        <thead className="text-slate-400 uppercase tracking-wider font-semibold border-b border-white/5">
+                    {/* Unified Sleek Horizontal-Scrollable Table (Clean on both Mobile & Desktop) */}
+                    <div className="overflow-x-auto rounded-xl border border-white/[0.07] bg-white/[0.01]">
+                      <table className="w-full min-w-[680px] text-left text-xs">
+                        <thead className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold bg-white/[0.02] border-b border-white/[0.06]">
                           <tr>
-                            <th className="py-2.5 px-3 w-8">Status</th>
-                            <th className="py-2.5 px-3">Problem Title</th>
-                            <th className="py-2.5 px-3">Difficulty</th>
-                            <th className="py-2.5 px-3">Primary Pattern</th>
-                            <th className="py-2.5 px-3">Target Companies</th>
-                            <th className="py-2.5 px-3 text-right">Priority</th>
-                            <th className="py-2.5 px-3 text-right">Action</th>
+                            <th className="py-2.5 px-3 w-10">Done</th>
+                            <th className="py-2.5 px-3 min-w-[200px]">Problem</th>
+                            <th className="py-2.5 px-3 whitespace-nowrap">Difficulty</th>
+                            <th className="py-2.5 px-3 whitespace-nowrap">Pattern</th>
+                            <th className="py-2.5 px-3 whitespace-nowrap">Companies</th>
+                            <th className="py-2.5 px-3 text-right whitespace-nowrap">Score</th>
+                            <th className="py-2.5 px-3 text-right whitespace-nowrap">Action</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-white/[0.05]">
                           {phase.problems.map((prob) => {
                             const userProg = progress[prob.id]?.status || "todo";
                             const isNext = prob.id === nextUpId;
+                            const topCos = prob.companies.slice(0, 2);
+                            const extraCos = prob.companies.length - topCos.length;
+
                             return (
                               <tr
                                 key={prob.id}
                                 className={cn(
                                   "hover:bg-white/[0.03] transition-colors group",
-                                  isNext && "bg-violet-500/[0.04]"
+                                  isNext && "bg-violet-500/[0.05]"
                                 )}
                               >
                                 <td className="py-3 px-3">
@@ -837,7 +787,7 @@ export default function SmartPlannerPage() {
                                     onClick={() =>
                                       userProg === "solved" ? markAttempted(prob.id) : markSolved(prob.id)
                                     }
-                                    className="text-slate-500 hover:text-emerald-400 transition-colors cursor-pointer"
+                                    className="text-slate-500 hover:text-emerald-400 transition-colors cursor-pointer block"
                                     title="Toggle Status"
                                   >
                                     {userProg === "solved" ? (
@@ -850,43 +800,50 @@ export default function SmartPlannerPage() {
 
                                 <td className="py-3 px-3 font-semibold text-white group-hover:text-violet-300 transition-colors">
                                   <div className="flex items-center gap-2">
-                                    <Link href={`/dsa/questions/${prob.slug}`}>{prob.title}</Link>
+                                    <Link href={`/dsa/questions/${prob.slug}`} className="hover:underline">
+                                      {prob.title}
+                                    </Link>
                                     {isNext && (
-                                      <span className="px-1.5 py-0.5 rounded bg-violet-500/20 border border-violet-400/40 text-violet-200 text-[9px] font-bold uppercase tracking-wider">
+                                      <span className="px-1.5 py-0.5 rounded bg-violet-500/20 border border-violet-400/40 text-violet-200 text-[9px] font-bold uppercase tracking-wider shrink-0">
                                         Next
                                       </span>
                                     )}
                                   </div>
                                 </td>
 
-                                <td className="py-3 px-3">
+                                <td className="py-3 px-3 whitespace-nowrap">
                                   <DifficultyBadge difficulty={prob.difficulty} />
                                 </td>
 
-                                <td className="py-3 px-3">
-                                  <span className="text-slate-300 bg-white/[0.03] px-2 py-0.5 rounded border border-white/5 text-[11px]">
+                                <td className="py-3 px-3 whitespace-nowrap">
+                                  <span className="text-slate-300 bg-white/[0.04] px-2 py-0.5 rounded-md border border-white/10 text-[11px]">
                                     {prob.primaryPattern || "General"}
                                   </span>
                                 </td>
 
-                                <td className="py-3 px-3">
-                                  <div className="flex flex-wrap gap-1">
-                                    {prob.companies.slice(0, 3).map((c) => (
+                                <td className="py-3 px-3 whitespace-nowrap">
+                                  <div className="flex items-center gap-1">
+                                    {topCos.map((c) => (
                                       <span
                                         key={c}
-                                        className="text-[10px] text-slate-400 bg-slate-800/60 px-1.5 py-0.5 rounded"
+                                        className="text-[10px] text-slate-300 bg-slate-800/70 px-1.5 py-0.5 rounded capitalize"
                                       >
                                         {c}
                                       </span>
                                     ))}
+                                    {extraCos > 0 && (
+                                      <span className="text-[10px] text-slate-500 font-mono">
+                                        +{extraCos}
+                                      </span>
+                                    )}
                                   </div>
                                 </td>
 
-                                <td className="py-3 px-3 text-right font-mono font-bold text-violet-400">
+                                <td className="py-3 px-3 text-right font-mono font-bold text-violet-400 whitespace-nowrap">
                                   {prob.priorityScore}
                                 </td>
 
-                                <td className="py-3 px-3 text-right">
+                                <td className="py-3 px-3 text-right whitespace-nowrap">
                                   <div className="flex items-center justify-end gap-1.5">
                                     <Link href={`/dsa/questions/${prob.slug}`}>
                                       <Button size="sm" variant="outline" className="text-[11px] h-7 px-2.5">
@@ -898,7 +855,7 @@ export default function SmartPlannerPage() {
                                         href={prob.canonicalUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="p-1 text-slate-500 hover:text-white"
+                                        className="p-1 text-slate-500 hover:text-white transition-colors"
                                         title="Open on LeetCode"
                                       >
                                         <ExternalLink className="w-3.5 h-3.5" />

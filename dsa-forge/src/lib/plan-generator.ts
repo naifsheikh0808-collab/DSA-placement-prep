@@ -83,6 +83,14 @@ function classifyProblemTopic(p: Problem): { topicIndex: number; phase: 1 | 2 | 
   return { topicIndex: CURRICULUM_TOPICS.length - 1, phase: 4, topicId: "company-recency" };
 }
 
+function normalizeCompanySlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 const DIFFICULTY_RANK_MAP: Record<PlannerProfile["level"], Record<Difficulty, number>> = {
   beginner: { Easy: 0, Medium: 1, Hard: 2 },
   basics: { Easy: 0, Medium: 1, Hard: 2 },
@@ -95,10 +103,10 @@ const DIFFICULTY_RANK_MAP: Record<PlannerProfile["level"], Record<Difficulty, nu
  * Controls what fraction of a topic's budget goes to Easy / Medium / Hard.
  */
 const DIFF_WEIGHTS: Record<PlannerProfile["level"], { Easy: number; Medium: number; Hard: number }> = {
-  beginner:     { Easy: 0.45, Medium: 0.45, Hard: 0.10 },
+  beginner:     { Easy: 0.65, Medium: 0.35, Hard: 0.00 },
   basics:       { Easy: 0.30, Medium: 0.55, Hard: 0.15 },
-  intermediate: { Easy: 0.15, Medium: 0.60, Hard: 0.25 },
-  advanced:     { Easy: 0.05, Medium: 0.45, Hard: 0.50 },
+  intermediate: { Easy: 0.10, Medium: 0.60, Hard: 0.30 },
+  advanced:     { Easy: 0.00, Medium: 0.35, Hard: 0.65 },
 };
 
 type AnnotatedProblem = {
@@ -112,17 +120,6 @@ type AnnotatedProblem = {
 
 /**
  * Selects a balanced set of problems from a phase's candidate pool.
- *
- * Strategy:
- * 1. Group candidates by topicIndex (preserves curriculum order).
- * 2. For each topic, allocate a proportional budget and split it
- *    across Easy / Medium / Hard according to DIFF_WEIGHTS[level].
- * 3. Within each difficulty bucket, pick the highest-scored problems first.
- * 4. Concatenate all topic clusters in order.
- * 5. Fill any remaining slots (rounding gaps) with the globally highest-scored unused problems.
- *
- * Result: Two Pointers Easy → Two Pointers Medium → Two Pointers Hard →
- *         Sliding Window Easy → Sliding Window Medium → … (difficulty balanced per topic)
  */
 function selectBalancedProblems(
   candidates: AnnotatedProblem[],
@@ -140,8 +137,10 @@ function selectBalancedProblems(
   }
 
   const topicIds = Array.from(byTopic.keys()).sort((a, b) => a - b);
-  // Each topic gets an equal share; at least 2 problems per topic
-  const budgetPerTopic = Math.max(2, Math.ceil(phaseCount / topicIds.length));
+  // Distribute slots across topics; ensure all topics stay represented even in short sprints
+  const budgetPerTopic = phaseCount >= topicIds.length * 2
+    ? Math.max(2, Math.ceil(phaseCount / topicIds.length))
+    : Math.max(1, Math.ceil(phaseCount / topicIds.length));
 
   const result: Problem[] = [];
   const usedIds = new Set<string>();
@@ -158,25 +157,36 @@ function selectBalancedProblems(
     const medPool  = topicItems.filter(x => x.problem.difficulty === "Medium").sort((a, b) => b.score - a.score);
     const hardPool = topicItems.filter(x => x.problem.difficulty === "Hard").sort((a, b) => b.score - a.score);
 
-    // Allocate slots by weight, ensuring at least 1 for each non-empty bucket when budget allows
+    // Allocate slots by weight
     let easyN = Math.round(remaining * weights.Easy);
     let hardN = Math.round(remaining * weights.Hard);
-    let medN  = remaining - easyN - hardN;
+    let medN  = Math.max(0, remaining - easyN - hardN);
 
     // Clamp to available pool sizes
     easyN = Math.min(easyN, easyPool.length);
     hardN = Math.min(hardN, hardPool.length);
-    medN  = Math.min(Math.max(0, medN), medPool.length);
+    medN  = Math.min(medN, medPool.length);
 
-    // If a bucket was capped, redistribute leftover slots to medium (most versatile)
+    // If a bucket was capped, redistribute leftover slots cleanly
     const taken = easyN + medN + hardN;
     if (taken < remaining) {
       const extra = remaining - taken;
       const medExtra = Math.min(extra, medPool.length - medN);
       medN += medExtra;
-      // then to easy
-      const easyExtra = Math.min(remaining - easyN - medN - hardN, easyPool.length - easyN);
-      easyN += Math.max(0, easyExtra);
+      const leftAfterMed = remaining - easyN - medN - hardN;
+      if (leftAfterMed > 0) {
+        if (level === "advanced" || level === "intermediate") {
+          const hardExtra = Math.min(leftAfterMed, hardPool.length - hardN);
+          hardN += hardExtra;
+          const easyExtra = Math.min(remaining - easyN - medN - hardN, easyPool.length - easyN);
+          easyN += Math.max(0, easyExtra);
+        } else {
+          const easyExtra = Math.min(leftAfterMed, easyPool.length - easyN);
+          easyN += easyExtra;
+          const hardExtra = Math.min(remaining - easyN - medN - hardN, hardPool.length - hardN);
+          hardN += Math.max(0, hardExtra);
+        }
+      }
     }
 
     // Pick from each bucket (filter already-used ids)
@@ -195,9 +205,8 @@ function selectBalancedProblems(
     const fallback = candidates
       .filter(x => !usedIds.has(x.problem.id))
       .sort((a, b) => {
-        // For fallback, still prefer topic order then score
-        if (a.topicIndex !== b.topicIndex) return a.topicIndex - b.topicIndex;
-        return b.score - a.score;
+        if (b.score !== a.score) return b.score - a.score;
+        return a.topicIndex - b.topicIndex;
       });
     for (const item of fallback) {
       if (result.length >= phaseCount) break;
@@ -209,29 +218,61 @@ function selectBalancedProblems(
   return result;
 }
 
-function calculateRelevanceScore(p: Problem, profile: PlannerProfile, targetCo: string[]): number {
+function calculateRelevanceScore(
+  p: Problem,
+  profile: PlannerProfile,
+  targetCoSet: Set<string>
+): number {
   let score = p.priorityScore || 50;
 
-  if (targetCo.length > 0 && p.companies.some((c) => targetCo.includes(c.toLowerCase()))) {
-    score += 35; // Priority boost for company target match
+  // Target company cohort match with frequency density boost
+  if (targetCoSet.size > 0 && p.companies.length > 0) {
+    let matchCount = 0;
+    for (const c of p.companies) {
+      if (targetCoSet.has(normalizeCompanySlug(c))) {
+        matchCount++;
+      }
+    }
+    if (matchCount > 0) {
+      const densityRatio = matchCount / Math.max(1, p.companies.length);
+      score += 55 + Math.min(matchCount, 4) * 20 + Math.round(densityRatio * 45);
+    }
   }
+
+  // Recency weighting
   if (p.timeframes.includes("30d")) score += 25;
   else if (p.timeframes.includes("3m")) score += 15;
   else if (p.timeframes.includes("6m")) score += 5;
 
-  if (profile.role === "quant" && p.difficulty === "Hard") score += 20;
-  if (profile.role === "intern" && p.difficulty === "Easy") score += 15;
+  // Strong Role & Career Stage differentiation
+  if (profile.role === "quant") {
+    if (p.difficulty === "Hard") score += 65;
+    else if (p.difficulty === "Medium") score += 15;
+    else score -= 35;
+  } else if (profile.role === "sde2" || profile.stage === "working") {
+    if (p.difficulty === "Hard") score += 30;
+    else if (p.difficulty === "Medium") score += 25;
+    else score -= 20;
+  } else if (profile.role === "intern" || profile.stage === "1st_2nd") {
+    if (p.difficulty === "Easy") score += 35;
+    else if (p.difficulty === "Medium") score += 10;
+    else score -= 25;
+  } else {
+    // sde1 / campus placements
+    if (p.difficulty === "Medium") score += 20;
+    else if (p.difficulty === "Easy") score += 10;
+  }
+
+  // Skill level secondary tie-breaker
+  if (profile.level === "beginner" && p.difficulty === "Easy") score += 25;
+  if (profile.level === "advanced" && p.difficulty === "Hard") score += 30;
 
   return score;
 }
 
 /**
  * Generates a fully structured 4-phase roadmap tailored to the user's target companies,
- * timeline, and skill level. Questions within each phase and across the entire plan
- * are sequenced by:
- * 1. Chronological DSA topic progression
- * 2. Difficulty progression (Easy -> Medium -> Hard)
- * 3. Company target relevance & interview recency score
+ * timeline, and skill level.
  */
 export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPhaseGenerated[] {
   let problemsPerDay = 1.5;
@@ -241,16 +282,16 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
   else problemsPerDay = 5;
 
   const totalBudget = Math.min(
-    Math.max(Math.round(profile.durationDays * problemsPerDay * 0.7), 24),
-    90
+    Math.max(Math.round(profile.durationDays * problemsPerDay * 0.7), 16),
+    120
   );
 
-  const targetCo = (profile.targetCompanies || []).map((c) => c.toLowerCase());
+  const targetCoSet = new Set((profile.targetCompanies || []).map(normalizeCompanySlug));
   const diffOrder = DIFFICULTY_RANK_MAP[profile.level] || DIFFICULTY_RANK_MAP.basics;
 
   const annotated = TOP_PROBLEMS.map((p) => {
     const { topicIndex, phase, topicId } = classifyProblemTopic(p);
-    const score = calculateRelevanceScore(p, profile, targetCo);
+    const score = calculateRelevanceScore(p, profile, targetCoSet);
     const diffRank = diffOrder[p.difficulty] ?? 1;
 
     return {
@@ -263,19 +304,8 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     };
   });
 
-  // Target company prioritization
-  let candidatePool = annotated;
-  if (targetCo.length > 0) {
-    const matchingCo = candidatePool.filter((item) =>
-      item.problem.companies.some((c) => targetCo.includes(c.toLowerCase()))
-    );
-    if (matchingCo.length >= 20) {
-      candidatePool = [
-        ...matchingCo,
-        ...candidatePool.filter((item) => !matchingCo.includes(item)),
-      ];
-    }
-  }
+  // Sort globally by personalized relevance score before phase partitioning
+  const sortedPool = [...annotated].sort((a, b) => b.score - a.score);
 
   // Partition into phases without duplicates
   const phaseCandidates: Record<1 | 2 | 3 | 4, typeof annotated> = {
@@ -287,17 +317,17 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
 
   const usedProblemIds = new Set<string>();
 
-  for (const item of candidatePool) {
+  for (const item of sortedPool) {
     if (usedProblemIds.has(item.problem.id)) continue;
     phaseCandidates[item.phase].push(item);
     usedProblemIds.add(item.problem.id);
   }
 
-  // Budget allocation per phase
-  const p1Count = Math.max(Math.round(totalBudget * 0.25), 6);
-  const p2Count = Math.max(Math.round(totalBudget * 0.3), 7);
-  const p3Count = Math.max(Math.round(totalBudget * 0.3), 7);
-  const p4Count = Math.max(totalBudget - (p1Count + p2Count + p3Count), 5);
+  // Budget allocation per phase (responsive to totalBudget)
+  const p1Count = Math.max(Math.round(totalBudget * 0.25), 4);
+  const p2Count = Math.max(Math.round(totalBudget * 0.30), 4);
+  const p3Count = Math.max(Math.round(totalBudget * 0.30), 4);
+  const p4Count = Math.max(totalBudget - (p1Count + p2Count + p3Count), 4);
 
   // Per-phase: pick a balanced Easy+Medium+Hard mix within each topic cluster
   // (Two Pointers Easy→Medium→Hard, then Sliding Window Easy→Medium→Hard, …)

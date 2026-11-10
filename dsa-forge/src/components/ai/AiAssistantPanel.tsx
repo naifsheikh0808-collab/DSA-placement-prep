@@ -23,7 +23,8 @@ import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
 import { PrimeAiSettingsModal } from "@/components/ai/PrimeAiSettingsModal";
 import { PrimeAiMessageRenderer } from "@/components/ai/PrimeAiMessageRenderer";
 import { usePrimeAi } from "@/hooks/use-prime-ai";
-import { savePlannerProfile } from "@/lib/plan-storage";
+import { savePlannerProfile, savePlan } from "@/lib/plan-storage";
+import { generateStudyPlan } from "@/lib/plan-generator";
 import type { ProposedPlannerConfig } from "@/lib/question-search";
 
 // ── Proposed Plan Card ────────────────────────────────────────────────────────
@@ -178,10 +179,17 @@ export function AiAssistantPanel({ docked = false, onClose, onOpen }: AiAssistan
           dailyHours: plan.dailyHours,
           targetCompanies: plan.targetCompanies ?? [],
           companyPreset: "custom",
-          stage: "Placement Prep" as const,
+          stage: "3rd_4th" as const,
           createdAt: new Date().toISOString(),
         };
         savePlannerProfile(newProfile as any);
+        try {
+          const studyPlan = generateStudyPlan(newProfile as any);
+          studyPlan.userId = "local";
+          savePlan(studyPlan);
+        } catch {
+          // ignore if plan build fails
+        }
 
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, planApplied: true } : m))
