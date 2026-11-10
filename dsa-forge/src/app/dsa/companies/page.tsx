@@ -8,13 +8,12 @@ import { formatCompanyName } from "@/lib/market-stats";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const MAANG  = new Set(["meta", "amazon", "apple", "netflix", "google", "facebook"]);
-const MANGOS = new Set(["meta", "amazon", "netflix", "google", "openai", "oracle", "salesforce"]);
+const MANGOS = new Set(["meta", "amazon", "netflix", "google", "openai", "oracle", "salesforce", "facebook"]);
 
 // Tier 1: FAANG/MAANG + elite product MNCs + top Indian unicorns + HFTs/Quant funds
 const TIER1 = new Set([
   // FAANG/MAANG core
-  "google", "amazon", "microsoft", "meta", "apple", "netflix",
+  "google", "amazon", "microsoft", "meta", "apple", "netflix", "facebook", "oracle",
   // Elite Global Tech
   "nvidia", "uber", "linkedin", "salesforce", "adobe", "airbnb", "atlassian",
   "stripe", "databricks", "figma", "snowflake", "coinbase", "palantir",
@@ -212,7 +211,8 @@ type SubCategory = { label: string; set: Set<string> | "rest" | null };
 const TIER_SUBCATEGORIES: Record<string, SubCategory[]> = {
   "TIER 1": [
     { label: "All",               set: null },
-    { label: "MAANG",             set: T1_FAANG_MAANG },
+    { label: "MAANG/FAANG",       set: T1_FAANG_MAANG },
+    { label: "MANGOS",            set: MANGOS },
     { label: "Elite Global Tech", set: T1_ELITE_GLOBAL },
     { label: "HFT / Quant",       set: T1_HFT_QUANT },
     { label: "Indian Unicorns",   set: T1_INDIAN_UNICORNS },
@@ -234,12 +234,12 @@ const TIER_SUBCATEGORIES: Record<string, SubCategory[]> = {
   ],
 };
 
-type TierFilter = "ALL" | "MAANG" | "MANGOS" | "TIER 1" | "TIER 2" | "TIER 3";
+type TierFilter = "ALL" | "TIER 1" | "TIER 2" | "TIER 3";
 
 export default function CompaniesPage() {
   const [search,       setSearch]       = useState("");
-  const [selectedTier, setSelectedTier] = useState<TierFilter>("MAANG");
-  const [selectedCat,  setSelectedCat]  = useState<string>("All");
+  const [selectedTier, setSelectedTier] = useState<TierFilter>("TIER 1");
+  const [selectedCat,  setSelectedCat]  = useState<string>("MAANG/FAANG");
   const [visibleCount, setVisibleCount] = useState<number>(15);
 
   const allCompanies = getAllCompanies();
@@ -256,9 +256,7 @@ export default function CompaniesPage() {
 
     // Top-level tier filter
     let passesTier = true;
-    if      (selectedTier === "MAANG")  passesTier = MAANG.has(norm);
-    else if (selectedTier === "MANGOS") passesTier = MANGOS.has(norm);
-    else if (selectedTier === "TIER 1") passesTier = TIER1.has(norm);
+    if      (selectedTier === "TIER 1") passesTier = TIER1.has(norm);
     else if (selectedTier === "TIER 2") passesTier = TIER2.has(norm);
     else if (selectedTier === "TIER 3") passesTier = !TIER1.has(norm) && !TIER2.has(norm);
     if (!passesTier) return false;
@@ -286,7 +284,7 @@ export default function CompaniesPage() {
     setVisibleCount((prev) => prev + 15);
   };
 
-  const tiers: TierFilter[] = ["ALL", "MAANG", "MANGOS", "TIER 1", "TIER 2", "TIER 3"];
+  const tiers: TierFilter[] = ["ALL", "TIER 1", "TIER 2", "TIER 3"];
   const subCategories = TIER_SUBCATEGORIES[selectedTier] ?? null;
 
   return (
@@ -335,7 +333,7 @@ export default function CompaniesPage() {
                 key={tier}
                 onClick={() => {
                   setSelectedTier(tier);
-                  setSelectedCat("All");
+                  setSelectedCat(tier === "TIER 1" ? "MAANG/FAANG" : "All");
                   setVisibleCount(15);
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -367,7 +365,7 @@ export default function CompaniesPage() {
                   }}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-violet-500/20 text-violet-300 border border-violet-500/40 shadow-sm shadow-violet-500/10"
+                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold border border-violet-400/50 shadow-md shadow-violet-600/30 ring-1 ring-violet-400/30 scale-[1.02]"
                       : "bg-white/[0.03] text-slate-400 hover:bg-white/[0.07] hover:text-slate-200 border border-white/[0.06]"
                   }`}
                 >
