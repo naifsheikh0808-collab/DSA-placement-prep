@@ -365,7 +365,7 @@ export default function CompaniesPage() {
                   }}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold border border-violet-400/50 shadow-md shadow-violet-600/30 ring-1 ring-violet-400/30 scale-[1.02]"
+                      ? "bg-violet-500/25 text-violet-100 font-semibold border border-violet-400/50 shadow-sm shadow-violet-500/20"
                       : "bg-white/[0.03] text-slate-400 hover:bg-white/[0.07] hover:text-slate-200 border border-white/[0.06]"
                   }`}
                 >
