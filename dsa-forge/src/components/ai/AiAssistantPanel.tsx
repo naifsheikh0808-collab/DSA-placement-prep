@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import {
+  X,
   Send,
   Sparkles,
   Trash2,
@@ -111,8 +112,17 @@ const MODEL_INFO = {
   },
 };
 
+interface AiAssistantPanelProps {
+  /** When true, renders the full Study Coach panel (docked or in a drawer). */
+  docked?: boolean;
+  /** Called when the user closes the docked panel. */
+  onClose?: () => void;
+  /** Called when the floating button is clicked to open. */
+  onOpen?: () => void;
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
-export function AiAssistantPanel() {
+export function AiAssistantPanel({ docked = false, onClose, onOpen }: AiAssistantPanelProps = {}) {
   const { user, isConfigured, signInWithGoogle } = useAuth();
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
@@ -191,6 +201,26 @@ export function AiAssistantPanel() {
     ? "💎 BYOK Unlimited"
     : `⚡ Free: ${remThisModel !== undefined && remThisModel !== null ? remThisModel : 10}/10 left`;
 
+  // ── Floating button (shown when panel is closed) ──────────────────────────
+  if (!docked) {
+    return (
+      <button
+        onClick={onOpen}
+        title="Prime AI Study Coach"
+        aria-label="Open Prime AI Study Coach"
+        className="fixed bottom-7 right-7 z-40 w-14 h-14 rounded-full bg-gradient-to-b from-violet-500 via-violet-600 to-indigo-800 border-t border-l border-r-2 border-b-[5px] border-t-violet-300/60 border-x-violet-500/50 border-b-violet-950 shadow-[0_10px_20px_-3px_rgba(0,0,0,0.6),0_6px_0_#3b0764,0_0_25px_rgba(139,92,246,0.45),inset_0_2px_4px_rgba(255,255,255,0.4),inset_0_-2px_4px_rgba(0,0,0,0.5)] flex items-center justify-center text-white hover:scale-105 hover:shadow-[0_14px_28px_-3px_rgba(0,0,0,0.7),0_8px_0_#3b0764,0_0_35px_rgba(139,92,246,0.6)] hover:brightness-110 active:translate-y-1.5 active:shadow-[0_2px_0_#3b0764,0_4px_12px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.6)] transition-all duration-200 ease-out cursor-pointer group p-0.5"
+      >
+        {/* Glowing online pulse indicator */}
+        <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#090a0f] shadow-sm animate-pulse z-20 pointer-events-none" />
+        <img
+          src="/ai-logo.png"
+          alt="Prime AI Study Coach"
+          className="w-[94%] h-[94%] object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+        />
+      </button>
+    );
+  }
+
   return (
     <>
       <PrimeAiSettingsModal
@@ -202,38 +232,48 @@ export function AiAssistantPanel() {
         remainingGroq={remainingGroq}
       />
 
-      {/* Sleek, Lean Container */}
-      <div className="flex flex-col rounded-3xl bg-gradient-to-b from-[#131024] via-[#0e0c1a] to-[#090812] border border-violet-500/25 shadow-2xl shadow-violet-950/40 overflow-hidden h-[500px]">
-        {/* ── Compact Top Bar ── */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <PrimeAiLogo size="sm" />
+      {/* Sleek Docked / Drawer Container */}
+      <aside className="flex flex-col w-full h-full bg-[#0e0c1a] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl shadow-violet-900/30">
+        {/* ── Header ── */}
+        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/[0.07] bg-gradient-to-r from-violet-950/40 via-[#120f26] to-indigo-950/30 flex-shrink-0">
+          <PrimeAiLogo size="xs" />
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-white font-extrabold text-sm tracking-tight">Prime AI</span>
               <span className="text-white/20 text-xs">|</span>
-              <span className="text-violet-300 text-xs font-semibold">Study Coach</span>
+              <span className="text-violet-300 text-xs font-medium truncate">Study Coach</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            {/* Settings Gear Button */}
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+              title="Prime AI Settings & API Keys"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </button>
             {/* Clear Chat Button */}
             {messages.length > 0 && (
               <button
                 onClick={clearChat}
-                className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
                 title="Clear conversation"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             )}
-            {/* Settings Gear Button */}
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white transition-colors"
-              title="Prime AI Settings & API Keys"
-            >
-              <Settings className="w-3.5 h-3.5" />
-            </button>
+            {/* Close Panel Button */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                title="Close Study Coach"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -258,41 +298,38 @@ export function AiAssistantPanel() {
               </Button>
             </div>
           ) : messages.length === 0 ? (
-            /* Sleek Empty State with Compact Quick Prompts */
-            <div className="flex-1 overflow-y-auto p-5 flex flex-col justify-center">
-              <div className="max-w-xl mx-auto w-full space-y-4">
-                <div className="text-center space-y-1">
-                  <h3 className="text-white font-extrabold text-base tracking-tight flex items-center justify-center gap-2">
-                    <span>What would you like to prepare today?</span>
-                  </h3>
-                  <p className="text-white/40 text-xs">
-                    Context-aware recommendations using your target companies and tracker history.
-                  </p>
-                </div>
+            /* Sleek Empty State with Planner Quick Prompts */
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col justify-center gap-4">
+              <div className="text-center space-y-1">
+                <PrimeAiLogo size="md" className="mx-auto mb-2.5" />
+                <h3 className="text-white font-bold text-sm tracking-tight">
+                  Prime AI Study Coach
+                </h3>
+                <p className="text-white/40 text-xs max-w-[250px] mx-auto leading-relaxed">
+                  Context-aware guidance using your target companies and solved history.
+                </p>
+              </div>
 
-                {/* 2x2 Clean Grid of Quick Prompts */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                  {QUICK_PROMPTS.map((prompt) => {
-                    const Icon = prompt.icon;
-                    return (
-                      <button
-                        key={prompt.label}
-                        onClick={() => sendMessage(prompt.label)}
-                        disabled={loading}
-                        className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] hover:bg-violet-500/10 border border-white/[0.06] hover:border-violet-500/30 text-left transition-all group"
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-violet-500/15 group-hover:bg-violet-500/25 flex items-center justify-center flex-shrink-0 transition-colors">
-                          <Icon className="w-4 h-4 text-violet-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white/80 group-hover:text-white text-xs font-medium leading-snug line-clamp-2">
-                            {prompt.label}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Clean Stack of Quick Prompts */}
+              <div className="w-full space-y-2">
+                {QUICK_PROMPTS.map((prompt) => {
+                  const Icon = prompt.icon;
+                  return (
+                    <button
+                      key={prompt.label}
+                      onClick={() => sendMessage(prompt.label)}
+                      disabled={loading}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-violet-500/15 border border-white/[0.07] hover:border-violet-500/35 text-left transition-all group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-violet-500/15 group-hover:bg-violet-500/25 flex items-center justify-center flex-shrink-0 transition-colors">
+                        <Icon className="w-3.5 h-3.5 text-violet-400" />
+                      </div>
+                      <span className="text-white/75 group-hover:text-white text-xs font-medium leading-snug">
+                        {prompt.label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : (
@@ -496,31 +533,20 @@ export function AiAssistantPanel() {
                   </button>
                 </div>
 
-                {/* Right: Settings Button & Send Button */}
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setIsSettingsOpen(true)}
-                    type="button"
-                    title="Prime AI Settings & API Keys"
-                    className="p-1.5 rounded-xl hover:bg-white/10 text-white/40 hover:text-white transition-colors"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={() => sendMessage()}
-                    disabled={!input.trim() || loading}
-                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-violet-900/30 transition-all"
-                  >
-                    <span>Send</span>
-                    <Send className="w-3 h-3" />
-                  </button>
-                </div>
+                {/* Right: Send Button */}
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={!input.trim() || loading}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-violet-900/30 transition-all shrink-0"
+                >
+                  <span>Send</span>
+                  <Send className="w-3 h-3" />
+                </button>
               </div>
             </div>
           </div>
         )}
-      </div>
+      </aside>
     </>
   );
 }

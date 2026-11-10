@@ -7,49 +7,32 @@ import {
   Compass,
   Sparkles,
   Zap,
-  Target,
-  Calendar,
-  Clock,
   Briefcase,
   GraduationCap,
   Layers,
-  ChevronRight,
+  ChevronDown,
   CheckCircle2,
   Circle,
-  Play,
-  RotateCcw,
   SlidersHorizontal,
   AlertTriangle,
   ExternalLink,
-  BookOpen,
   ArrowRight,
-  Flame,
   Award,
-  Building2,
-  Filter,
 } from "lucide-react";
-import { TOP_PROBLEMS, getAllCompanies, getAllPatterns } from "@/lib/db";
 import { DifficultyBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useProgressStore } from "@/hooks/use-progress";
-import type { Difficulty, Problem, Timeframe } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
   loadPlan,
   savePlan,
-  updateTaskStatus,
-  rescheduleTask,
-  deletePlan,
   loadPlannerProfile,
   savePlannerProfile,
-  deletePlannerProfile,
 } from "@/lib/plan-storage";
 import {
   generateStudyPlan,
-  validateStudyPlan,
   generatePersonalizedRoadmap,
-  RoadmapPhaseGenerated,
 } from "@/lib/plan-generator";
-import type { StudyPlan, StudyTask } from "@/lib/types";
 
 /* ─── Profile Types ─────────────────────────────────────────── */
 export type RoleTarget = "intern" | "sde1" | "sde2" | "quant";
@@ -105,16 +88,27 @@ const COMPANY_PRESETS: Record<string, { label: string; desc: string; companies: 
   },
 };
 
+const ROLE_LABELS: Record<RoleTarget, string> = {
+  intern: "Summer Intern",
+  sde1: "SDE-1",
+  sde2: "SDE-2",
+  quant: "Quant / HFT",
+};
+
+const LEVEL_LABELS: Record<SkillLevel, string> = {
+  beginner: "Beginner",
+  basics: "Basics",
+  intermediate: "Intermediate",
+  advanced: "Advanced",
+};
+
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function SmartPlannerPage() {
   const [profile, setProfile] = useState<PlannerProfile | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
-  const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
-  const [planPreview, setPlanPreview] = useState<StudyPlan | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [planLoading, setPlanLoading] = useState(false);
-  const [planError, setPlanError] = useState<string | null>(null);
+  const [isAiOpen, setIsAiOpen] = useState(false);
+  const [expandedPhases, setExpandedPhases] = useState<Record<number, boolean>>({});
 
   // Form states for questionnaire
   const [formRole, setFormRole] = useState<RoleTarget>("sde1");
@@ -124,9 +118,12 @@ export default function SmartPlannerPage() {
   const [formCustomCompanies, setFormCustomCompanies] = useState<string[]>([]);
   const [formDuration, setFormDuration] = useState<DurationOption>(30);
   const [formDailyHours, setFormDailyHours] = useState<DailyHourOption>(2);
-  const [stepIndex, setStepIndex] = useState<number>(1);
 
-  const { progress, markSolved, markAttempted, markRevise } = useProgressStore();
+  const { progress, markSolved, markAttempted } = useProgressStore();
+
+  const togglePhase = (phaseNumber: number) => {
+    setExpandedPhases((prev) => ({ ...prev, [phaseNumber]: !prev[phaseNumber] }));
+  };
 
   // Load profile from storage & listen for AI Coach applied plans or auth changes
   useEffect(() => {
@@ -149,12 +146,10 @@ export default function SmartPlannerPage() {
           setProfile(null);
           setIsEditing(true);
         }
-      } catch (e) {
+      } catch {
         setProfile(null);
         setIsEditing(true);
       }
-      const savedPlan = loadPlan();
-      setStudyPlan(savedPlan);
     };
 
     loadSaved();
@@ -166,88 +161,14 @@ export default function SmartPlannerPage() {
     };
   }, []);
 
-  // Smooth scroll to AI coach if navigated with #ai-coach
+  // Auto-open floating Study Coach drawer when navigated via /dsa/planner#ai-coach
   useEffect(() => {
     if (mounted && typeof window !== "undefined" && window.location.hash === "#ai-coach") {
-      const el = document.getElementById("ai-coach");
-      if (el) {
-        setTimeout(() => {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 150);
-      }
+      setIsAiOpen(true);
     }
-  }, [mounted, profile]);
+  }, [mounted]);
 
-  // Generate plan preview
-  const handleGeneratePlan = () => {
-    if (!profile) return;
-    setPlanLoading(true);
-    setPlanError(null);
-    try {
-      const plan = generateStudyPlan(profile, progress);
-      plan.userId = "local"; // Will be set by auth context
-      const validation = validateStudyPlan(plan);
-      if (!validation.valid) {
-        setPlanError(validation.errors.join("; "));
-        return;
-      }
-      setPlanPreview(plan);
-      setShowPreview(true);
-    } catch (e) {
-      setPlanError("Failed to generate plan. Please try again.");
-    } finally {
-      setPlanLoading(false);
-    }
-  };
-
-  // Confirm and save plan
-  const handleConfirmPlan = () => {
-    if (!planPreview) return;
-    savePlan(planPreview);
-    setStudyPlan(planPreview);
-    setPlanPreview(null);
-    setShowPreview(false);
-  };
-
-  // Cancel plan preview
-  const handleCancelPreview = () => {
-    setPlanPreview(null);
-    setShowPreview(false);
-  };
-
-  // Task actions
-  const handleTaskComplete = (taskId: string) => {
-    if (!studyPlan) return;
-    const updated = updateTaskStatus(studyPlan, taskId, "completed");
-    setStudyPlan(updated);
-  };
-
-  const handleTaskSkip = (taskId: string) => {
-    if (!studyPlan) return;
-    const updated = updateTaskStatus(studyPlan, taskId, "skipped");
-    setStudyPlan(updated);
-  };
-
-  const handleTaskRevise = (taskId: string) => {
-    if (!studyPlan) return;
-    const updated = updateTaskStatus(studyPlan, taskId, "revision_needed");
-    setStudyPlan(updated);
-  };
-
-  const handleTaskReschedule = (taskId: string, newDay: number) => {
-    if (!studyPlan) return;
-    const updated = rescheduleTask(studyPlan, taskId, newDay);
-    setStudyPlan(updated);
-  };
-
-  // Get today's tasks
-  const todaysPlan = useMemo(() => {
-    if (!studyPlan) return null;
-    const today = new Date().toISOString().split("T")[0];
-    return studyPlan.dailyPlans.find((d) => d.date === today) || studyPlan.dailyPlans[0];
-  }, [studyPlan]);
-
-  // Save profile and generate roadmap
+  // Save profile, generate roadmap & sync background StudyPlan for My Progress
   const handleSaveProfile = () => {
     const selectedCompanies =
       formCompanyPreset === "custom"
@@ -267,14 +188,14 @@ export default function SmartPlannerPage() {
 
     setProfile(newProfile);
     setIsEditing(false);
+    setExpandedPhases({});
     try {
       savePlannerProfile(newProfile);
-      // ── Sync Study Plan & Notify all tabs & Active Roadmap ──
+      // Sync StudyPlan silently for ActiveRoadmapCard in My Progress
       try {
         const newPlan = generateStudyPlan(newProfile, progress);
         newPlan.userId = "local";
         savePlan(newPlan);
-        setStudyPlan(newPlan);
       } catch {
         const existing = loadPlan();
         if (existing) {
@@ -284,12 +205,12 @@ export default function SmartPlannerPage() {
           window.dispatchEvent(new Event("leetprime:plan-updated"));
         }
       }
-    } catch (e) {
+    } catch {
       // storage quota or disabled
     }
   };
 
-  // Generate phases
+  // Generate phases (chronological 1 -> 4, all start collapsed for instant overview)
   const generatedPhases = useMemo(() => {
     if (!profile) return [];
     return generatePersonalizedRoadmap(profile);
@@ -309,18 +230,11 @@ export default function SmartPlannerPage() {
     ? Math.round((solvedCount / allRoadmapProblems.length) * 100)
     : 0;
 
-  // "Today's Smart Practice Focus" (top 2-3 unsolved problems from the earliest incomplete phase)
-  const todaysFocusProblems = useMemo(() => {
-    const unsolved = allRoadmapProblems.filter((p) => progress[p.id]?.status !== "solved");
-    return unsolved.slice(0, 3);
-  }, [allRoadmapProblems, progress]);
-
   /* ─────────────────────────────────────────────────────────────
      RENDER: Questionnaire / Profile Wizard
   ────────────────────────────────────────────────────────────── */
-  if (!mounted || isEditing || !profile) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-8 pb-20">
+  const wizardView = (
+    <div className="flex-1 min-w-0 max-w-4xl mx-auto space-y-8 pb-24">
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
@@ -337,21 +251,23 @@ export default function SmartPlannerPage() {
 
         {/* Wizard Card */}
         <div className="p-6 sm:p-8 rounded-3xl bg-[#10131f]/80 border border-white/10 backdrop-blur-xl shadow-2xl space-y-8">
-          {/* ── Caution Notice Banner When Adjusting Preferences ── */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/35 flex items-start gap-3.5 shadow-lg shadow-amber-950/20">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <div className="text-xs sm:text-sm font-bold text-amber-200 flex items-center gap-2">
-                <span>Caution: Updating Preferences Will Recalibrate Your Roadmap</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold uppercase tracking-wider">
-                  Notice
-                </span>
+          {/* ── Caution Notice Banner When Adjusting Existing Preferences ── */}
+          {profile && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/35 flex items-start gap-3.5 shadow-lg shadow-amber-950/20">
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <div className="text-xs sm:text-sm font-bold text-amber-200 flex items-center gap-2">
+                  <span>Caution: Updating Preferences Will Recalibrate Your Roadmap</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold uppercase tracking-wider">
+                    Notice
+                  </span>
+                </div>
+                <p className="text-xs text-amber-300/80 leading-relaxed">
+                  Modifying your target role, timeline, or target companies will generate a new preparation roadmap and update or reset your <strong>Active Placement Roadmap</strong> in &quot;My Progress&quot; to match your new target goals.
+                </p>
               </div>
-              <p className="text-xs text-amber-300/80 leading-relaxed">
-                Modifying your target role, timeline, or target companies will generate a new preparation roadmap and update or reset your <strong>Active Placement Roadmap</strong> in &quot;My Progress&quot; to match your new target goals.
-              </p>
             </div>
-          </div>
+          )}
 
           {/* Step 1: Target Role & Year */}
           <div className="space-y-4">
@@ -602,428 +518,249 @@ export default function SmartPlannerPage() {
           </div>
         </div>
       </div>
-    );
-  }
+  );
 
   /* ─────────────────────────────────────────────────────────────
-     RENDER: Active Roadmap & Smart Practice Mission Control
+     RENDER: Unified Layout (Clean Plan HUD + Collapsible Phases + Floating Study Coach)
   ────────────────────────────────────────────────────────────── */
-  return (
-    <div className="space-y-6 sm:space-y-7 max-w-7xl mx-auto pb-20">
-      {/* ── Sleek & Lean Mission Control HUD Bar ─────────────────── */}
-      <div className="p-4 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-[#14172b]/95 via-[#0f1222] to-[#0a0c16] border border-violet-500/30 shadow-lg shadow-violet-950/20 backdrop-blur-xl relative overflow-hidden">
+  const mainContent = (!mounted || isEditing || !profile) ? wizardView : (
+    <div className="flex-1 min-w-0 max-w-7xl mx-auto space-y-5 sm:space-y-6 pb-24">
+      {/* ── Clean, Uncluttered Top Plan Header Card ────────────── */}
+      <div className="p-4 sm:px-6 sm:py-4 rounded-2xl bg-gradient-to-r from-[#14172b]/95 via-[#0f1222] to-[#0a0c16] border border-violet-500/30 shadow-lg shadow-violet-950/20 backdrop-blur-xl relative overflow-hidden">
         <div className="absolute -top-12 -right-12 w-48 h-48 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
-          {/* Left: Active Mission HUD Pill & Target Role */}
-          <div className="flex flex-wrap items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-500/40 flex items-center justify-center shrink-0 shadow-inner">
-              <Compass className="w-4 h-4 text-amber-400" />
+        {/* Desktop Layout: Scannable Single Row */}
+        <div className="hidden sm:flex items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/35 flex items-center justify-center shrink-0">
+              <Compass className="w-5 h-5 text-amber-400" />
             </div>
-
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-white font-extrabold text-sm sm:text-base tracking-tight">
-                  Mission Control: <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-200 to-indigo-200">{profile.role.toUpperCase().replace("_", "-")} Roadmap</span>
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-bold uppercase tracking-wider">
-                  {profile.durationDays}D Plan · {profile.dailyHours}h/day
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold capitalize">
-                  {profile.level} Level
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-white font-extrabold text-base md:text-lg tracking-tight">
+                  {ROLE_LABELS[profile.role] || "SDE-1"} Roadmap
+                </h1>
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
+                  Active Plan
                 </span>
               </div>
-              <p className="text-xs text-slate-400 truncate max-w-xl mt-0.5">
-                Targeting <strong className="text-slate-200 font-semibold">{COMPANY_PRESETS[profile.companyPreset]?.label || "Top Tech Companies"}</strong> · Sequenced by foundation & company recency
-              </p>
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-400 mt-0.5">
+                <span className="text-slate-200 font-medium">
+                  {COMPANY_PRESETS[profile.companyPreset]?.label || "Top Tech Companies"}
+                </span>
+                <span className="text-white/20">·</span>
+                <span>{profile.durationDays} Days · {profile.dailyHours}h/day</span>
+                <span className="text-white/20">·</span>
+                <span className="text-amber-300/90 font-medium">{LEVEL_LABELS[profile.level]}</span>
+              </div>
             </div>
           </div>
 
-          {/* Right: Live Interactive Stats & Quick Edit Button */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-white/5">
-            {/* Compact Progress Badge with Bar */}
-            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10">
-              <div className="text-right">
-                <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span className="text-emerald-400 font-extrabold">{completionPct}%</span>
-                  <span className="text-[10px] text-slate-400 font-normal">({solvedCount}/{allRoadmapProblems.length} Qs)</span>
-                </div>
-                <div className="w-24 bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-                  <div
-                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${completionPct}%` }}
-                  />
-                </div>
+          <div className="flex items-center gap-3.5 shrink-0">
+            <div className="px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/10 min-w-[140px]">
+              <div className="flex items-center justify-between gap-3 text-xs font-bold">
+                <span className="text-emerald-400">{completionPct}%</span>
+                <span className="text-[11px] text-slate-400 font-normal">
+                  {solvedCount}/{allRoadmapProblems.length} Qs
+                </span>
+              </div>
+              <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1.5">
+                <div
+                  className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${completionPct}%` }}
+                />
               </div>
             </div>
 
-            {/* Adjust Preferences Button */}
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              type="button"
               onClick={() => setIsEditing(true)}
-              className="text-xs font-semibold border-violet-500/30 hover:border-violet-500/60 bg-violet-600/10 hover:bg-violet-600/20 text-violet-200 hover:text-white px-3 py-1.5 h-8 rounded-xl shadow-sm transition-all cursor-pointer active:scale-95"
+              className="px-4 py-2.5 rounded-xl bg-[#1d173d] hover:bg-[#292154] border border-violet-400/50 hover:border-violet-300/70 text-white font-bold text-xs shadow-md shadow-violet-950/40 flex items-center gap-2 transition-all cursor-pointer active:scale-95 shrink-0"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5 text-violet-400" />
-              Adjust Preferences
-            </Button>
+              <SlidersHorizontal className="w-3.5 h-3.5 text-violet-300" />
+              <span>Change Plan</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Dedicated Mobile Layout: Sleek, 3 Clean Rows, Zero Clutter */}
+        <div className="flex flex-col sm:hidden gap-3 relative z-10">
+          {/* Row 1: Role Title + High-Contrast Change Plan Button */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-violet-600/20 border border-violet-500/35 flex items-center justify-center shrink-0">
+                <Compass className="w-4 h-4 text-amber-400" />
+              </div>
+              <h1 className="text-white font-extrabold text-base tracking-tight truncate">
+                {ROLE_LABELS[profile.role] || "SDE-1"} Roadmap
+              </h1>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="px-3 py-1.5 rounded-xl bg-violet-600/90 hover:bg-violet-500 border border-violet-400/40 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Change Plan</span>
+            </button>
+          </div>
+
+          {/* Row 2: Scannable 1-Line Summary Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+            <span className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/10 font-medium text-white">
+              {COMPANY_PRESETS[profile.companyPreset]?.label || "Top Tech"}
+            </span>
+            <span className="px-2 py-0.5 rounded-md bg-violet-500/15 border border-violet-500/25 text-violet-300 font-semibold">
+              {profile.durationDays}D · {profile.dailyHours}h/d
+            </span>
+            <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/25 text-amber-300 font-semibold">
+              {LEVEL_LABELS[profile.level]}
+            </span>
+          </div>
+
+          {/* Row 3: Full-Width Progress Bar */}
+          <div className="pt-2 border-t border-white/5 space-y-1.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-emerald-400">{completionPct}% Completed</span>
+              <span className="text-slate-400 font-mono">
+                {solvedCount} / {allRoadmapProblems.length} Qs
+              </span>
+            </div>
+            <div className="w-full bg-slate-800/90 h-1.5 rounded-full overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+                style={{ width: `${completionPct}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── Prime AI Study Coach (Directly Visible) ────────────── */}
-      <div id="ai-coach" className="space-y-3 scroll-mt-6">
+      {/* ── Collapsible 4-Phase Study Roadmap ────────────────────── */}
+      <div className="space-y-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-400 uppercase tracking-wider mb-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Multi-Model Adaptive Strategist</span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-            Prime AI Study Coach
+          <h2 className="text-lg sm:text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <Layers className="w-5 h-5 text-violet-400 shrink-0" />
+            <span>Your Study Roadmap</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Adaptive multi-model mentor powered by Gemini & Groq for roadmap tuning, weak patterns & company prep.
-          </p>
-        </div>
-        <AiAssistantPanel />
-      </div>
-
-      {/* ── Today's Smart Practice Focus (UPGRADED SMART PRACTICE) ──── */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-violet-950/40 via-[#101322] to-[#0c0e17] border border-violet-500/30 backdrop-blur-md space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
-              <Flame className="w-4 h-4 fill-amber-400 text-amber-400" />
-              <span>Today's Smart Practice Focus</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-              Highest-Signal Questions for Today
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Dynamically selected to push your roadmap forward based on your target companies and recency trends.
-            </p>
-          </div>
-
-          <span className="text-xs px-3 py-1 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30 font-semibold font-mono">
-            {todaysFocusProblems.length} Target Tasks
-          </span>
-        </div>
-
-        {todaysFocusProblems.length === 0 ? (
-          <div className="py-12 text-center rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-            <Award className="w-10 h-10 text-emerald-400 mx-auto" />
-            <h3 className="text-lg font-bold text-white">All Current Tasks Completed!</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              You've cleared all recommended problems in your roadmap. Feel free to revise attempted problems or adjust your schedule.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {todaysFocusProblems.map((prob, idx) => {
-              const userProg = progress[prob.id]?.status || "todo";
-              const is30d = prob.timeframes.includes("30d");
-
-              return (
-                <div
-                  key={prob.id}
-                  className="p-5 rounded-2xl bg-[#141829]/90 border border-violet-500/25 hover:border-violet-500/50 transition-all flex flex-col justify-between space-y-4 group"
-                >
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <DifficultyBadge difficulty={prob.difficulty} />
-                      {is30d && (
-                        <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-bold border border-rose-500/30 flex items-center gap-1">
-                          <Flame className="w-3 h-3 fill-rose-400" /> 30d Hot
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 className="font-bold text-base text-white group-hover:text-violet-300 transition-colors">
-                      <Link href={`/dsa/questions/${prob.slug}`}>{prob.title}</Link>
-                    </h3>
-
-                    <div className="flex flex-wrap items-center gap-1 text-[11px] text-slate-400">
-                      <span className="text-slate-300 font-medium bg-white/[0.04] px-2 py-0.5 rounded border border-white/5">
-                        {prob.primaryPattern || "General"}
-                      </span>
-                    </div>
-
-                    <div className="text-[11px] text-slate-400 line-clamp-1">
-                      Companies: <span className="text-slate-300">{prob.companies.slice(0, 3).join(", ")}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions & Status */}
-                  <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => markSolved(prob.id)}
-                        className={`p-2 rounded-lg text-xs font-semibold border transition-all ${
-                          userProg === "solved"
-                            ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/25"
-                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-emerald-300 hover:border-emerald-500/40"
-                        }`}
-                        title="Mark as Solved"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => markRevise(prob.id)}
-                        className={`p-2 rounded-lg text-xs font-semibold border transition-all ${
-                          userProg === "revise"
-                            ? "bg-amber-500 text-white border-amber-400"
-                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-amber-300"
-                        }`}
-                        title="Flag for Revision"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <Link href={`/dsa/questions/${prob.slug}`}>
-                        <Button size="sm" className="bg-violet-600 hover:bg-violet-500 text-white text-xs px-3">
-                          Solve <Play className="w-3 h-3 ml-1 fill-current" />
-                        </Button>
-                      </Link>
-                      {prob.canonicalUrl && (
-                        <a
-                          href={prob.canonicalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 text-slate-400 hover:text-white transition-colors"
-                          title="Open LeetCode"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* ── Adaptive Study Plan Tasks ─────────────────────────────── */}
-      {studyPlan && (
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#10131f]/80 border border-white/10 backdrop-blur-xl space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-extrabold text-white tracking-tight">Today's Adaptive Tasks</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {studyPlan.completedTasks}/{studyPlan.totalTasks} completed
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleGeneratePlan} disabled={planLoading}>
-                {planLoading ? "Generating..." : "Regenerate Plan"}
-              </Button>
-            </div>
-          </div>
-
-          {planError && (
-            <div className="p-3 rounded-xl bg-rose-900/20 border border-rose-500/30 text-rose-300 text-xs">
-              {planError}
-            </div>
-          )}
-
-          {todaysPlan && todaysPlan.tasks.length > 0 ? (
-            <div className="space-y-3">
-              {todaysPlan.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`p-4 rounded-2xl border transition-all ${
-                    task.status === "completed"
-                      ? "bg-emerald-950/20 border-emerald-500/30"
-                      : task.status === "skipped"
-                      ? "bg-slate-800/30 border-slate-600/30 opacity-60"
-                      : task.status === "revision_needed"
-                      ? "bg-amber-950/20 border-amber-500/30"
-                      : "bg-white/[0.02] border-white/10"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                          task.type === "solving" ? "bg-violet-500/20 text-violet-300" :
-                          task.type === "revision" ? "bg-amber-500/20 text-amber-300" :
-                          task.type === "mock" ? "bg-rose-500/20 text-rose-300" :
-                          "bg-cyan-500/20 text-cyan-300"
-                        }`}>
-                          {task.type}
-                        </span>
-                        <span className="text-xs text-slate-400">{task.estimatedMinutes}min</span>
-                      </div>
-                      <h3 className="text-sm font-bold text-white">{task.title}</h3>
-                      <p className="text-xs text-slate-400">{task.description}</p>
-                      {task.problemUrl && (
-                        <a href={task.problemUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-violet-400 hover:underline">
-                          Open Problem →
-                        </a>
-                      )}
-                    </div>
-                    <div className="flex gap-1.5 shrink-0">
-                      <button
-                        onClick={() => handleTaskComplete(task.id)}
-                        className={`p-2 rounded-lg text-xs border transition-all ${
-                          task.status === "completed"
-                            ? "bg-emerald-500 text-white border-emerald-400"
-                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-emerald-300"
-                        }`}
-                        title="Complete"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleTaskSkip(task.id)}
-                        className={`p-2 rounded-lg text-xs border transition-all ${
-                          task.status === "skipped"
-                            ? "bg-slate-500 text-white border-slate-400"
-                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-slate-300"
-                        }`}
-                        title="Skip"
-                      >
-                        <Circle className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleTaskRevise(task.id)}
-                        className={`p-2 rounded-lg text-xs border transition-all ${
-                          task.status === "revision_needed"
-                            ? "bg-amber-500 text-white border-amber-400"
-                            : "bg-white/[0.04] text-slate-400 border-white/10 hover:text-amber-300"
-                        }`}
-                        title="Needs Revision"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-8 text-center text-slate-400 text-sm">
-              No tasks for today. Generate a new plan to get started.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Plan Preview Modal */}
-      {showPreview && planPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 rounded-3xl bg-[#10131f] border border-violet-500/30 space-y-4">
-            <h2 className="text-xl font-extrabold text-white">Preview New Plan</h2>
-            <p className="text-xs text-slate-400">
-              {planPreview.totalTasks} tasks over {planPreview.dailyPlans.length} days.
-              Replacing will preserve completed tasks only if you choose to merge.
-            </p>
-            <div className="flex gap-3 pt-4">
-              <Button variant="ghost" onClick={handleCancelPreview}>Cancel</Button>
-              <Button onClick={handleConfirmPlan} className="bg-violet-600 hover:bg-violet-500">
-                Confirm & Save Plan
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Generate Plan Button (when no plan exists) */}
-      {!studyPlan && !isEditing && profile && (
-        <div className="p-6 rounded-3xl bg-[#10131f]/80 border border-white/10 text-center space-y-4">
-          <p className="text-slate-400 text-sm">No study plan yet. Generate one based on your profile.</p>
-          <Button onClick={handleGeneratePlan} disabled={planLoading} className="bg-violet-600 hover:bg-violet-500">
-            {planLoading ? "Generating..." : "Generate Adaptive Study Plan"}
-          </Button>
-          {planError && <p className="text-rose-400 text-xs">{planError}</p>}
-        </div>
-      )}
-
-      {/* ── 4-Phase Structured Roadmap ───────────────────────────── */}
-      <div className="space-y-6">
-        <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-400 uppercase tracking-wider mb-1">
-            <Layers className="w-4 h-4" />
-            <span>Complete Curriculum Breakdown</span>
-          </div>
-          <h2 className="text-2xl font-extrabold text-white tracking-tight">
-            Phase-by-Phase Roadmap Timeline
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Carefully curated problem clusters sequenced from core algorithmic mechanics to high-frequency company rounds.
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            4 guided stages from core patterns to target company rounds. Tap any phase to view questions.
           </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-3">
           {generatedPhases.map((phase) => {
             const phaseSolved = phase.problems.filter((p) => progress[p.id]?.status === "solved").length;
             const phasePct = phase.problems.length > 0 ? Math.round((phaseSolved / phase.problems.length) * 100) : 0;
+            const isExpanded = !!expandedPhases[phase.phaseNumber];
+            const nextUpId = phase.problems.find((p) => progress[p.id]?.status !== "solved")?.id;
 
             return (
               <div
                 key={phase.phaseNumber}
-                className="p-6 rounded-3xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md space-y-5"
+                className={cn(
+                  "rounded-2xl bg-[#10131f]/80 border backdrop-blur-md transition-all overflow-hidden",
+                  isExpanded
+                    ? "border-violet-500/40 shadow-lg shadow-violet-950/20"
+                    : "border-white/10 hover:border-violet-500/30"
+                )}
               >
-                {/* Phase Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full bg-violet-600/30 text-violet-300 text-xs font-bold font-mono border border-violet-500/30">
+                {/* Collapsible Phase Card Header — Sleek Single Bar */}
+                <button
+                  type="button"
+                  onClick={() => togglePhase(phase.phaseNumber)}
+                  aria-expanded={isExpanded}
+                  className="w-full p-4 sm:px-5 sm:py-4 flex items-center justify-between gap-3 text-left transition-colors hover:bg-white/[0.02] cursor-pointer group"
+                >
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-violet-600/25 text-violet-300 text-[11px] font-bold font-mono border border-violet-500/30 shrink-0">
                         Phase {phase.phaseNumber}
                       </span>
-                      <span className="text-xs text-slate-400 font-semibold">{phase.dayRange}</span>
+                      <span className="text-[11px] text-slate-400 font-semibold">
+                        {phase.dayRange} · {phase.problems.length} Qs
+                      </span>
                     </div>
-                    <h3 className="text-lg font-bold text-white">{phase.title}</h3>
-                    <p className="text-xs text-slate-400">{phase.tagline}</p>
+                    <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-violet-200 transition-colors truncate sm:whitespace-normal">
+                      {phase.title}
+                    </h3>
                   </div>
 
-                  {/* Progress & Focus Pills */}
-                  <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
-                    <div className="text-xs font-bold text-slate-300">
-                      {phaseSolved} / {phase.problems.length} Solved ({phasePct}%)
+                  {/* Progress + Chevron */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="hidden xs:flex sm:flex flex-col items-end gap-1">
+                      <span className="text-[11px] font-bold text-slate-300 font-mono">
+                        {phaseSolved}/{phase.problems.length}
+                      </span>
+                      <div className="w-16 sm:w-24 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="bg-emerald-400 h-full rounded-full transition-all duration-300"
+                          style={{ width: `${phasePct}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-32 bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className="bg-violet-400 h-full rounded-full transition-all"
-                        style={{ width: `${phasePct}%` }}
+
+                    <div
+                      className={cn(
+                        "w-8 h-8 rounded-xl border flex items-center justify-center transition-all",
+                        isExpanded
+                          ? "bg-violet-500/20 border-violet-500/40 text-violet-200"
+                          : "bg-white/[0.04] border-white/10 text-slate-400 group-hover:text-white group-hover:border-white/20"
+                      )}
+                    >
+                      <ChevronDown
+                        className={cn(
+                          "w-4 h-4 transition-transform duration-200",
+                          isExpanded && "rotate-180"
+                        )}
                       />
                     </div>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {phase.focusPatterns.map((pat) => (
-                        <span key={pat} className="text-[10px] text-slate-400 bg-white/[0.03] px-2 py-0.5 rounded border border-white/5">
-                          {pat}
-                        </span>
-                      ))}
-                    </div>
                   </div>
-                </div>
+                </button>
 
-                {/* Problems Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="text-slate-400 uppercase tracking-wider font-semibold border-b border-white/5">
-                      <tr>
-                        <th className="py-2.5 px-3 w-8">Status</th>
-                        <th className="py-2.5 px-3">Problem Title</th>
-                        <th className="py-2.5 px-3">Difficulty</th>
-                        <th className="py-2.5 px-3">Primary Pattern</th>
-                        <th className="py-2.5 px-3">Target Companies</th>
-                        <th className="py-2.5 px-3 text-right">Priority</th>
-                        <th className="py-2.5 px-3 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
+                {/* Expanded Content: Short Tagline + Focus Pills + Questions */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-3 border-t border-white/10 space-y-4 animate-in fade-in duration-200">
+                    {/* Phase Details */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                      <p className="text-xs text-slate-400 leading-relaxed">{phase.tagline}</p>
+                      <div className="flex flex-wrap gap-1.5 shrink-0">
+                        {phase.focusPatterns.slice(0, 4).map((pat) => (
+                          <span
+                            key={pat}
+                            className="text-[10px] text-slate-300 bg-white/[0.04] px-2 py-0.5 rounded-md border border-white/5"
+                          >
+                            {pat}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Mobile Problem List (Sleek Cards, Zero Horizontal Scroll) */}
+                    <div className="block md:hidden space-y-2">
                       {phase.problems.map((prob) => {
                         const userProg = progress[prob.id]?.status || "todo";
+                        const isNext = prob.id === nextUpId;
                         return (
-                          <tr key={prob.id} className="hover:bg-white/[0.02] transition-colors group">
-                            <td className="py-3 px-3">
+                          <div
+                            key={prob.id}
+                            className={cn(
+                              "p-3 rounded-xl border transition-all flex items-center justify-between gap-2.5",
+                              userProg === "solved"
+                                ? "bg-emerald-950/15 border-emerald-500/20"
+                                : isNext
+                                ? "bg-violet-950/20 border-violet-500/35"
+                                : "bg-white/[0.02] border-white/5"
+                            )}
+                          >
+                            <div className="flex items-start gap-2.5 min-w-0">
                               <button
-                                onClick={() => (userProg === "solved" ? markAttempted(prob.id) : markSolved(prob.id))}
-                                className="text-slate-500 hover:text-emerald-400 transition-colors"
+                                type="button"
+                                onClick={() =>
+                                  userProg === "solved" ? markAttempted(prob.id) : markSolved(prob.id)
+                                }
+                                className="mt-0.5 text-slate-500 hover:text-emerald-400 transition-colors shrink-0"
                                 title="Toggle Status"
                               >
                                 {userProg === "solved" ? (
@@ -1032,67 +769,190 @@ export default function SmartPlannerPage() {
                                   <Circle className="w-4 h-4 text-slate-600 hover:text-slate-400" />
                                 )}
                               </button>
-                            </td>
 
-                            <td className="py-3 px-3 font-semibold text-white group-hover:text-violet-300 transition-colors">
-                              <Link href={`/dsa/questions/${prob.slug}`}>{prob.title}</Link>
-                            </td>
-
-                            <td className="py-3 px-3">
-                              <DifficultyBadge difficulty={prob.difficulty} />
-                            </td>
-
-                            <td className="py-3 px-3">
-                              <span className="text-slate-300 bg-white/[0.03] px-2 py-0.5 rounded border border-white/5 text-[11px]">
-                                {prob.primaryPattern || "General"}
-                              </span>
-                            </td>
-
-                            <td className="py-3 px-3">
-                              <div className="flex flex-wrap gap-1">
-                                {prob.companies.slice(0, 3).map((c) => (
-                                  <span key={c} className="text-[10px] text-slate-400 bg-slate-800/60 px-1.5 py-0.5 rounded">
-                                    {c}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-
-                            <td className="py-3 px-3 text-right font-mono font-bold text-violet-400">
-                              {prob.priorityScore}
-                            </td>
-
-                            <td className="py-3 px-3 text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <Link href={`/dsa/questions/${prob.slug}`}>
-                                  <Button size="sm" variant="outline" className="text-[11px] h-7 px-2.5">
-                                    Solve
-                                  </Button>
-                                </Link>
-                                {prob.canonicalUrl && (
-                                  <a
-                                    href={prob.canonicalUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-1 text-slate-500 hover:text-white"
-                                    title="Open on LeetCode"
+                              <div className="min-w-0 space-y-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <Link
+                                    href={`/dsa/questions/${prob.slug}`}
+                                    className="text-xs font-bold text-white hover:text-violet-300 transition-colors leading-snug"
                                   >
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                  </a>
-                                )}
+                                    {prob.title}
+                                  </Link>
+                                  {isNext && (
+                                    <span className="px-1.5 py-0.5 rounded bg-violet-500/25 border border-violet-400/40 text-violet-200 text-[9px] font-bold uppercase tracking-wider">
+                                      Next
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <DifficultyBadge difficulty={prob.difficulty} />
+                                  <span className="text-[10px] text-slate-400 bg-white/[0.04] px-1.5 py-0.5 rounded border border-white/5 truncate max-w-[140px]">
+                                    {prob.primaryPattern || "General"}
+                                  </span>
+                                </div>
                               </div>
-                            </td>
-                          </tr>
+                            </div>
+
+                            <Link
+                              href={`/dsa/questions/${prob.slug}`}
+                              className="px-2.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-violet-600/80 border border-white/10 hover:border-violet-400/50 text-[11px] font-bold text-white flex items-center gap-1 shrink-0 transition-all"
+                            >
+                              <span>Solve</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          </div>
                         );
                       })}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+
+                    {/* Desktop Problems Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="text-slate-400 uppercase tracking-wider font-semibold border-b border-white/5">
+                          <tr>
+                            <th className="py-2.5 px-3 w-8">Status</th>
+                            <th className="py-2.5 px-3">Problem Title</th>
+                            <th className="py-2.5 px-3">Difficulty</th>
+                            <th className="py-2.5 px-3">Primary Pattern</th>
+                            <th className="py-2.5 px-3">Target Companies</th>
+                            <th className="py-2.5 px-3 text-right">Priority</th>
+                            <th className="py-2.5 px-3 text-right">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {phase.problems.map((prob) => {
+                            const userProg = progress[prob.id]?.status || "todo";
+                            const isNext = prob.id === nextUpId;
+                            return (
+                              <tr
+                                key={prob.id}
+                                className={cn(
+                                  "hover:bg-white/[0.03] transition-colors group",
+                                  isNext && "bg-violet-500/[0.04]"
+                                )}
+                              >
+                                <td className="py-3 px-3">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      userProg === "solved" ? markAttempted(prob.id) : markSolved(prob.id)
+                                    }
+                                    className="text-slate-500 hover:text-emerald-400 transition-colors cursor-pointer"
+                                    title="Toggle Status"
+                                  >
+                                    {userProg === "solved" ? (
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    ) : (
+                                      <Circle className="w-4 h-4 text-slate-600 hover:text-slate-400" />
+                                    )}
+                                  </button>
+                                </td>
+
+                                <td className="py-3 px-3 font-semibold text-white group-hover:text-violet-300 transition-colors">
+                                  <div className="flex items-center gap-2">
+                                    <Link href={`/dsa/questions/${prob.slug}`}>{prob.title}</Link>
+                                    {isNext && (
+                                      <span className="px-1.5 py-0.5 rounded bg-violet-500/20 border border-violet-400/40 text-violet-200 text-[9px] font-bold uppercase tracking-wider">
+                                        Next
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+
+                                <td className="py-3 px-3">
+                                  <DifficultyBadge difficulty={prob.difficulty} />
+                                </td>
+
+                                <td className="py-3 px-3">
+                                  <span className="text-slate-300 bg-white/[0.03] px-2 py-0.5 rounded border border-white/5 text-[11px]">
+                                    {prob.primaryPattern || "General"}
+                                  </span>
+                                </td>
+
+                                <td className="py-3 px-3">
+                                  <div className="flex flex-wrap gap-1">
+                                    {prob.companies.slice(0, 3).map((c) => (
+                                      <span
+                                        key={c}
+                                        className="text-[10px] text-slate-400 bg-slate-800/60 px-1.5 py-0.5 rounded"
+                                      >
+                                        {c}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </td>
+
+                                <td className="py-3 px-3 text-right font-mono font-bold text-violet-400">
+                                  {prob.priorityScore}
+                                </td>
+
+                                <td className="py-3 px-3 text-right">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <Link href={`/dsa/questions/${prob.slug}`}>
+                                      <Button size="sm" variant="outline" className="text-[11px] h-7 px-2.5">
+                                        Solve
+                                      </Button>
+                                    </Link>
+                                    {prob.canonicalUrl && (
+                                      <a
+                                        href={prob.canonicalUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-1 text-slate-500 hover:text-white"
+                                        title="Open on LeetCode"
+                                      >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                      </a>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <div className="flex gap-6 items-start max-w-[1600px] mx-auto transition-all duration-300">
+      {/* Main scrollable content */}
+      {mainContent}
+
+      {/* Docked Prime AI Study Coach on desktop (pushes content smoothly left) */}
+      {mounted && isAiOpen && (
+        <div className="hidden lg:flex w-[380px] xl:w-[420px] shrink-0 sticky top-4 self-start h-[640px] xl:h-[660px] max-h-[calc(100vh-3rem)]">
+          <AiAssistantPanel
+            docked
+            onClose={() => setIsAiOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* Mobile overlay drawer */}
+      {mounted && isAiOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md h-full p-3 sm:p-4 flex flex-col">
+            <AiAssistantPanel
+              docked
+              onClose={() => setIsAiOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Floating pop button (same UX as Homepage AI button) */}
+      {mounted && !isAiOpen && (
+        <AiAssistantPanel onOpen={() => setIsAiOpen(true)} />
+      )}
     </div>
   );
 }
