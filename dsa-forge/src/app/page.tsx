@@ -88,18 +88,18 @@ export default function HomePage() {
               <Link href="/dsa/planner#ai-coach" className="block w-full">
                 <button
                   type="button"
-                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-violet-900/30 border border-violet-400/30 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
+                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-violet-700 via-indigo-700 to-violet-700 hover:from-violet-600 hover:to-indigo-600 text-white font-bold text-xs shadow-sm border border-violet-400/25 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-white/15 flex items-center justify-center">
                       <Compass className="w-3.5 h-3.5 text-amber-300" />
                     </div>
                     <div className="text-left">
                       <div className="leading-tight font-extrabold text-white">AI Smart Planner</div>
-                      <div className="text-[10px] text-violet-200/80 font-normal">Personalized Sprint &amp; Coach</div>
+                      <div className="text-[10px] text-violet-200/75 font-normal">Personalized Sprint &amp; Coach</div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-violet-200 shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-violet-200/80 shrink-0" />
                 </button>
               </Link>
 
@@ -151,11 +151,11 @@ export default function HomePage() {
               <Link href="/dsa/planner#ai-coach">
                 <button
                   type="button"
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-violet-900/30 border border-violet-400/30 flex items-center gap-1.5 sm:gap-2 group transition-all cursor-pointer active:scale-[0.98] shrink-0"
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-violet-700 via-indigo-700 to-violet-700 hover:from-violet-600 hover:to-indigo-600 text-white font-semibold text-xs sm:text-sm shadow-sm border border-violet-400/25 flex items-center gap-1.5 sm:gap-2 group transition-all cursor-pointer active:scale-[0.98] shrink-0"
                 >
                   <Compass className="w-4 h-4 text-amber-300 shrink-0" />
                   <span>AI Smart Planner</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-violet-200 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 text-violet-200/80 group-hover:text-violet-100 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </Link>
               <Link href="/dsa/companies">
