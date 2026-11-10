@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { Building2, Search, ArrowRight, ChevronDown, Sparkles, Tag } from "lucide-react";
 import { getAllCompanies } from "@/lib/db";
+import { formatCompanyName } from "@/lib/market-stats";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const FAANG  = new Set(["facebook", "meta", "amazon", "apple", "netflix", "google"]);
-const MAANG  = new Set(["meta", "amazon", "apple", "netflix", "google"]);
+const MAANG  = new Set(["meta", "amazon", "apple", "netflix", "google", "facebook"]);
 const MANGOS = new Set(["meta", "amazon", "netflix", "google", "openai", "oracle", "salesforce"]);
 
 // Tier 1: FAANG/MAANG + elite product MNCs + top Indian unicorns + HFTs/Quant funds
@@ -212,7 +212,7 @@ type SubCategory = { label: string; set: Set<string> | "rest" | null };
 const TIER_SUBCATEGORIES: Record<string, SubCategory[]> = {
   "TIER 1": [
     { label: "All",               set: null },
-    { label: "FAANG / MAANG",     set: T1_FAANG_MAANG },
+    { label: "MAANG",             set: T1_FAANG_MAANG },
     { label: "Elite Global Tech", set: T1_ELITE_GLOBAL },
     { label: "HFT / Quant",       set: T1_HFT_QUANT },
     { label: "Indian Unicorns",   set: T1_INDIAN_UNICORNS },
@@ -234,11 +234,11 @@ const TIER_SUBCATEGORIES: Record<string, SubCategory[]> = {
   ],
 };
 
-type TierFilter = "ALL" | "FAANG" | "MAANG" | "MANGOS" | "TIER 1" | "TIER 2" | "TIER 3";
+type TierFilter = "MAANG" | "ALL" | "MANGOS" | "TIER 1" | "TIER 2" | "TIER 3";
 
 export default function CompaniesPage() {
   const [search,       setSearch]       = useState("");
-  const [selectedTier, setSelectedTier] = useState<TierFilter>("ALL");
+  const [selectedTier, setSelectedTier] = useState<TierFilter>("MAANG");
   const [selectedCat,  setSelectedCat]  = useState<string>("All");
   const [visibleCount, setVisibleCount] = useState<number>(15);
 
@@ -256,8 +256,7 @@ export default function CompaniesPage() {
 
     // Top-level tier filter
     let passesTier = true;
-    if      (selectedTier === "FAANG")  passesTier = FAANG.has(norm);
-    else if (selectedTier === "MAANG")  passesTier = MAANG.has(norm);
+    if      (selectedTier === "MAANG")  passesTier = MAANG.has(norm);
     else if (selectedTier === "MANGOS") passesTier = MANGOS.has(norm);
     else if (selectedTier === "TIER 1") passesTier = TIER1.has(norm);
     else if (selectedTier === "TIER 2") passesTier = TIER2.has(norm);
@@ -287,7 +286,7 @@ export default function CompaniesPage() {
     setVisibleCount((prev) => prev + 15);
   };
 
-  const tiers: TierFilter[] = ["ALL", "FAANG", "MAANG", "MANGOS", "TIER 1", "TIER 2", "TIER 3"];
+  const tiers: TierFilter[] = ["MAANG", "ALL", "MANGOS", "TIER 1", "TIER 2", "TIER 3"];
   const subCategories = TIER_SUBCATEGORIES[selectedTier] ?? null;
 
   return (
@@ -399,7 +398,7 @@ export default function CompaniesPage() {
               </div>
 
               <h2 className="text-xl font-bold text-white group-hover:text-violet-300 transition-colors">
-                {company.name}
+                {formatCompanyName(company.name)}
               </h2>
 
               <div className="mt-3 flex items-center gap-2 text-xs">
