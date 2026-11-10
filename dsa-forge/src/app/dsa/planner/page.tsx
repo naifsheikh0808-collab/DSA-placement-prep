@@ -676,8 +676,17 @@ export default function SmartPlannerPage() {
             <Layers className="w-5 h-5 text-violet-400 shrink-0" />
             <span>Your Study Roadmap</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            4 guided stages from core patterns to target company rounds. Tap any phase to view questions.
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
+            4 guided stages tailored for your{" "}
+            <span className="text-violet-300 font-semibold">{ROLE_LABELS[profile.role] || "SDE-1"}</span>{" "}
+            prep{" "}
+            {getCompanyPresetLabel(profile.companyPreset, profile.targetCompanies) === "All Companies"
+              ? "across"
+              : "at"}{" "}
+            <span className="text-slate-200 font-semibold">
+              {getCompanyPresetLabel(profile.companyPreset, profile.targetCompanies)}
+            </span>
+            . Tap any phase to view questions.
           </p>
         </div>
 
