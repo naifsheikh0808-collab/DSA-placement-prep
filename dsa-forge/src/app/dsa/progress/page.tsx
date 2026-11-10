@@ -427,30 +427,42 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
 
         {/* Collapsed Grid Content */}
         {showPatternBreakdown && (
-          <div className="p-5 sm:p-6 pt-0 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          <div className="p-3 sm:p-6 pt-0 border-t border-white/5 grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3.5">
             {patternMasteryStats.map(({ pattern, solved, total, pct }) => (
               <Link
                 key={pattern.id}
                 href={`/dsa/patterns/${pattern.slug}`}
-                className="p-4 bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 hover:border-violet-500/30 rounded-2xl space-y-2.5 transition-all group"
+                className="p-3 sm:p-4 bg-white/[0.025] hover:bg-white/[0.06] border border-white/[0.08] hover:border-violet-500/40 rounded-xl sm:rounded-2xl flex flex-col justify-between gap-2 sm:gap-2.5 transition-all group hover:-translate-y-0.5"
               >
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="text-slate-200 group-hover:text-violet-300 transition-colors font-bold">
-                    {pattern.name}
-                  </span>
-                  <span className="text-violet-400 font-mono">{pct}%</span>
+                <div>
+                  <div className="flex items-start justify-between gap-1.5">
+                    <span
+                      className="text-slate-200 group-hover:text-violet-300 transition-colors font-bold text-[11px] sm:text-xs leading-tight line-clamp-2"
+                      title={pattern.name}
+                    >
+                      {pattern.name}
+                    </span>
+                    <span className="text-violet-400 font-mono text-[10px] sm:text-xs font-bold shrink-0">
+                      {pct}%
+                    </span>
+                  </div>
+
+                  <div className="w-full bg-slate-800/90 h-1 sm:h-1.5 rounded-full overflow-hidden mt-2 sm:mt-2.5">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500",
+                        pct === 100
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-400"
+                          : "bg-gradient-to-r from-violet-500 to-indigo-500"
+                      )}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
                 </div>
 
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-violet-500 to-indigo-500 h-full transition-all duration-300"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
-                  <span>{solved} of {total} solved</span>
-                  <span className="text-violet-400/80 group-hover:translate-x-0.5 transition-transform">→</span>
+                <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400 sm:text-slate-500 pt-0.5">
+                  <span className="truncate">{solved} of {total} solved</span>
+                  <span className="text-violet-400/80 group-hover:translate-x-0.5 transition-transform text-xs shrink-0">→</span>
                 </div>
               </Link>
             ))}
