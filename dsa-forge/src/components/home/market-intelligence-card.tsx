@@ -95,19 +95,19 @@ export function MarketIntelligenceCard() {
     );
   }, []);
 
-  // Handles mobile tap & desktop hover with 3-second auto-dismiss on mobile
+  // Handles mobile tap & desktop hover with 2-second auto-dismiss on mobile
   const handleBarInteraction = useCallback(
     (index: number | null) => {
       clearTooltipTimer();
       setActiveBarIndex(index);
       setShowTooltip(true);
 
-      // On mobile / touch devices: auto-dismiss after 3000ms
+      // On mobile / touch devices: auto-dismiss after 2000ms
       if (index !== null && isTouchDevice()) {
         tooltipTimeoutRef.current = setTimeout(() => {
           setShowTooltip(false);
           setActiveBarIndex(null);
-        }, 3000);
+        }, 2000);
       }
     },
     [clearTooltipTimer, isTouchDevice]
