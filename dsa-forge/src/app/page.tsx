@@ -58,7 +58,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-slate-300 text-xs sm:text-sm md:text-[15px] leading-relaxed max-w-2xl font-normal">
-              <strong>LeetPrime</strong> brings together all LeetCode Pro DSA problems mapped company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Packed with extra intelligence you won&apos;t find on LeetCode Pro—including real-time 30-day interview recency filters, 15 pattern-first mastery roadmaps, and priority scoring.
+              <strong>LeetPrime</strong> unites 3,400+ LeetCode Pro problems mapped company-wise across 659 tech leaders. Stop wasting time grinding random questions—mastering our <strong>24 structured algorithmic patterns</strong> gives you the blueprint to tackle virtually any interview problem, supercharged with live 30-day recency signals and Prime AI coaching.
             </p>
 
             {/* Value comparison pills */}
@@ -73,7 +73,7 @@ export default function HomePage() {
                 <span className="text-emerald-400 font-bold">✓</span> Tier 1, 2 &amp; 3 Company Tiers
               </span>
               <span className="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
-                <span className="text-emerald-400 font-bold">✓</span> 15 Pattern Frameworks
+                <span className="text-emerald-400 font-bold">✓</span> 24 Pattern Blueprints
               </span>
             </div>
 
@@ -90,7 +90,7 @@ export default function HomePage() {
               </Link>
               <Link href="/dsa/patterns">
                 <Button variant="glass" size="md">
-                  <GitBranch className="w-4 h-4 mr-1 text-violet-400" /> 15 DSA Patterns
+                  <GitBranch className="w-4 h-4 mr-1 text-violet-400" /> 24 DSA Patterns
                 </Button>
               </Link>
               <Link href="/dsa/questions">

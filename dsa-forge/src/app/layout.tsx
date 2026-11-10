@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | LeetPrime",
   },
   description:
-    "LeetPrime includes the complete collection of LeetCode Pro DSA problems organized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Supercharged with extra features that go beyond LeetCode Pro: real-time interview recency (30d/3m/6m), 15 pattern-first mastery roadmaps, and priority scoring.",
+    "LeetPrime includes the complete collection of 3,426 LeetCode Pro DSA problems organized company-wise across 659 tech giants. Supercharged with real-time interview recency (30d/3m/6m), 24 structured algorithmic patterns, interactive market radar, and Prime AI placement coaching.",
   keywords: ["LeetPrime", "LeetCode Pro", "DSA", "interview prep", "LeetCode", "company wise dsa", "placement preparation", "coding interview", "data structures", "algorithms"],
   openGraph: {
     title: "LeetPrime — Beyond LeetCode Pro | Company-Wise DSA & Recency Engine",
