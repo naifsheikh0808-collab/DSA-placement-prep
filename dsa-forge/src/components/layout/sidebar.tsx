@@ -46,6 +46,15 @@ export function Sidebar() {
         </button>
       </div>
 
+      {/* Mobile Backdrop Overlay (Click outside to close) */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-in fade-in duration-200"
+          aria-hidden="true"
+        />
+      )}
+
       {/* Sidebar Container */}
       <aside
         className={cn(

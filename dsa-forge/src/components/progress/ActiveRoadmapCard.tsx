@@ -229,6 +229,28 @@ export function ActiveRoadmapCard() {
           </span>
         </div>
 
+        {/* Company Focus Chips on Mobile */}
+        {activeProfile.targetCompanies && activeProfile.targetCompanies.length > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap text-[11px] pt-0.5">
+            <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 shrink-0">
+              <Building2 className="w-3 h-3 text-violet-400" /> Focus:
+            </span>
+            {activeProfile.targetCompanies.slice(0, 4).map((c) => (
+              <span
+                key={c}
+                className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-200 capitalize"
+              >
+                {c}
+              </span>
+            ))}
+            {activeProfile.targetCompanies.length > 4 && (
+              <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/10 font-mono">
+                +{activeProfile.targetCompanies.length - 4}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Row 3: Sleek Progress Bar */}
         <div className="space-y-1.5 pt-1 border-t border-white/[0.07]">
           <div className="flex items-center justify-between text-[11px]">

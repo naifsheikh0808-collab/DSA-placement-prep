@@ -206,49 +206,49 @@ export default function ProgressPage() {
       </div>
 
       {/* ── User Profile & Cloud Sync Card ─────────────────────── */}
-      <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-[#16132b]/80 via-[#101322] to-[#0c0e17] border border-violet-500/25 backdrop-blur-xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+      <div className="p-4 sm:p-7 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#16132b]/80 via-[#101322] to-[#0c0e17] border border-violet-500/25 backdrop-blur-xl relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
           {/* User Info Left */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 w-full lg:w-auto">
             {user?.photoURL ? (
               <img
                 src={user.photoURL}
                 alt={user.displayName || "User"}
                 referrerPolicy="no-referrer"
                 crossOrigin="anonymous"
-                className="w-16 h-16 rounded-2xl border-2 border-violet-500/40 object-cover shadow-lg shadow-violet-500/20"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl border-2 border-violet-500/40 object-cover shadow-lg shadow-violet-500/20 shrink-0"
               />
             ) : (
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-violet-500/25">
-                <User className="w-8 h-8" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-extrabold text-base sm:text-xl shadow-lg shadow-violet-500/25 shrink-0">
+                <User className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
             )}
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-extrabold text-white">
+            <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-xl font-extrabold text-white truncate max-w-[180px] sm:max-w-none">
                   {user ? user.displayName || "Google User" : "Guest Explorer"}
                 </h2>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${solverRank.badge} ${solverRank.color}`}>
+                <span className={cn("text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0", solverRank.badge, solverRank.color)}>
                   {solverRank.title}
                 </span>
               </div>
 
-              <div className="text-xs text-slate-400">
+              <div className="text-[11px] sm:text-xs text-slate-400 truncate">
                 {user ? user.email : "Local Browser Storage (Guest Mode)"}
               </div>
 
               {/* Status Indicator */}
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 pt-0.5">
                 {user ? (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-emerald-400 truncate">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                     Cloud Synchronized (Firebase)
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-400">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
-                    Guest Mode · Not Synced to Cloud
+                  <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-amber-400 truncate">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 shrink-0" />
+                    Guest Mode · Not Synced
                   </span>
                 )}
               </div>
@@ -256,24 +256,24 @@ export default function ProgressPage() {
           </div>
 
           {/* User Actions & Sign-in Right */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
             {user ? (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={logout}
-                className="text-xs border-white/10 hover:border-rose-500/40 text-slate-300 hover:text-rose-300"
+                className="w-full sm:w-auto text-xs border-white/10 hover:border-rose-500/40 text-slate-300 hover:text-rose-300 rounded-xl"
               >
                 <LogOut className="w-3.5 h-3.5 mr-1.5" /> Sign Out
               </Button>
             ) : (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 w-full">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full">
                 <Button
                   size="sm"
                   onClick={signInWithGoogle}
-                  className="w-full sm:w-auto bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs px-4 py-2.5 shadow-lg shadow-violet-600/25 flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl shadow-md shadow-violet-600/25 flex items-center justify-center gap-2 active:scale-95 transition-all"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="#EA4335"
                       d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"
@@ -291,13 +291,13 @@ export default function ProgressPage() {
                       d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16.5C3.7 20.3 7.5 23.5 12 23.5z"
                     />
                   </svg>
-                  Sign in with Google to Sync
+                  <span>Sign in with Google to Sync</span>
                 </Button>
 
                 {!isConfigured && (
                   <button
                     onClick={() => setShowFirebaseGuide(!showFirebaseGuide)}
-                    className="text-[11px] text-violet-400 hover:text-violet-300 underline font-medium"
+                    className="text-[10px] sm:text-[11px] text-violet-400 hover:text-violet-300 underline font-medium text-center sm:text-left py-0.5"
                   >
                     Setup Firebase Keys
                   </button>
@@ -309,10 +309,8 @@ export default function ProgressPage() {
 
         {/* Guest Mode Explainer Callout */}
         {!user && (
-          <div className="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 gap-2">
-            <span>
-              💡 <strong>Guest Practice Active:</strong> Anyone can explore and practice freely. Sign in with Google to automatically back up your progress to the cloud so you can continue from any device.
-            </span>
+          <div className="mt-3.5 sm:mt-5 pt-3 sm:pt-4 border-t border-white/[0.08] text-[11px] sm:text-xs text-slate-400 leading-relaxed">
+            💡 <strong className="text-slate-300">Guest Practice Active:</strong> Sign in with Google to automatically sync and save your progress across all your devices.
           </div>
         )}
 
