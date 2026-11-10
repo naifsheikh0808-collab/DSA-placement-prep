@@ -222,7 +222,7 @@ export function MarketIntelligenceCard() {
   }, [mode, selectedCompany, selectedPattern, chartData]);
 
   return (
-    <div className="lg:col-span-2 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-violet-950/30 via-[#101322] to-[#0c0e17] border border-violet-500/30 backdrop-blur-md flex flex-col justify-between space-y-4 sm:space-y-5 transition-all">
+    <div className="lg:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-950/30 via-[#101322] to-[#0c0e17] border border-violet-500/30 backdrop-blur-md flex flex-col justify-between space-y-3.5 sm:space-y-5 transition-all">
       {/* ── Top Header: Title & View Switcher ── */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">

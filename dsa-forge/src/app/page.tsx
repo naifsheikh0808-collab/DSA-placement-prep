@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   GitBranch, Building2, Map, ArrowRight,
-  Zap, Target, Clock, Dumbbell, Play, Sparkles, TrendingUp, Compass
+  Zap, Target, Clock, Dumbbell, Play, Sparkles, TrendingUp, Compass, Code2
 } from "lucide-react";
 import { getAllPatterns, getAllCompanies, getPlatformStats, TOP_PROBLEMS } from "@/lib/db";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
@@ -41,28 +41,34 @@ export default function HomePage() {
           <UserAvatar size="md" />
         </div>
 
-        {/* Hero Section — Sleek & Large */}
-        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#16132b]/85 via-[#101322]/85 to-[#0c0e17]/85 border border-violet-500/25 p-5 sm:p-7 md:px-8 md:py-6 backdrop-blur-xl shadow-xl shadow-black/40">
+        {/* Hero Section — Sleek, Compact on Mobile & Large on Desktop */}
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#16132b]/85 via-[#101322]/85 to-[#0c0e17]/85 border border-violet-500/25 p-4 sm:p-7 md:px-8 md:py-6 backdrop-blur-xl shadow-xl shadow-black/40">
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 max-w-3xl space-y-3.5 sm:space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold">
+          <div className="relative z-10 max-w-3xl space-y-3 sm:space-y-4">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-[11px] sm:text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>LeetPrime · Beyond LeetCode Pro</span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
               All LeetCode Pro Problems.{" "}
               <span className="gradient-accent-text block sm:inline">Company-Wise &amp; Supercharged.</span>
             </h1>
 
-            <p className="text-slate-300 text-xs sm:text-sm md:text-[15px] leading-relaxed max-w-2xl font-normal">
+            {/* Desktop Description: Comprehensive */}
+            <p className="hidden sm:block text-slate-300 text-xs sm:text-sm md:text-[15px] leading-relaxed max-w-2xl font-normal">
               <strong>LeetPrime</strong> unites 3,400+ LeetCode Pro problems mapped company-wise across 659 tech leaders. Stop wasting time grinding random questions—mastering our <strong>24 structured algorithmic patterns</strong> gives you the blueprint to tackle virtually any interview problem, supercharged with live 30-day recency signals and Prime AI coaching.
             </p>
 
-            {/* Value comparison pills */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-0.5 text-[11px] sm:text-xs text-slate-300">
+            {/* Mobile Description: Punchy & Compact 2-line Clarity */}
+            <p className="block sm:hidden text-slate-300 text-xs leading-relaxed font-normal">
+              Stop grinding random questions. Master <strong>24 structured patterns</strong> to crack any technical interview across 659 tech giants.
+            </p>
+
+            {/* Desktop-only value comparison pills (hidden on mobile to eliminate clutter) */}
+            <div className="hidden sm:flex flex-wrap items-center gap-1.5 sm:gap-2 pt-0.5 text-[11px] sm:text-xs text-slate-300">
               <span className="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 flex items-center gap-1.5 font-medium">
                 <span className="text-emerald-400 font-bold">✓</span> 100% LeetCode Pro Bank
               </span>
@@ -77,7 +83,67 @@ export default function HomePage() {
               </span>
             </div>
 
-            <div className="pt-1.5 flex flex-wrap items-center gap-2.5">
+            {/* Mobile Action Dock — Tactile, obviously clickable cards */}
+            <div className="flex sm:hidden flex-col gap-2 pt-1 w-full">
+              <Link href="/dsa/planner#ai-coach" className="block w-full">
+                <button
+                  type="button"
+                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-600/30 border border-violet-400/30 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Compass className="w-3.5 h-3.5 text-amber-300" />
+                    </div>
+                    <div className="text-left">
+                      <div className="leading-tight font-extrabold text-white">AI Smart Planner</div>
+                      <div className="text-[10px] text-violet-200/80 font-normal">Personalized Sprint &amp; Coach</div>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-violet-200" />
+                </button>
+              </Link>
+
+              <div className="grid grid-cols-2 gap-2 w-full">
+                <Link href="/dsa/patterns" className="block">
+                  <button
+                    type="button"
+                    className="w-full p-2.5 rounded-xl bg-violet-500/15 hover:bg-violet-500/20 active:scale-[0.98] border border-violet-500/35 text-left transition-all cursor-pointer shadow-sm shadow-violet-500/10"
+                  >
+                    <div className="flex items-center gap-1.5 mb-0.5 text-violet-300 font-bold text-xs">
+                      <GitBranch className="w-3.5 h-3.5 text-violet-400" /> 24 Patterns
+                    </div>
+                    <div className="text-[10px] text-slate-400 leading-tight">Curated Blueprint</div>
+                  </button>
+                </Link>
+
+                <Link href="/dsa/companies" className="block">
+                  <button
+                    type="button"
+                    className="w-full p-2.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/20 active:scale-[0.98] border border-indigo-500/35 text-left transition-all cursor-pointer shadow-sm shadow-indigo-500/10"
+                  >
+                    <div className="flex items-center gap-1.5 mb-0.5 text-indigo-300 font-bold text-xs">
+                      <Building2 className="w-3.5 h-3.5 text-indigo-400" /> Companies
+                    </div>
+                    <div className="text-[10px] text-slate-400 leading-tight">659 Tech Giants</div>
+                  </button>
+                </Link>
+              </div>
+
+              <Link href="/dsa/questions" className="block w-full">
+                <button
+                  type="button"
+                  className="w-full py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 active:scale-[0.98] flex items-center justify-between text-[11px] text-slate-300 font-medium transition-all cursor-pointer"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Code2 className="w-3.5 h-3.5 text-emerald-400" /> Question Bank + Recency
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">3,426 Qs →</span>
+                </button>
+              </Link>
+            </div>
+
+            {/* Desktop Action Buttons — Sleek horizontal row (preserved) */}
+            <div className="hidden sm:flex pt-1.5 flex-wrap items-center gap-2.5">
               <Link href="/dsa/planner#ai-coach">
                 <Button size="md" className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-violet-600/30">
                   <Compass className="w-4 h-4 mr-1.5 text-amber-300" /> AI Smart Planner
@@ -119,7 +185,7 @@ export default function HomePage() {
         </div>
 
         {/* Main Grid: Interactive Market Radar + Top Companies */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 pt-1 sm:pt-2">
           {/* Interactive Market & Pattern Intelligence Card */}
           <MarketIntelligenceCard />
 
@@ -169,7 +235,7 @@ export default function HomePage() {
         </div>
 
         {/* Featured Patterns Preview */}
-        <div className="space-y-3.5">
+        <div className="space-y-3.5 pt-3 sm:pt-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
