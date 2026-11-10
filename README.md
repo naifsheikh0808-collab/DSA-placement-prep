@@ -23,11 +23,11 @@
 
 🔗 **Website:** [**https://leetprime-pro.vercel.app**](https://leetprime-pro.vercel.app/)
 
-*Complete archive of 3,300+ LeetCode Pro problems mapped company-wise across 650+ tech giants, real-time 30-day interview recency filters, and Prime AI placement coaching.*
+*Complete archive of 3,426 LeetCode Pro problems mapped company-wise across 659 tech giants, real-time 30-day interview recency filters, interactive market intelligence analytics, and Prime AI placement coaching.*
 
 ---
 
-**LeetPrime** contains the complete archive of **LeetCode Pro / Premium DSA problems** categorized company-wise across Tier 1, Tier 2, and Tier 3 tech giants. Supercharged with **Prime AI**, LeetPrime introduces intelligent multi-model coaching, real-time interview recency tracking, adaptive roadmaps, and rich DSA visualization to make placement prep faster, smarter, and significantly higher ROI.
+**LeetPrime** contains the complete archive of **3,426 LeetCode Pro / Premium DSA problems** categorized company-wise across 659 Tier 1, Tier 2, and Tier 3 tech giants. Supercharged with **Prime AI**, LeetPrime introduces intelligent multi-model coaching, real-time interview recency tracking, adaptive roadmaps, interactive market intelligence, and rich DSA visualization to make placement prep faster, smarter, and significantly higher ROI.
 
 ---
 
@@ -35,10 +35,11 @@
 
 | Feature | Standard LeetCode Pro | ⚡ LeetPrime |
 | :--- | :---: | :---: |
-| **Company-Wise Problem Bank** | ✅ Yes | ✅ **Complete Company-Wise Question Library (650+ Companies)** |
+| **Company-Wise Problem Bank** | ✅ Yes | ✅ **Complete Company-Wise Question Library (3,426 Problems across 659 Companies)** |
+| **Interactive Market Intelligence Radar** | ❌ None | 📊 **Real-time interactive company-pattern distributions & hiring demand analytics** |
 | **Real-Time Interview Recency Engine** | ❌ Static / Cumbersome | ⚡ **Interactive 30d, 3m, 6m, 1yr+ timeframes** |
 | **Company Tier Classification** | ❌ None (mixed alphabetically) | 🎯 **Tier 1 (FAANG/HFT), Tier 2 (Banks/FinTech), Tier 3** |
-| **Algorithmic Pattern Frameworks** | ❌ Blind random lists | 🧩 **24 Chronological Patterns (Two-Tier Core & Advanced) + Hybrid Tagging + Specialized SQL** |
+| **Pedagogical Pattern Progression** | ❌ Blind random lists | 🧩 **24 Patterns with 103-Edge Prerequisite DAG + Hybrid Tagging + Specialized SQL** |
 | **AI Problem Coach** | ⚠️ Generic / Rigid | 🧠 **Context-Aware Prime AI (Progressive hints, notes review)** |
 | **Multi-Model Intelligence** | ❌ Single locked model | 🔄 **Toggle between Google Gemini 2.5 Flash & Groq Llama 3.3 70B** |
 | **Professional Markdown & Big-O Badges** | ❌ Monospace plain text | 📊 **Formatted comparison tables & glowing Big-O badges** |
@@ -100,20 +101,30 @@ LeetPrime features **Prime AI**, a proprietary AI coaching engine designed speci
 * **6 Months (Recent)**: Medium-term hiring trend.
 * **All Time / Classic**: Evergreen benchmark problems.
 
-### 3. 🧩 Two-Tier 24 Pattern Hierarchy & Hybrid Multi-Pattern Search
+### 3. 📊 Real-Time Market Intelligence Radar & Hiring Trends
+Interactive data visualization directly on the homepage synthesizing 3,426 problems across 659 companies:
+* **Company Radar**: Deep-dive into company-specific pattern weightings (e.g. Google's 305 Dynamic Programming questions, Meta's 147 DP/Two Pointer questions, Amazon's 150 Binary Tree questions).
+* **Pattern Demand Index**: Invert the lens to discover which companies test specific patterns most heavily (e.g., who tests Sliding Window or Graph DFS/BFS).
+* **Universal Difficulty Matrix**: Real-time stacked breakdown of Easy, Medium, and Hard distributions across all 3,426 problems.
+* **Contextual 1-Click Problem Solver**: Dynamically surfaces the #1 highest-yield problem matching your active company or pattern selection with an instant **Solve Question** launcher.
+* **Responsive Mobile Optimization**: Touch-friendly 2-second auto-dismiss tooltips ensuring clean, zero-clutter mobile chart exploration.
+
+### 4. 🧩 Two-Tier 24 Pattern Hierarchy & Pedagogical Prerequisite DAG
 Master algorithmic frameworks arranged in chronological learning order, complete with hybrid pattern matching:
 * **Tier 1: Core Foundations (#01 – #15)**: Two Pointers, Sliding Window, Fast & Slow Pointers, Linked List Reversal, Monotonic Stack & Queue, Top 'K' Elements / Heaps, Two Heaps, Subsets & Combinations, Modified Binary Search, Bitwise XOR, Tree DFS, Tree BFS, Graph BFS & DFS, 0/1 Knapsack & Dynamic Programming, Merge Intervals.
 * **Tier 2: Advanced Frameworks (#16 – #24)**: Prefix Sums & Difference Arrays, Trie (Prefix Tree), Topological Sort, Union-Find (DSU), Backtracking & Branch and Bound, Segment Trees & Fenwick Trees, Greedy Strategies, Matrix & Grid Navigation, Design & Hybrid Structures.
 * **Specialized Categories (SQL & Database)**: 197+ real-world tech interview SQL questions categorized into a dedicated SQL hub (Joins, Aggregates, Window Functions, and CTEs).
+* **Strict Pedagogical Prerequisite DAG**: All 24 patterns are sequentially ordered (`beginner` $\to$ `core` $\to$ `advanced` $\to$ `challenge`) verified by an automated 20/20 assertion deterministic audit proof suite (`audit_pattern_accuracy.js`) with 103 explicit dependency edges satisfied and 0 inversions.
+* **Pedagogical Sorting Filter**: The Question Bank (`/dsa/questions`) offers a one-click **"Sort: Pedagogical Order"** synchronized with pattern URLs for optimal learning efficiency.
 * **Multi-Pattern / Hybrid Question Support**: Real-world interview problems rarely rely on a single technique. Problems support both `primaryPattern` and `secondaryPatterns` (e.g. *LRU Cache* = Design & Hybrid Structures + Hash Map + Doubly Linked List; *Longest Substring Without Repeating Characters* = Sliding Window + Hash Map). Filtering by any associated pattern immediately finds the problem.
 * **100% Deterministic Categorization**: 4,100+ official LeetCode topic tags pre-ingested offline into a verified classification matrix to eliminate generic `"Uncategorized"` tags entirely.
 
-### 4. 🧭 Smart Planner & Active Placement Roadmap
+### 5. 🧭 Smart Planner & Active Placement Roadmap
 * **Personalized Mission Control**: Set target role, timeline (15, 30, 60, or 90 days), and daily hours.
 * **Highest-Signal Today Focus**: Curates top 2–3 daily problems pushing your roadmap forward.
 * **Active Placement Roadmap in "My Progress"**: A dedicated sprint command card tracking current day progress (`Day 14 of 30`), completion percentage, daily remaining tasks, and sprint pace (`🔥 Ahead of Pace`, `🟢 On Track`).
 
-### 5. 💎 Multi-Tier BYOK Key Storage & Free Quotas
+### 6. 💎 Multi-Tier BYOK Key Storage & Free Quotas
 * **Generous Free Tier**: 10 Gemini + 10 Groq queries per user/hour out-of-the-box.
 * **Permanent BYOK Persistence**: API keys are saved across server restarts using server-side storage and browser `localStorage` auto-sync.
 
