@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { usePrimeAi } from "@/hooks/use-prime-ai";
 import { useAuth } from "@/context/auth-context";
 import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
@@ -54,15 +54,21 @@ const MODEL_INFO = {
     id: "gemini",
     name: "Gemini 2.5 Flash",
     shortName: "Gemini 2.5",
+    tag: "Best for Code",
     badge: "⚡",
+    provider: "Google",
     color: "text-blue-400",
+    description: "Best for complete code & edge-case accuracy",
   },
   groq: {
     id: "groq",
     name: "Llama 3.3 70B",
     shortName: "Llama 3.3",
+    tag: "Fast Hints",
     badge: "🚀",
+    provider: "Groq",
     color: "text-orange-400",
+    description: "Ultra-fast response for hints & complexity",
   },
 };
 
@@ -77,7 +83,20 @@ interface HomeAiButtonProps {
 
 export function HomeAiButton({ docked = false, onClose, onOpen }: HomeAiButtonProps) {
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const modelMenuRef = useRef<HTMLDivElement | null>(null);
   const { user, isConfigured, signInWithGoogle } = useAuth();
+
+  useEffect(() => {
+    if (!isModelMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modelMenuRef.current && !modelMenuRef.current.contains(e.target as Node)) {
+        setIsModelMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isModelMenuOpen]);
 
   const {
     messages,
@@ -337,16 +356,64 @@ export function HomeAiButton({ docked = false, onClose, onOpen }: HomeAiButtonPr
               />
               <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] mt-1 px-0.5">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    onClick={toggleModel}
-                    type="button"
-                    title="Click to switch AI model"
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white/[0.07] hover:bg-white/[0.14] border border-white/10 text-white transition-all shadow-sm group"
-                  >
-                    <span>{model.badge}</span>
-                    <span className={model.color}>{model.shortName}</span>
-                    <ChevronDown className="w-2.5 h-2.5 text-white/50 group-hover:text-white transition-transform" />
-                  </button>
+                  {/* Model Selector Dropdown with Subtle Purpose Badges */}
+                  <div className="relative" ref={modelMenuRef}>
+                    <button
+                      onClick={() => setIsModelMenuOpen((prev) => !prev)}
+                      type="button"
+                      title="Choose AI Model"
+                      className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white/[0.07] hover:bg-white/[0.14] border border-white/10 text-white transition-all shadow-sm group cursor-pointer"
+                    >
+                      <span>{model.badge}</span>
+                      <span className={model.color}>{model.shortName}</span>
+                      <ChevronDown className={cn("w-2.5 h-2.5 text-white/50 group-hover:text-white transition-transform duration-200", isModelMenuOpen && "rotate-180")} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isModelMenuOpen && (
+                      <div className="absolute bottom-full left-0 mb-2 w-64 rounded-2xl border border-white/10 bg-[#161329]/95 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
+                        <div className="px-2 py-1 text-[10px] font-semibold tracking-wider uppercase text-white/40">Select Model</div>
+                        {(Object.keys(MODEL_INFO) as Array<keyof typeof MODEL_INFO>).map((key) => {
+                          const m = MODEL_INFO[key];
+                          const isSelected = activeModel === key;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => {
+                                setActiveModel(key);
+                                setIsModelMenuOpen(false);
+                              }}
+                              className={cn(
+                                "w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all text-left mb-0.5 cursor-pointer",
+                                isSelected
+                                  ? "bg-violet-600/25 border border-violet-500/40 text-white"
+                                  : "hover:bg-white/[0.07] text-white/70 hover:text-white border border-transparent"
+                              )}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-sm">{m.badge}</span>
+                                <div className="min-w-0">
+                                  <div className="font-semibold text-white text-xs truncate">{m.name}</div>
+                                  <div className="text-[10px] text-white/40 truncate">{m.description}</div>
+                                </div>
+                              </div>
+                              <span
+                                className={cn(
+                                  "px-1.5 py-0.5 rounded-full text-[9px] font-bold shrink-0 ml-1.5 border",
+                                  key === "gemini"
+                                    ? "bg-blue-500/15 border-blue-500/30 text-blue-300"
+                                    : "bg-orange-500/15 border-orange-500/30 text-orange-300"
+                                )}
+                              >
+                                {m.tag}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={() => setIsSettingsOpen(true)}
                     type="button"
