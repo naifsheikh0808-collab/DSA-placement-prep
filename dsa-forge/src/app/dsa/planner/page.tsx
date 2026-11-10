@@ -82,7 +82,7 @@ const COMPANY_PRESETS: Record<string, { label: string; desc: string; companies: 
     companies: ["Oracle", "Cisco", "Intel", "IBM", "Dell", "Visa", "American Express", "Mastercard"],
   },
   all: {
-    label: "All Top Tech Companies",
+    label: "All Companies",
     desc: "Curated cross-company placement preparation",
     companies: [],
   },
@@ -555,7 +555,7 @@ export default function SmartPlannerPage() {
               </div>
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-400 mt-0.5">
                 <span className="text-slate-200 font-medium">
-                  {COMPANY_PRESETS[profile.companyPreset]?.label || "Top Tech Companies"}
+                  {COMPANY_PRESETS[profile.companyPreset]?.label || "All Companies"}
                 </span>
                 <span className="text-white/20">·</span>
                 <span>{profile.durationDays} Days · {profile.dailyHours}h/day</span>
@@ -618,7 +618,7 @@ export default function SmartPlannerPage() {
           {/* Row 2: Scannable 1-Line Summary Pills */}
           <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
             <span className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/10 font-medium text-white">
-              {COMPANY_PRESETS[profile.companyPreset]?.label || "Top Tech"}
+              {COMPANY_PRESETS[profile.companyPreset]?.label || "All Companies"}
             </span>
             <span className="px-2 py-0.5 rounded-md bg-violet-500/15 border border-violet-500/25 text-violet-300 font-semibold">
               {profile.durationDays}D · {profile.dailyHours}h/d

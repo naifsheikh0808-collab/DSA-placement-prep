@@ -10,11 +10,9 @@ import {
   ArrowRight,
   Building2,
 } from "lucide-react";
-import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
 import { loadPlan, loadPlannerProfile, PLAN_UPDATED_EVENT } from "@/lib/plan-storage";
 import { generatePersonalizedRoadmap } from "@/lib/plan-generator";
 import { useProgressStore } from "@/hooks/use-progress";
-import { TOP_PROBLEMS } from "@/lib/db";
 import type { StudyPlan, PlannerProfile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -31,8 +29,6 @@ const LEVEL_LABELS: Record<string, string> = {
   intermediate: "Intermediate",
   advanced: "Advanced",
 };
-
-const STORAGE_KEY = "leetprime_smart_plan_profile";
 
 export function ActiveRoadmapCard() {
   const [plan, setPlan] = useState<StudyPlan | null>(null);
@@ -266,7 +262,9 @@ export function ActiveRoadmapCard() {
         {/* Top Bar: Connected Title & Status */}
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.08] flex-wrap gap-2">
           <div className="flex items-center gap-2.5">
-            <PrimeAiLogo size="xs" />
+            <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-500/35 flex items-center justify-center shrink-0">
+              <Compass className="w-4 h-4 text-amber-400" />
+            </div>
             <span className="text-white font-extrabold text-sm sm:text-base tracking-tight">
               Your Study Roadmap
             </span>

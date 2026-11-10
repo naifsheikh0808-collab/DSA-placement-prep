@@ -339,7 +339,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
         )}
       </div>
 
-      {/* ── Active Prime AI Roadmap Sprint ───────────────────── */}
+      {/* ── Connected Study Roadmap Card ───────────────────── */}
       <ActiveRoadmapCard />
 
       {/* ── Summary Problem Metrics (clickable) ─────────────── */}
