@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { usePrimeAi } from "@/hooks/use-prime-ai";
 import { useAuth } from "@/context/auth-context";
 import { PrimeAiLogo } from "@/components/ai/PrimeAiLogo";
@@ -8,6 +8,9 @@ import { PrimeAiSettingsModal } from "@/components/ai/PrimeAiSettingsModal";
 import { PrimeAiMessageRenderer } from "@/components/ai/PrimeAiMessageRenderer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { savePlannerProfile, savePlan } from "@/lib/plan-storage";
+import { generateStudyPlan } from "@/lib/plan-generator";
+import type { ProposedPlannerConfig } from "@/lib/question-search";
 import {
   X,
   Send,
@@ -19,7 +22,66 @@ import {
   Trophy,
   Zap,
   Building2,
+  Map,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
+
+// ── Proposed Plan Card ────────────────────────────────────────────────────────
+interface PlanCardProps {
+  plan: ProposedPlannerConfig;
+  applied: boolean;
+  onApply: () => void;
+}
+
+function ProposedPlanCard({ plan, applied, onApply }: PlanCardProps) {
+  return (
+    <div className="mt-3 rounded-2xl border border-violet-500/30 bg-violet-950/20 p-3.5 backdrop-blur-sm">
+      <div className="flex items-center justify-between pb-2 mb-2 border-b border-violet-500/20">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg bg-violet-500/20 flex items-center justify-center">
+            <Map className="w-3.5 h-3.5 text-violet-400" />
+          </div>
+          <span className="text-violet-200 text-xs font-bold">Proposed Roadmap Preview</span>
+        </div>
+        <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-[10px] font-semibold">
+          {plan.durationDays} Days · {plan.dailyHours}h/day
+        </span>
+      </div>
+
+      <p className="text-white/80 text-xs leading-relaxed">{plan.planSummary}</p>
+
+      {plan.targetCompanies && plan.targetCompanies.length > 0 && (
+        <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+          <span className="text-white/40 text-[10px] uppercase font-semibold">Targets:</span>
+          {plan.targetCompanies.slice(0, 5).map((c) => (
+            <span key={c} className="px-2 py-0.5 rounded-lg bg-white/[0.06] border border-white/10 text-white/60 text-[10px]">
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-3 pt-2.5 border-t border-violet-500/15 flex items-center justify-between">
+        <span className="text-white/40 text-[11px]">Role: {plan.role.toUpperCase()} ({plan.level})</span>
+        {applied ? (
+          <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold">
+            <CheckCircle2 className="w-4 h-4" />
+            Applied to Roadmap!
+          </div>
+        ) : (
+          <button
+            onClick={onApply}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-md shadow-violet-900/30 transition-all cursor-pointer"
+          >
+            <span>Apply to Smart Planner</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ── Spicy preset queries that spark curiosity ────────────────────────────────
 const HOME_QUICK_ACTIONS = [
@@ -100,6 +162,7 @@ export function HomeAiButton({ docked = false, onClose, onOpen }: HomeAiButtonPr
 
   const {
     messages,
+    setMessages,
     input,
     setInput,
     loading,
@@ -115,6 +178,60 @@ export function HomeAiButton({ docked = false, onClose, onOpen }: HomeAiButtonPr
     setIsSettingsOpen,
     isByok,
   } = usePrimeAi({ mode: "general" });
+
+  const handleApplyPlan = useCallback(
+    async (msgId: string, plan: ProposedPlannerConfig) => {
+      try {
+        let detectedPreset = plan.companyPreset;
+        const comps = (plan.targetCompanies ?? []).map((c) => c.toLowerCase());
+        if (!detectedPreset || detectedPreset === "custom") {
+          if (comps.some((c) => ["google", "meta", "amazon", "apple", "microsoft", "netflix"].includes(c))) {
+            detectedPreset = "maang";
+          } else if (comps.some((c) => ["flipkart", "swiggy", "zomato", "razorpay", "phonepe", "cred", "meesho", "blinkit"].includes(c))) {
+            detectedPreset = "unicorns";
+          } else if (comps.some((c) => ["goldman sachs", "goldman-sachs", "jpmorgan", "citadel", "jane street", "jane-street", "morgan stanley"].includes(c))) {
+            detectedPreset = "fintech_hft";
+          } else if (comps.some((c) => ["uber", "atlassian", "adobe", "salesforce", "oracle", "cisco", "nvidia"].includes(c))) {
+            detectedPreset = "tier1_product";
+          } else if (comps.length === 0) {
+            detectedPreset = "all";
+          } else {
+            detectedPreset = "custom";
+          }
+        }
+
+        const newProfile = {
+          role: plan.role || "sde1",
+          level: plan.level || "basics",
+          stage: plan.stage || "3rd_4th",
+          durationDays: plan.durationDays || 30,
+          dailyHours: plan.dailyHours || 2,
+          companyPreset: detectedPreset,
+          targetCompanies: plan.targetCompanies ?? [],
+          createdAt: new Date().toISOString(),
+        };
+
+        savePlannerProfile(newProfile as any);
+        try {
+          const studyPlan = generateStudyPlan(newProfile as any);
+          studyPlan.userId = "local";
+          savePlan(studyPlan);
+        } catch (planErr) {
+          console.warn("Failed to generate study plan:", planErr);
+        }
+
+        setMessages((prev) =>
+          prev.map((m) => (m.id === msgId ? { ...m, planApplied: true } : m))
+        );
+
+        window.dispatchEvent(new Event("leetprime:plan-updated"));
+        window.dispatchEvent(new Event("storage"));
+      } catch (err) {
+        console.error("Failed to apply plan:", err);
+      }
+    },
+    [setMessages]
+  );
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -311,6 +428,14 @@ export function HomeAiButton({ docked = false, onClose, onOpen }: HomeAiButtonPr
                         <span>{msg.content}</span>
                       )}
                     </div>
+
+                    {!!msg.proposedPlan && (
+                      <ProposedPlanCard
+                        plan={msg.proposedPlan as ProposedPlannerConfig}
+                        applied={!!msg.planApplied}
+                        onApply={() => handleApplyPlan(msg.id, msg.proposedPlan as ProposedPlannerConfig)}
+                      />
+                    )}
                     {msg.role === "model" && !msg.error && (
                       <div className="mt-1.5 flex items-center gap-1 opacity-35 text-[9px]">
                         <Sparkles className="w-2.5 h-2.5" />

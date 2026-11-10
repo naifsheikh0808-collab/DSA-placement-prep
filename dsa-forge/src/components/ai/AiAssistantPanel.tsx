@@ -172,28 +172,52 @@ export function AiAssistantPanel({ docked = false, onClose, onOpen }: AiAssistan
   const handleApplyPlan = useCallback(
     async (msgId: string, plan: ProposedPlannerConfig) => {
       try {
+        // Detect matched preset if not explicitly specified
+        let detectedPreset = plan.companyPreset;
+        const comps = (plan.targetCompanies ?? []).map((c) => c.toLowerCase());
+        if (!detectedPreset || detectedPreset === "custom") {
+          if (comps.some((c) => ["google", "meta", "amazon", "apple", "microsoft", "netflix"].includes(c))) {
+            detectedPreset = "maang";
+          } else if (comps.some((c) => ["flipkart", "swiggy", "zomato", "razorpay", "phonepe", "cred", "meesho", "blinkit"].includes(c))) {
+            detectedPreset = "unicorns";
+          } else if (comps.some((c) => ["goldman sachs", "goldman-sachs", "jpmorgan", "citadel", "jane street", "jane-street", "morgan stanley"].includes(c))) {
+            detectedPreset = "fintech_hft";
+          } else if (comps.some((c) => ["uber", "atlassian", "adobe", "salesforce", "oracle", "cisco", "nvidia"].includes(c))) {
+            detectedPreset = "tier1_product";
+          } else if (comps.length === 0) {
+            detectedPreset = "all";
+          } else {
+            detectedPreset = "custom";
+          }
+        }
+
         const newProfile = {
-          role: plan.role,
-          level: plan.level,
-          durationDays: plan.durationDays,
-          dailyHours: plan.dailyHours,
+          role: plan.role || "sde1",
+          level: plan.level || "basics",
+          stage: plan.stage || "3rd_4th",
+          durationDays: plan.durationDays || 30,
+          dailyHours: plan.dailyHours || 2,
+          companyPreset: detectedPreset,
           targetCompanies: plan.targetCompanies ?? [],
-          companyPreset: "custom",
-          stage: "3rd_4th" as const,
           createdAt: new Date().toISOString(),
         };
+
         savePlannerProfile(newProfile as any);
         try {
           const studyPlan = generateStudyPlan(newProfile as any);
           studyPlan.userId = "local";
           savePlan(studyPlan);
-        } catch {
-          // ignore if plan build fails
+        } catch (planErr) {
+          console.warn("Failed to generate study plan:", planErr);
         }
 
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, planApplied: true } : m))
         );
+
+        // Explicitly trigger global plan update events
+        window.dispatchEvent(new Event("leetprime:plan-updated"));
+        window.dispatchEvent(new Event("storage"));
       } catch (err) {
         console.error("Failed to apply plan:", err);
       }

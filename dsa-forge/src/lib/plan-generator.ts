@@ -80,7 +80,7 @@ function classifyProblemTopic(p: Problem): { topicIndex: number; phase: 1 | 2 | 
   if (combined.includes("array") || combined.includes("string")) {
     return { topicIndex: 0, phase: 1, topicId: "two-pointers" };
   }
-  return { topicIndex: CURRICULUM_TOPICS.length - 1, phase: 4, topicId: "company-recency" };
+  return { topicIndex: 12, phase: 3, topicId: "graphs" };
 }
 
 function normalizeCompanySlug(name: string): string {
@@ -124,7 +124,8 @@ type AnnotatedProblem = {
 function selectBalancedProblems(
   candidates: AnnotatedProblem[],
   phaseCount: number,
-  level: PlannerProfile["level"]
+  level: PlannerProfile["level"],
+  usedIds: Set<string> = new Set<string>()
 ): Problem[] {
   if (candidates.length === 0) return [];
   const weights = DIFF_WEIGHTS[level];
@@ -132,18 +133,16 @@ function selectBalancedProblems(
   // Group by topicIndex, keeping insertion order (already sorted by topicIndex via partition)
   const byTopic = new Map<number, AnnotatedProblem[]>();
   for (const item of candidates) {
+    if (usedIds.has(item.problem.id)) continue;
     if (!byTopic.has(item.topicIndex)) byTopic.set(item.topicIndex, []);
     byTopic.get(item.topicIndex)!.push(item);
   }
 
   const topicIds = Array.from(byTopic.keys()).sort((a, b) => a - b);
   // Distribute slots across topics; ensure all topics stay represented even in short sprints
-  const budgetPerTopic = phaseCount >= topicIds.length * 2
-    ? Math.max(2, Math.ceil(phaseCount / topicIds.length))
-    : Math.max(1, Math.ceil(phaseCount / topicIds.length));
+  const budgetPerTopic = Math.max(1, Math.ceil(phaseCount / Math.max(1, topicIds.length)));
 
   const result: Problem[] = [];
-  const usedIds = new Set<string>();
 
   for (const topicIdx of topicIds) {
     if (result.length >= phaseCount) break;
@@ -153,9 +152,9 @@ function selectBalancedProblems(
     const remaining = Math.min(budgetPerTopic, phaseCount - result.length);
 
     // Sort each difficulty bucket by relevance score descending
-    const easyPool = topicItems.filter(x => x.problem.difficulty === "Easy").sort((a, b) => b.score - a.score);
-    const medPool  = topicItems.filter(x => x.problem.difficulty === "Medium").sort((a, b) => b.score - a.score);
-    const hardPool = topicItems.filter(x => x.problem.difficulty === "Hard").sort((a, b) => b.score - a.score);
+    const easyPool = topicItems.filter(x => x.problem.difficulty === "Easy" && !usedIds.has(x.problem.id)).sort((a, b) => b.score - a.score);
+    const medPool  = topicItems.filter(x => x.problem.difficulty === "Medium" && !usedIds.has(x.problem.id)).sort((a, b) => b.score - a.score);
+    const hardPool = topicItems.filter(x => x.problem.difficulty === "Hard" && !usedIds.has(x.problem.id)).sort((a, b) => b.score - a.score);
 
     // Allocate slots by weight
     let easyN = Math.round(remaining * weights.Easy);
@@ -191,9 +190,9 @@ function selectBalancedProblems(
 
     // Pick from each bucket (filter already-used ids)
     const topicSelected: Problem[] = [
-      ...easyPool.slice(0, easyN).filter(x => !usedIds.has(x.problem.id)).map(x => x.problem),
-      ...medPool .slice(0, medN ).filter(x => !usedIds.has(x.problem.id)).map(x => x.problem),
-      ...hardPool.slice(0, hardN).filter(x => !usedIds.has(x.problem.id)).map(x => x.problem),
+      ...easyPool.slice(0, easyN).map(x => x.problem),
+      ...medPool .slice(0, medN ).map(x => x.problem),
+      ...hardPool.slice(0, hardN).map(x => x.problem),
     ];
 
     for (const p of topicSelected) usedIds.add(p.id);
@@ -223,7 +222,7 @@ function calculateRelevanceScore(
   profile: PlannerProfile,
   targetCoSet: Set<string>
 ): number {
-  let score = p.priorityScore || 50;
+  let score = (p.priorityScore || 50) * 0.5;
 
   // Target company cohort match with frequency density boost
   if (targetCoSet.size > 0 && p.companies.length > 0) {
@@ -234,38 +233,50 @@ function calculateRelevanceScore(
       }
     }
     if (matchCount > 0) {
-      const densityRatio = matchCount / Math.max(1, p.companies.length);
-      score += 55 + Math.min(matchCount, 4) * 20 + Math.round(densityRatio * 45);
-    }
-  }
+      score += 110;
+      if (p.timeframes.includes("30d")) score += 70;
+      else if (p.timeframes.includes("3m")) score += 40;
+      else if (p.timeframes.includes("6m")) score += 20;
 
-  // Recency weighting
-  if (p.timeframes.includes("30d")) score += 25;
-  else if (p.timeframes.includes("3m")) score += 15;
-  else if (p.timeframes.includes("6m")) score += 5;
+      const specificity = 1 - Math.min(1, (p.companies.length - 1) / 45);
+      score += Math.round(specificity * 60);
+    } else {
+      score -= 35;
+    }
+  } else {
+    // All companies / general prep mode
+    if (p.timeframes.includes("30d")) score += 45;
+    else if (p.timeframes.includes("3m")) score += 25;
+    else if (p.timeframes.includes("6m")) score += 10;
+  }
 
   // Strong Role & Career Stage differentiation
   if (profile.role === "quant") {
-    if (p.difficulty === "Hard") score += 65;
+    if (p.difficulty === "Hard") score += 75;
     else if (p.difficulty === "Medium") score += 15;
-    else score -= 35;
+    else score -= 55;
   } else if (profile.role === "sde2" || profile.stage === "working") {
-    if (p.difficulty === "Hard") score += 30;
-    else if (p.difficulty === "Medium") score += 25;
-    else score -= 20;
+    if (p.difficulty === "Hard") score += 40;
+    else if (p.difficulty === "Medium") score += 30;
+    else score -= 30;
   } else if (profile.role === "intern" || profile.stage === "1st_2nd") {
-    if (p.difficulty === "Easy") score += 35;
-    else if (p.difficulty === "Medium") score += 10;
-    else score -= 25;
+    if (p.difficulty === "Easy") score += 50;
+    else if (p.difficulty === "Medium") score += 20;
+    else score -= 60;
   } else {
     // sde1 / campus placements
-    if (p.difficulty === "Medium") score += 20;
-    else if (p.difficulty === "Easy") score += 10;
+    if (p.difficulty === "Medium") score += 25;
+    else if (p.difficulty === "Easy") score += 15;
   }
 
   // Skill level secondary tie-breaker
-  if (profile.level === "beginner" && p.difficulty === "Easy") score += 25;
-  if (profile.level === "advanced" && p.difficulty === "Hard") score += 30;
+  if (profile.level === "beginner") {
+    if (p.difficulty === "Easy") score += 30;
+    else if (p.difficulty === "Hard") score -= 40;
+  } else if (profile.level === "advanced") {
+    if (p.difficulty === "Hard") score += 35;
+    else if (p.difficulty === "Easy") score -= 30;
+  }
 
   return score;
 }
@@ -289,7 +300,12 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
   const targetCoSet = new Set((profile.targetCompanies || []).map(normalizeCompanySlug));
   const diffOrder = DIFFICULTY_RANK_MAP[profile.level] || DIFFICULTY_RANK_MAP.basics;
 
-  const annotated = TOP_PROBLEMS.map((p) => {
+  // Filter out SQL problems from general algorithmic DSA roadmap
+  const dsaProblems = TOP_PROBLEMS.filter(
+    (p) => p.primaryPattern !== "SQL"
+  );
+
+  const annotated = dsaProblems.map((p) => {
     const { topicIndex, phase, topicId } = classifyProblemTopic(p);
     const score = calculateRelevanceScore(p, profile, targetCoSet);
     const diffRank = diffOrder[p.difficulty] ?? 1;
@@ -304,37 +320,51 @@ export function generatePersonalizedRoadmap(profile: PlannerProfile): RoadmapPha
     };
   });
 
-  // Sort globally by personalized relevance score before phase partitioning
-  const sortedPool = [...annotated].sort((a, b) => b.score - a.score);
-
-  // Partition into phases without duplicates
-  const phaseCandidates: Record<1 | 2 | 3 | 4, typeof annotated> = {
-    1: [],
-    2: [],
-    3: [],
-    4: [],
-  };
-
-  const usedProblemIds = new Set<string>();
-
-  for (const item of sortedPool) {
-    if (usedProblemIds.has(item.problem.id)) continue;
-    phaseCandidates[item.phase].push(item);
-    usedProblemIds.add(item.problem.id);
-  }
-
   // Budget allocation per phase (responsive to totalBudget)
   const p1Count = Math.max(Math.round(totalBudget * 0.25), 4);
   const p2Count = Math.max(Math.round(totalBudget * 0.30), 4);
   const p3Count = Math.max(Math.round(totalBudget * 0.30), 4);
   const p4Count = Math.max(totalBudget - (p1Count + p2Count + p3Count), 4);
 
-  // Per-phase: pick a balanced Easy+Medium+Hard mix within each topic cluster
-  // (Two Pointers Easy→Medium→Hard, then Sliding Window Easy→Medium→Hard, …)
-  const p1Problems = selectBalancedProblems(phaseCandidates[1], p1Count, profile.level);
-  const p2Problems = selectBalancedProblems(phaseCandidates[2], p2Count, profile.level);
-  const p3Problems = selectBalancedProblems(phaseCandidates[3], p3Count, profile.level);
-  const p4Problems = selectBalancedProblems(phaseCandidates[4], p4Count, profile.level);
+  const usedProblemIds = new Set<string>();
+
+  // Phase 1: Foundations & Sequential Algorithms
+  const p1Candidates = annotated.filter((x) => x.phase === 1);
+  const p1Problems = selectBalancedProblems(p1Candidates, p1Count, profile.level, usedProblemIds);
+
+  // Phase 2: Hierarchical Structures & Traversal
+  const p2Candidates = annotated.filter((x) => x.phase === 2);
+  const p2Problems = selectBalancedProblems(p2Candidates, p2Count, profile.level, usedProblemIds);
+
+  // Phase 3: Core Algorithmic Mastery & Optimization
+  const p3Candidates = annotated.filter((x) => x.phase === 3);
+  const p3Problems = selectBalancedProblems(p3Candidates, p3Count, profile.level, usedProblemIds);
+
+  // Phase 4: Target Company Recency & Mock Sprint (Pure Company Recency & Mock Sprints)
+  let p4Pool = annotated.filter((x) => !usedProblemIds.has(x.problem.id));
+  if (targetCoSet.size > 0) {
+    const matchingTarget = p4Pool.filter((x) =>
+      x.problem.companies.some((c) => targetCoSet.has(normalizeCompanySlug(c)))
+    );
+    if (matchingTarget.length >= p4Count) {
+      p4Pool = matchingTarget;
+    }
+  }
+
+  // Rank Phase 4 questions by live recency (30d > 3m > 6m) and relevance score
+  p4Pool.sort((a, b) => {
+    const aRec = a.problem.timeframes.includes("30d") ? 3 : a.problem.timeframes.includes("3m") ? 2 : a.problem.timeframes.includes("6m") ? 1 : 0;
+    const bRec = b.problem.timeframes.includes("30d") ? 3 : b.problem.timeframes.includes("3m") ? 2 : b.problem.timeframes.includes("6m") ? 1 : 0;
+    if (bRec !== aRec) return bRec - aRec;
+    return b.score - a.score;
+  });
+
+  const p4Problems: Problem[] = [];
+  for (const item of p4Pool) {
+    if (p4Problems.length >= p4Count) break;
+    p4Problems.push(item.problem);
+    usedProblemIds.add(item.problem.id);
+  }
 
   const daySplit1 = Math.round(profile.durationDays * 0.25);
   const daySplit2 = Math.round(profile.durationDays * 0.55);

@@ -102,6 +102,19 @@ const LEVEL_LABELS: Record<SkillLevel, string> = {
   advanced: "Advanced",
 };
 
+export function getCompanyPresetLabel(preset?: string, targetCompanies?: string[]): string {
+  if (preset && COMPANY_PRESETS[preset]) {
+    return COMPANY_PRESETS[preset].label;
+  }
+  if (targetCompanies && targetCompanies.length > 0) {
+    if (targetCompanies.length <= 3) {
+      return targetCompanies.join(", ");
+    }
+    return `${targetCompanies.slice(0, 2).join(", ")} +${targetCompanies.length - 2}`;
+  }
+  return "All Companies";
+}
+
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function SmartPlannerPage() {
   const [profile, setProfile] = useState<PlannerProfile | null>(null);
@@ -416,7 +429,10 @@ export default function SmartPlannerPage() {
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setFormCompanyPreset(key)}
+                    onClick={() => {
+                      setFormCompanyPreset(key);
+                      setFormCustomCompanies(item.companies);
+                    }}
                     className={cn(
                       "p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer",
                       active
@@ -433,6 +449,13 @@ export default function SmartPlannerPage() {
                 );
               })}
             </div>
+
+            {formCompanyPreset === "custom" && formCustomCompanies.length > 0 && (
+              <div className="p-3 rounded-xl bg-violet-600/15 border border-violet-500/30 flex items-center justify-between text-xs text-violet-200">
+                <span>Selected Focus: <strong>{formCustomCompanies.slice(0, 5).join(", ")}{formCustomCompanies.length > 5 ? ` +${formCustomCompanies.length - 5}` : ""}</strong></span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 uppercase">Custom Target</span>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-white/[0.08]" />
@@ -555,7 +578,7 @@ export default function SmartPlannerPage() {
               </div>
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-400 mt-0.5">
                 <span className="text-slate-200 font-medium">
-                  {COMPANY_PRESETS[profile.companyPreset]?.label || "All Companies"}
+                  {getCompanyPresetLabel(profile.companyPreset, profile.targetCompanies)}
                 </span>
                 <span className="text-white/20">·</span>
                 <span>{profile.durationDays} Days · {profile.dailyHours}h/day</span>
@@ -618,7 +641,7 @@ export default function SmartPlannerPage() {
           {/* Row 2: Scannable 1-Line Summary Pills */}
           <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
             <span className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/10 font-medium text-white">
-              {COMPANY_PRESETS[profile.companyPreset]?.label || "All Companies"}
+              {getCompanyPresetLabel(profile.companyPreset, profile.targetCompanies)}
             </span>
             <span className="px-2 py-0.5 rounded-md bg-violet-500/15 border border-violet-500/25 text-violet-300 font-semibold">
               {profile.durationDays}D · {profile.dailyHours}h/d

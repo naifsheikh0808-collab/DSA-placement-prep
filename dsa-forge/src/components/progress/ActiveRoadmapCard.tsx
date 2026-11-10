@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { loadPlan, loadPlannerProfile, PLAN_UPDATED_EVENT } from "@/lib/plan-storage";
 import { generatePersonalizedRoadmap } from "@/lib/plan-generator";
+import { getCompanyPresetLabel } from "@/app/dsa/planner/page";
 import { useProgressStore } from "@/hooks/use-progress";
 import type { StudyPlan, PlannerProfile } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -223,12 +224,9 @@ export function ActiveRoadmapCard() {
           <span className="px-2 py-0.5 rounded-md bg-violet-500/15 border border-violet-500/25 text-violet-300 font-semibold">
             {activeProfile.dailyHours || 2}h/day
           </span>
-          {activeProfile.targetCompanies && activeProfile.targetCompanies.length > 0 && (
-            <span className="px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/10 text-slate-300 capitalize">
-              {activeProfile.targetCompanies[0]}
-              {activeProfile.targetCompanies.length > 1 ? ` +${activeProfile.targetCompanies.length - 1}` : ""}
-            </span>
-          )}
+          <span className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/10 text-white font-medium">
+            {getCompanyPresetLabel(activeProfile.companyPreset, activeProfile.targetCompanies)}
+          </span>
         </div>
 
         {/* Row 3: Sleek Progress Bar */}
