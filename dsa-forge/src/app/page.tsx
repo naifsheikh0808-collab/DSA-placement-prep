@@ -88,7 +88,7 @@ export default function HomePage() {
               <Link href="/dsa/planner#ai-coach" className="block w-full">
                 <button
                   type="button"
-                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-600/30 border border-violet-400/30 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
+                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-violet-900/30 border border-violet-400/30 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
@@ -99,7 +99,7 @@ export default function HomePage() {
                       <div className="text-[10px] text-violet-200/80 font-normal">Personalized Sprint &amp; Coach</div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-violet-200" />
+                  <ArrowRight className="w-4 h-4 text-violet-200 shrink-0" />
                 </button>
               </Link>
 
@@ -107,24 +107,26 @@ export default function HomePage() {
                 <Link href="/dsa/patterns" className="block">
                   <button
                     type="button"
-                    className="w-full p-2.5 rounded-xl bg-violet-500/15 hover:bg-violet-500/20 active:scale-[0.98] border border-violet-500/35 text-left transition-all cursor-pointer shadow-sm shadow-violet-500/10"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[#18132f] hover:bg-[#221b42] active:scale-[0.97] border border-violet-500/40 text-left transition-all cursor-pointer shadow-sm flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-1.5 mb-0.5 text-violet-300 font-bold text-xs">
-                      <GitBranch className="w-3.5 h-3.5 text-violet-400" /> 24 Patterns
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <GitBranch className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                      <span className="font-bold text-white text-xs truncate">24 Patterns</span>
                     </div>
-                    <div className="text-[10px] text-slate-400 leading-tight">Curated Blueprint</div>
+                    <ArrowRight className="w-3.5 h-3.5 text-violet-400/80 shrink-0" />
                   </button>
                 </Link>
 
                 <Link href="/dsa/companies" className="block">
                   <button
                     type="button"
-                    className="w-full p-2.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/20 active:scale-[0.98] border border-indigo-500/35 text-left transition-all cursor-pointer shadow-sm shadow-indigo-500/10"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[#121832] hover:bg-[#1a2245] active:scale-[0.97] border border-indigo-500/40 text-left transition-all cursor-pointer shadow-sm flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-1.5 mb-0.5 text-indigo-300 font-bold text-xs">
-                      <Building2 className="w-3.5 h-3.5 text-indigo-400" /> Companies
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <span className="font-bold text-white text-xs truncate">Companies</span>
                     </div>
-                    <div className="text-[10px] text-slate-400 leading-tight">659 Tech Giants</div>
+                    <ArrowRight className="w-3.5 h-3.5 text-indigo-400/80 shrink-0" />
                   </button>
                 </Link>
               </div>
@@ -132,37 +134,59 @@ export default function HomePage() {
               <Link href="/dsa/questions" className="block w-full">
                 <button
                   type="button"
-                  className="w-full py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 active:scale-[0.98] flex items-center justify-between text-[11px] text-slate-300 font-medium transition-all cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl bg-[#101423] hover:bg-[#161c30] border border-white/10 active:scale-[0.98] flex items-center justify-between text-[11px] text-slate-300 font-medium transition-all cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5">
                     <Code2 className="w-3.5 h-3.5 text-emerald-400" /> Question Bank + Recency
                   </span>
-                  <span className="text-[10px] text-slate-400 font-mono">3,426 Qs →</span>
+                  <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                    3,426 Qs <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </span>
                 </button>
               </Link>
             </div>
 
-            {/* Desktop Action Buttons — Sleek horizontal row (preserved) */}
+            {/* Desktop Action Buttons — Sleek, tactile, and clickable with directional cues */}
             <div className="hidden sm:flex pt-1.5 flex-wrap items-center gap-2.5">
               <Link href="/dsa/planner#ai-coach">
-                <Button size="md" className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-violet-600/30">
-                  <Compass className="w-4 h-4 mr-1.5 text-amber-300" /> AI Smart Planner
-                </Button>
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm shadow-md shadow-violet-900/30 border border-violet-400/30 flex items-center gap-2 group transition-all cursor-pointer active:scale-[0.98]"
+                >
+                  <Compass className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span>AI Smart Planner</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-violet-200 group-hover:translate-x-0.5 transition-transform" />
+                </button>
               </Link>
               <Link href="/dsa/companies">
-                <Button variant="glass" size="md">
-                  <Dumbbell className="w-4 h-4 mr-1 text-violet-400" /> Company Wise DSA
-                </Button>
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-xl bg-[#121832] hover:bg-[#1a2245] border border-indigo-500/40 hover:border-indigo-400/60 text-white font-semibold text-sm shadow-sm flex items-center gap-2 group transition-all cursor-pointer active:scale-[0.98]"
+                >
+                  <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <span>Company Wise DSA</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-indigo-400/80 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all" />
+                </button>
               </Link>
               <Link href="/dsa/patterns">
-                <Button variant="glass" size="md">
-                  <GitBranch className="w-4 h-4 mr-1 text-violet-400" /> 24 DSA Patterns
-                </Button>
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-xl bg-[#18132f] hover:bg-[#221b42] border border-violet-500/40 hover:border-violet-400/60 text-white font-semibold text-sm shadow-sm flex items-center gap-2 group transition-all cursor-pointer active:scale-[0.98]"
+                >
+                  <GitBranch className="w-4 h-4 text-violet-400 shrink-0" />
+                  <span>24 DSA Patterns</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-violet-400/80 group-hover:text-violet-300 group-hover:translate-x-0.5 transition-all" />
+                </button>
               </Link>
               <Link href="/dsa/questions">
-                <Button variant="ghost" size="md" className="text-slate-300 hover:text-white">
-                  Question Bank + Recency <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-slate-200 hover:text-white font-semibold text-sm shadow-sm flex items-center gap-2 group transition-all cursor-pointer active:scale-[0.98]"
+                >
+                  <Code2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Question Bank</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+                </button>
               </Link>
             </div>
           </div>
@@ -236,17 +260,21 @@ export default function HomePage() {
 
         {/* Featured Patterns Preview */}
         <div className="space-y-3.5 pt-3 sm:pt-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                <GitBranch className="w-5 h-5 text-violet-400" /> Core Pattern Roadmap
+              <h2 className="text-base sm:text-xl font-bold text-white flex items-center gap-2">
+                <GitBranch className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400 shrink-0" /> Core Pattern Roadmap
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
                 Master questions grouped by core algorithmic framework.
               </p>
             </div>
-            <Link href="/dsa/patterns" className="text-xs text-violet-400 hover:text-violet-300 font-semibold">
-              Explore All 24 Patterns →
+            <Link
+              href="/dsa/patterns"
+              className="text-xs text-violet-400 hover:text-violet-300 font-semibold flex items-center gap-1 shrink-0 self-start sm:self-auto group"
+            >
+              <span>Explore All 24 Patterns</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
