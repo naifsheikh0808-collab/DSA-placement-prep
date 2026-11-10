@@ -234,7 +234,7 @@ const TIER_SUBCATEGORIES: Record<string, SubCategory[]> = {
   ],
 };
 
-type TierFilter = "MAANG" | "ALL" | "MANGOS" | "TIER 1" | "TIER 2" | "TIER 3";
+type TierFilter = "ALL" | "MAANG" | "MANGOS" | "TIER 1" | "TIER 2" | "TIER 3";
 
 export default function CompaniesPage() {
   const [search,       setSearch]       = useState("");
@@ -286,7 +286,7 @@ export default function CompaniesPage() {
     setVisibleCount((prev) => prev + 15);
   };
 
-  const tiers: TierFilter[] = ["MAANG", "ALL", "MANGOS", "TIER 1", "TIER 2", "TIER 3"];
+  const tiers: TierFilter[] = ["ALL", "MAANG", "MANGOS", "TIER 1", "TIER 2", "TIER 3"];
   const subCategories = TIER_SUBCATEGORIES[selectedTier] ?? null;
 
   return (
