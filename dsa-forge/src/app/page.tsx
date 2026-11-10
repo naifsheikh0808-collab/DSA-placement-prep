@@ -59,7 +59,7 @@ export default function HomePage() {
 
             {/* Desktop Description: Comprehensive */}
             <p className="hidden sm:block text-slate-300 text-xs sm:text-sm md:text-[15px] leading-relaxed max-w-2xl font-normal">
-              <strong>LeetPrime</strong> unites 3,400+ LeetCode Pro problems mapped company-wise across 659 tech leaders. Stop wasting time grinding random questions—mastering our <strong>24 structured algorithmic patterns</strong> gives you the blueprint to tackle virtually any interview problem, supercharged with live 30-day recency signals and Prime AI coaching.
+              Stop grinding random questions. <strong>LeetPrime</strong> organizes 3,400+ company-wise problems across 659 tech giants into <strong>24 core patterns</strong>—giving you the blueprint to crack any technical interview, backed by live 30-day recency and Prime AI coaching.
             </p>
 
             {/* Mobile Description: Punchy & Compact 2-line Clarity */}
