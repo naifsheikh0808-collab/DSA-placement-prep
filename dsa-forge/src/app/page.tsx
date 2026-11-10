@@ -64,7 +64,7 @@ export default function HomePage() {
 
             {/* Mobile Description: Punchy & Compact 2-line Clarity */}
             <p className="block sm:hidden text-slate-300 text-xs leading-relaxed font-normal">
-              Stop grinding random questions. Master <strong>24 structured patterns</strong> to crack any technical interview across 659 tech giants.
+              Stop grinding random questions. Master <strong>Company-wise DSA</strong> through <strong>24 structured patterns</strong> to crack any technical interview across 659 tech giants.
             </p>
 
             {/* Desktop-only value comparison pills (hidden on mobile to eliminate clutter) */}
