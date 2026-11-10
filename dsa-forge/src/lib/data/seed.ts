@@ -31,27 +31,10 @@ export const PATTERNS: Pattern[] = [
       "Solve pair, palindrome, and sorting problems twice as fast by searching from both ends instead of nested loops.",
     orderIndex: 1,
     color: "#6366f1",
-    questionCount: 16,
+    questionCount: 15,
     companyCoverage: 53,
     difficulty: "core",
     questions: [
-      {
-        id: "tp-1",
-        externalId: "167",
-        title: "Pair with Target Sum",
-        slug: "pair-with-target-sum",
-        difficulty: "Easy",
-        canonicalUrl: "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted"
-        ],
-        companyCount: 18,
-        frequency: 0.72,
-        orderIndex: 1,
-        levelTag: "beginner",
-      },
       {
         id: "tp-2",
         externalId: "283",
@@ -66,7 +49,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 22,
         frequency: 0.78,
-        orderIndex: 2,
+        orderIndex: 1,
         levelTag: "beginner",
       },
       {
@@ -83,7 +66,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 28,
         frequency: 0.81,
-        orderIndex: 3,
+        orderIndex: 2,
         levelTag: "beginner",
       },
       {
@@ -100,24 +83,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 14,
         frequency: 0.65,
-        orderIndex: 4,
-        levelTag: "beginner",
-      },
-      {
-        id: "tp-14",
-        externalId: "80",
-        title: "Remove Duplicates from Sorted Array II",
-        slug: "remove-duplicates-from-sorted-array-ii",
-        difficulty: "Medium",
-        canonicalUrl: "https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii"
-        ],
-        companyCount: 15,
-        frequency: 0.62,
-        orderIndex: 5,
+        orderIndex: 3,
         levelTag: "beginner",
       },
       {
@@ -136,8 +102,59 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 9,
         frequency: 22.5,
-        orderIndex: 6,
+        orderIndex: 4,
         levelTag: "beginner",
+      },
+      {
+        id: "tp-10",
+        externalId: "844",
+        title: "Backspace String Compare",
+        slug: "backspace-string-compare",
+        difficulty: "Easy",
+        canonicalUrl: "https://leetcode.com/problems/backspace-string-compare",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/backspace-string-compare"
+        ],
+        companyCount: 27,
+        frequency: 0.71,
+        orderIndex: 5,
+        levelTag: "beginner",
+      },
+      {
+        id: "tp-1",
+        externalId: "167",
+        title: "Pair with Target Sum",
+        slug: "pair-with-target-sum",
+        difficulty: "Medium",
+        canonicalUrl: "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted"
+        ],
+        companyCount: 18,
+        frequency: 0.72,
+        orderIndex: 6,
+        levelTag: "core",
+      },
+      {
+        id: "tp-14",
+        externalId: "80",
+        title: "Remove Duplicates from Sorted Array II",
+        slug: "remove-duplicates-from-sorted-array-ii",
+        difficulty: "Medium",
+        canonicalUrl: "https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii"
+        ],
+        companyCount: 15,
+        frequency: 0.62,
+        orderIndex: 7,
+        levelTag: "core",
       },
       {
         id: "tp-5",
@@ -153,7 +170,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 87,
         frequency: 0.92,
-        orderIndex: 7,
+        orderIndex: 8,
         levelTag: "core",
       },
       {
@@ -170,23 +187,6 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 34,
         frequency: 0.74,
-        orderIndex: 8,
-        levelTag: "core",
-      },
-      {
-        id: "tp-7",
-        externalId: "713",
-        title: "Subarray Product Less Than K",
-        slug: "subarray-product-less-than-k",
-        difficulty: "Medium",
-        canonicalUrl: "https://leetcode.com/problems/subarray-product-less-than-k",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/subarray-product-less-than-k"
-        ],
-        companyCount: 19,
-        frequency: 0.67,
         orderIndex: 9,
         levelTag: "core",
       },
@@ -208,23 +208,6 @@ export const PATTERNS: Pattern[] = [
         levelTag: "core",
       },
       {
-        id: "tp-10",
-        externalId: "844",
-        title: "Backspace String Compare",
-        slug: "backspace-string-compare",
-        difficulty: "Medium",
-        canonicalUrl: "https://leetcode.com/problems/backspace-string-compare",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/backspace-string-compare"
-        ],
-        companyCount: 27,
-        frequency: 0.71,
-        orderIndex: 11,
-        levelTag: "core",
-      },
-      {
         id: "tp-11",
         externalId: "581",
         title: "Shortest Unsorted Continuous Subarray",
@@ -238,7 +221,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 18,
         frequency: 0.64,
-        orderIndex: 12,
+        orderIndex: 11,
         levelTag: "core",
       },
       {
@@ -255,7 +238,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 72,
         frequency: 0.88,
-        orderIndex: 13,
+        orderIndex: 12,
         levelTag: "core",
       },
       {
@@ -272,7 +255,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 15,
         frequency: 120,
-        orderIndex: 14,
+        orderIndex: 13,
         levelTag: "core",
       },
       {
@@ -289,7 +272,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 22,
         frequency: 0.68,
-        orderIndex: 15,
+        orderIndex: 14,
         levelTag: "advanced",
       },
       {
@@ -306,7 +289,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 85,
         frequency: 0.91,
-        orderIndex: 16,
+        orderIndex: 15,
         levelTag: "advanced",
       }
     ],
@@ -359,6 +342,40 @@ export const PATTERNS: Pattern[] = [
         levelTag: "beginner",
       },
       {
+        id: "fsp-3",
+        externalId: "202",
+        title: "Happy Number",
+        slug: "happy-number",
+        difficulty: "Easy",
+        canonicalUrl: "https://leetcode.com/problems/happy-number",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/happy-number"
+        ],
+        companyCount: 27,
+        frequency: 0.71,
+        orderIndex: 3,
+        levelTag: "beginner",
+      },
+      {
+        id: "fsp-6",
+        externalId: "234",
+        title: "Palindrome Linked List",
+        slug: "palindrome-linked-list",
+        difficulty: "Easy",
+        canonicalUrl: "https://leetcode.com/problems/palindrome-linked-list",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/palindrome-linked-list"
+        ],
+        companyCount: 35,
+        frequency: 0.76,
+        orderIndex: 4,
+        levelTag: "beginner",
+      },
+      {
         id: "fsp-2",
         externalId: "142",
         title: "Linked List Cycle II",
@@ -372,24 +389,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 31,
         frequency: 0.74,
-        orderIndex: 3,
-        levelTag: "core",
-      },
-      {
-        id: "fsp-3",
-        externalId: "202",
-        title: "Happy Number",
-        slug: "happy-number",
-        difficulty: "Medium",
-        canonicalUrl: "https://leetcode.com/problems/happy-number",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/happy-number"
-        ],
-        companyCount: 27,
-        frequency: 0.71,
-        orderIndex: 4,
+        orderIndex: 5,
         levelTag: "core",
       },
       {
@@ -406,23 +406,6 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 42,
         frequency: 0.82,
-        orderIndex: 5,
-        levelTag: "core",
-      },
-      {
-        id: "fsp-6",
-        externalId: "234",
-        title: "Palindrome Linked List",
-        slug: "palindrome-linked-list",
-        difficulty: "Medium",
-        canonicalUrl: "https://leetcode.com/problems/palindrome-linked-list",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/palindrome-linked-list"
-        ],
-        companyCount: 35,
-        frequency: 0.76,
         orderIndex: 6,
         levelTag: "core",
       },
@@ -448,7 +431,7 @@ export const PATTERNS: Pattern[] = [
         externalId: "457",
         title: "Circular Array Loop",
         slug: "circular-array-loop",
-        difficulty: "Hard",
+        difficulty: "Medium",
         canonicalUrl: "https://leetcode.com/problems/circular-array-loop",
         platform: "leetcode",
         solved: false,
@@ -471,7 +454,7 @@ export const PATTERNS: Pattern[] = [
       "Track sub-arrays and strings with an expanding and shrinking window — perfect for finding longest, shortest, or target sums effortlessly.",
     orderIndex: 3,
     color: "#0ea5e9",
-    questionCount: 14,
+    questionCount: 15,
     companyCoverage: 74,
     difficulty: "core",
     questions: [
@@ -497,7 +480,7 @@ export const PATTERNS: Pattern[] = [
         externalId: "209",
         title: "Minimum Size Subarray Sum",
         slug: "minimum-size-subarray-sum",
-        difficulty: "Easy",
+        difficulty: "Medium",
         canonicalUrl: "https://leetcode.com/problems/minimum-size-subarray-sum",
         platform: "leetcode",
         solved: false,
@@ -612,6 +595,23 @@ export const PATTERNS: Pattern[] = [
         levelTag: "core",
       },
       {
+        id: "sw-15",
+        externalId: "713",
+        title: "Subarray Product Less Than K",
+        slug: "subarray-product-less-than-k",
+        difficulty: "Medium",
+        canonicalUrl: "https://leetcode.com/problems/subarray-product-less-than-k",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/subarray-product-less-than-k"
+        ],
+        companyCount: 19,
+        frequency: 0.67,
+        orderIndex: 9,
+        levelTag: "core",
+      },
+      {
         id: "sw-13",
         externalId: "904",
         title: "Fruit Into Baskets",
@@ -625,8 +625,25 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 11,
         frequency: 27.5,
-        orderIndex: 9,
+        orderIndex: 10,
         levelTag: "core",
+      },
+      {
+        id: "sw-11",
+        externalId: "930",
+        title: "Binary Subarrays With Sum",
+        slug: "binary-subarrays-with-sum",
+        difficulty: "Medium",
+        canonicalUrl: "https://leetcode.com/problems/binary-subarrays-with-sum",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/binary-subarrays-with-sum"
+        ],
+        companyCount: 14,
+        frequency: 0.62,
+        orderIndex: 11,
+        levelTag: "advanced",
       },
       {
         id: "sw-7",
@@ -642,7 +659,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 68,
         frequency: 0.89,
-        orderIndex: 10,
+        orderIndex: 12,
         levelTag: "advanced",
       },
       {
@@ -659,24 +676,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 54,
         frequency: 0.86,
-        orderIndex: 11,
-        levelTag: "advanced",
-      },
-      {
-        id: "sw-11",
-        externalId: "930",
-        title: "Binary Subarrays With Sum",
-        slug: "binary-subarrays-with-sum",
-        difficulty: "Medium",
-        canonicalUrl: "https://leetcode.com/problems/binary-subarrays-with-sum",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/binary-subarrays-with-sum"
-        ],
-        companyCount: 14,
-        frequency: 0.62,
-        orderIndex: 12,
+        orderIndex: 13,
         levelTag: "advanced",
       },
       {
@@ -693,7 +693,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 19,
         frequency: 0.65,
-        orderIndex: 13,
+        orderIndex: 14,
         levelTag: "challenge",
       },
       {
@@ -710,7 +710,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 10,
         frequency: 25,
-        orderIndex: 14,
+        orderIndex: 15,
         levelTag: "challenge",
       }
     ],
@@ -1350,23 +1350,6 @@ export const PATTERNS: Pattern[] = [
         levelTag: "beginner",
       },
       {
-        id: "st-2",
-        externalId: "155",
-        title: "Min Stack",
-        slug: "min-stack",
-        difficulty: "Medium",
-        canonicalUrl: "https://leetcode.com/problems/min-stack",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/min-stack"
-        ],
-        companyCount: 71,
-        frequency: 0.89,
-        orderIndex: 2,
-        levelTag: "beginner",
-      },
-      {
         id: "st-3",
         externalId: "232",
         title: "Implement Queue using Stacks",
@@ -1380,7 +1363,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 32,
         frequency: 0.74,
-        orderIndex: 3,
+        orderIndex: 2,
         levelTag: "beginner",
       },
       {
@@ -1397,7 +1380,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 15,
         frequency: 37.5,
-        orderIndex: 4,
+        orderIndex: 3,
         levelTag: "beginner",
       },
       {
@@ -1414,6 +1397,23 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 15,
         frequency: 120,
+        orderIndex: 4,
+        levelTag: "beginner",
+      },
+      {
+        id: "st-2",
+        externalId: "155",
+        title: "Min Stack",
+        slug: "min-stack",
+        difficulty: "Medium",
+        canonicalUrl: "https://leetcode.com/problems/min-stack",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/min-stack"
+        ],
+        companyCount: 71,
+        frequency: 0.89,
         orderIndex: 5,
         levelTag: "beginner",
       },
@@ -1554,23 +1554,6 @@ export const PATTERNS: Pattern[] = [
         levelTag: "core",
       },
       {
-        id: "st-5",
-        externalId: "84",
-        title: "Largest Rectangle in Histogram",
-        slug: "largest-rectangle-in-histogram",
-        difficulty: "Hard",
-        canonicalUrl: "https://leetcode.com/problems/largest-rectangle-in-histogram",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/largest-rectangle-in-histogram"
-        ],
-        companyCount: 47,
-        frequency: 0.83,
-        orderIndex: 14,
-        levelTag: "advanced",
-      },
-      {
         id: "st-8",
         externalId: "901",
         title: "Online Stock Span",
@@ -1584,6 +1567,23 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 22,
         frequency: 0.68,
+        orderIndex: 14,
+        levelTag: "advanced",
+      },
+      {
+        id: "st-5",
+        externalId: "84",
+        title: "Largest Rectangle in Histogram",
+        slug: "largest-rectangle-in-histogram",
+        difficulty: "Hard",
+        canonicalUrl: "https://leetcode.com/problems/largest-rectangle-in-histogram",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/largest-rectangle-in-histogram"
+        ],
+        companyCount: 47,
+        frequency: 0.83,
         orderIndex: 15,
         levelTag: "advanced",
       }
@@ -2381,23 +2381,6 @@ export const PATTERNS: Pattern[] = [
         levelTag: "core",
       },
       {
-        id: "hp-2",
-        externalId: "23",
-        title: "Merge k Sorted Lists",
-        slug: "merge-k-sorted-lists",
-        difficulty: "Hard",
-        canonicalUrl: "https://leetcode.com/problems/merge-k-sorted-lists",
-        platform: "leetcode",
-        solved: false,
-        links: [
-          "https://leetcode.com/problems/merge-k-sorted-lists"
-        ],
-        companyCount: 76,
-        frequency: 0.9,
-        orderIndex: 11,
-        levelTag: "advanced",
-      },
-      {
         id: "hp-4",
         externalId: "621",
         title: "Task Scheduler",
@@ -2411,6 +2394,23 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 47,
         frequency: 0.82,
+        orderIndex: 11,
+        levelTag: "advanced",
+      },
+      {
+        id: "hp-2",
+        externalId: "23",
+        title: "Merge k Sorted Lists",
+        slug: "merge-k-sorted-lists",
+        difficulty: "Hard",
+        canonicalUrl: "https://leetcode.com/problems/merge-k-sorted-lists",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/merge-k-sorted-lists"
+        ],
+        companyCount: 76,
+        frequency: 0.9,
         orderIndex: 12,
         levelTag: "advanced",
       },
@@ -2527,7 +2527,7 @@ export const PATTERNS: Pattern[] = [
       "Smart trial-and-error that explores all possibilities and quickly walks back when a path doesn't work out.",
     orderIndex: 12,
     color: "#84cc16",
-    questionCount: 14,
+    questionCount: 15,
     companyCoverage: 61,
     difficulty: "advanced",
     questions: [
@@ -2742,6 +2742,23 @@ export const PATTERNS: Pattern[] = [
         levelTag: "core",
       },
       {
+        id: "bt-15",
+        externalId: "79",
+        title: "Word Search",
+        slug: "word-search",
+        difficulty: "Medium",
+        canonicalUrl: "https://leetcode.com/problems/word-search",
+        platform: "leetcode",
+        solved: false,
+        links: [
+          "https://leetcode.com/problems/word-search"
+        ],
+        companyCount: 61,
+        frequency: 0.89,
+        orderIndex: 13,
+        levelTag: "core",
+      },
+      {
         id: "bt-5",
         externalId: "51",
         title: "N-Queens",
@@ -2755,7 +2772,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 42,
         frequency: 0.8,
-        orderIndex: 13,
+        orderIndex: 14,
         levelTag: "advanced",
       },
       {
@@ -2772,7 +2789,7 @@ export const PATTERNS: Pattern[] = [
         ],
         companyCount: 28,
         frequency: 0.72,
-        orderIndex: 14,
+        orderIndex: 15,
         levelTag: "challenge",
       }
     ],
@@ -3805,23 +3822,6 @@ export const PATTERNS: Pattern[] = [
   "difficulty": "advanced",
   "questions": [
     {
-      "id": "ms-1",
-      "externalId": "739",
-      "title": "Daily Temperatures",
-      "slug": "daily-temperatures",
-      "difficulty": "Medium",
-      "canonicalUrl": "https://leetcode.com/problems/daily-temperatures",
-      "platform": "leetcode",
-      "solved": false,
-      "links": [
-        "https://leetcode.com/problems/daily-temperatures"
-      ],
-      "companyCount": 52,
-      "frequency": 0.88,
-      "orderIndex": 1,
-      "levelTag": "beginner"
-    },
-    {
       "id": "ms-2",
       "externalId": "496",
       "title": "Next Greater Element I",
@@ -3835,6 +3835,23 @@ export const PATTERNS: Pattern[] = [
       ],
       "companyCount": 38,
       "frequency": 0.72,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "ms-1",
+      "externalId": "739",
+      "title": "Daily Temperatures",
+      "slug": "daily-temperatures",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/daily-temperatures",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/daily-temperatures"
+      ],
+      "companyCount": 52,
+      "frequency": 0.88,
       "orderIndex": 2,
       "levelTag": "beginner"
     },
@@ -3921,23 +3938,6 @@ export const PATTERNS: Pattern[] = [
   "difficulty": "advanced",
   "questions": [
     {
-      "id": "tr-1",
-      "externalId": "208",
-      "title": "Implement Trie (Prefix Tree)",
-      "slug": "implement-trie-prefix-tree",
-      "difficulty": "Medium",
-      "canonicalUrl": "https://leetcode.com/problems/implement-trie-prefix-tree",
-      "platform": "leetcode",
-      "solved": false,
-      "links": [
-        "https://leetcode.com/problems/implement-trie-prefix-tree"
-      ],
-      "companyCount": 68,
-      "frequency": 0.86,
-      "orderIndex": 1,
-      "levelTag": "beginner"
-    },
-    {
       "id": "tr-2",
       "externalId": "14",
       "title": "Longest Common Prefix",
@@ -3951,6 +3951,23 @@ export const PATTERNS: Pattern[] = [
       ],
       "companyCount": 85,
       "frequency": 0.92,
+      "orderIndex": 1,
+      "levelTag": "beginner"
+    },
+    {
+      "id": "tr-1",
+      "externalId": "208",
+      "title": "Implement Trie (Prefix Tree)",
+      "slug": "implement-trie-prefix-tree",
+      "difficulty": "Medium",
+      "canonicalUrl": "https://leetcode.com/problems/implement-trie-prefix-tree",
+      "platform": "leetcode",
+      "solved": false,
+      "links": [
+        "https://leetcode.com/problems/implement-trie-prefix-tree"
+      ],
+      "companyCount": 68,
+      "frequency": 0.86,
       "orderIndex": 2,
       "levelTag": "beginner"
     },

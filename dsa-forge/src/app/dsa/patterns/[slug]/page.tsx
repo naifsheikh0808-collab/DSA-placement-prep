@@ -38,11 +38,19 @@ function PatternContent({ slug }: { slug: string }) {
     ? Math.round((solvedCount / pattern.questions.length) * 100)
     : 0;
 
+  const DIFF_ORDER: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
+  const sortPedagogical = (qs: typeof pattern.questions) =>
+    [...qs].sort(
+      (a, b) =>
+        (DIFF_ORDER[a.difficulty] ?? 99) - (DIFF_ORDER[b.difficulty] ?? 99) ||
+        a.orderIndex - b.orderIndex
+    );
+
   const groups = {
-    beginner: pattern.questions.filter((q) => q.levelTag === "beginner"),
-    core: pattern.questions.filter((q) => q.levelTag === "core"),
-    advanced: pattern.questions.filter((q) => q.levelTag === "advanced"),
-    challenge: pattern.questions.filter((q) => q.levelTag === "challenge"),
+    beginner: sortPedagogical(pattern.questions.filter((q) => q.levelTag === "beginner")),
+    core: sortPedagogical(pattern.questions.filter((q) => q.levelTag === "core")),
+    advanced: sortPedagogical(pattern.questions.filter((q) => q.levelTag === "advanced")),
+    challenge: sortPedagogical(pattern.questions.filter((q) => q.levelTag === "challenge")),
   };
 
   const statusIcon = (qId: string) => {
