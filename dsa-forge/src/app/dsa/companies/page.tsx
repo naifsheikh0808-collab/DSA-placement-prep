@@ -239,7 +239,7 @@ type TierFilter = "ALL" | "TIER 1" | "TIER 2" | "TIER 3";
 export default function CompaniesPage() {
   const [search,       setSearch]       = useState("");
   const [selectedTier, setSelectedTier] = useState<TierFilter>("TIER 1");
-  const [selectedCat,  setSelectedCat]  = useState<string>("MAANG/FAANG");
+  const [selectedCat,  setSelectedCat]  = useState<string>("All");
   const [visibleCount, setVisibleCount] = useState<number>(15);
 
   const allCompanies = getAllCompanies();
@@ -333,7 +333,7 @@ export default function CompaniesPage() {
                 key={tier}
                 onClick={() => {
                   setSelectedTier(tier);
-                  setSelectedCat(tier === "TIER 1" ? "MAANG/FAANG" : "All");
+                  setSelectedCat("All");
                   setVisibleCount(15);
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
