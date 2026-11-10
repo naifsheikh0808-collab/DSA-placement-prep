@@ -105,7 +105,7 @@ export default function HomePage() {
         {/* Stats Ribbon — Compact & Sleek */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {[
-            { label: "Curated Patterns", val: patterns.length, desc: "High-frequency frameworks", color: "violet" },
+            { label: "DSA Patterns", val: patterns.length, desc: "High-frequency frameworks", color: "violet" },
             { label: "Target Companies", val: companies.length, desc: "Reporting live questions", color: "indigo" },
             { label: "Target Problems", val: stats.totalProblems, desc: "Prioritized question bank", color: "emerald" },
             { label: "Company Filings", val: stats.totalCompanies, desc: "Recency weighted reports", color: "amber" },
