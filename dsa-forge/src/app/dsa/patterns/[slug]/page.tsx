@@ -232,11 +232,6 @@ function PatternContent({ slug }: { slug: string }) {
 
                     {/* Metadata */}
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      {q.subPattern && (
-                        <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/10 text-[11px] font-medium text-zinc-400 whitespace-nowrap">
-                          {q.subPattern}
-                        </span>
-                      )}
                       <DifficultyBadge difficulty={q.difficulty} />
                       {q.companyCount > 0 && (
                         <span className="text-xs text-zinc-600 hidden sm:block">{q.companyCount} co</span>
