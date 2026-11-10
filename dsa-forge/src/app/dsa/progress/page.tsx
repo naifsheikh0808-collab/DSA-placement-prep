@@ -34,6 +34,7 @@ import { useAuth } from "@/context/auth-context";
 import { useProgressStore } from "@/hooks/use-progress";
 import { ActiveRoadmapCard } from "@/components/progress/ActiveRoadmapCard";
 import type { Difficulty, Problem } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 /* ─── Custom Social Brand Icons ──────────────────────────────── */
 function LinkedInIcon({ className }: { className?: string }) {
@@ -342,8 +343,8 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
       {/* ── Connected Study Roadmap Card ───────────────────── */}
       <ActiveRoadmapCard />
 
-      {/* ── Summary Problem Metrics (clickable) ─────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── Summary Problem Metrics (clickable, 2 cards in a row on mobile like homepage) ─────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {statCards.map((card) => {
           const pct = card.total > 0 ? (card.value / card.total) * 100 : 0;
           const isActive = solvedPanel === card.key;
@@ -354,33 +355,41 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...`}
               id={`stat-card-${card.key.toLowerCase()}`}
               onClick={() => openSolvedPanel(card.key)}
               aria-expanded={isActive}
-              className={`text-left p-5 bg-[#10131f]/70 border rounded-2xl backdrop-blur-md transition-all duration-200 group hover:-translate-y-0.5 ${
+              className={cn(
+                "text-left p-3.5 sm:p-5 bg-[#10131f]/70 border rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-200 group hover:-translate-y-0.5 cursor-pointer relative",
                 isActive
                   ? "border-violet-500/60 bg-violet-500/[0.06] shadow-[0_8px_28px_-6px_rgba(124,58,237,0.35)]"
                   : "border-white/10 hover:border-violet-500/40"
-              }`}
+              )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className={`text-[11px] ${card.text} uppercase font-bold tracking-wider mb-1`}>
+              <div className="flex items-start justify-between gap-1 mb-1 sm:mb-1.5">
+                <div className={cn("text-[10px] sm:text-[11px] font-bold uppercase tracking-wider truncate", card.text)}>
                   {card.label}
                 </div>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 border border-white/10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                   View
                 </span>
               </div>
-              <div className="text-3xl font-extrabold text-white">
-                {card.value}{" "}
-                <span className="text-sm font-normal text-slate-500">/ {card.total}</span>
+
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  {card.value}
+                </span>
+                <span className="text-[11px] sm:text-sm font-normal text-slate-500 font-mono">
+                  / {card.total}
+                </span>
               </div>
-              <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+
+              <div className="w-full bg-slate-800/90 h-1 sm:h-1.5 rounded-full mt-2 sm:mt-3 overflow-hidden">
                 <div
-                  className={`bg-gradient-to-r ${card.accent} h-full transition-all duration-500`}
+                  className={cn("bg-gradient-to-r h-full rounded-full transition-all duration-500", card.accent)}
                   style={{ width: `${Math.min(100, pct)}%` }}
                 />
               </div>
-              <div className="text-[11px] text-slate-400 mt-2">
+
+              <div className="text-[10px] sm:text-[11px] text-slate-400 mt-1.5 sm:mt-2 truncate leading-tight">
                 {card.key === "ALL"
-                  ? `${Math.round(pct)}% ${card.note}`
+                  ? `${Math.round(pct)}% curated benchmark`
                   : card.note}
               </div>
             </button>
