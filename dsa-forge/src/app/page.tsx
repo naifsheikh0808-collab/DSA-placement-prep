@@ -13,6 +13,7 @@ import { UserAvatar } from "@/components/layout/user-avatar";
 import { HomeAiButton } from "@/components/ai/HomeAiButton";
 import { MarketIntelligenceCard } from "@/components/home/market-intelligence-card";
 import { formatCompanyName } from "@/lib/market-stats";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   const [isAiOpen, setIsAiOpen] = useState(false);
@@ -122,29 +123,32 @@ export default function HomePage() {
           {/* Interactive Market & Pattern Intelligence Card */}
           <MarketIntelligenceCard />
 
-          {/* Quick Company Targets (Balanced Height & 6 Target Companies) */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md flex flex-col justify-between space-y-4 h-full">
-            <div className="space-y-3">
+          {/* Quick Company Targets (Compact on Mobile with 4 Qs, Full Height Desktop with 6 Qs) */}
+          <div className="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md flex flex-col justify-between space-y-2.5 sm:space-y-4 h-full">
+            <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-violet-400" /> Top Target Companies
+                <h3 className="text-xs sm:text-base font-bold text-white flex items-center gap-1.5 sm:gap-2">
+                  <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-400" /> Top Target Companies
                 </h3>
-                <Link href="/dsa/companies" className="text-xs text-violet-400 hover:text-violet-300 font-semibold">
+                <Link href="/dsa/companies" className="text-[11px] sm:text-xs text-violet-400 hover:text-violet-300 font-semibold">
                   View All
                 </Link>
               </div>
 
               <div className="space-y-1.5 sm:space-y-2">
-                {companies.slice(0, 6).map((c) => (
+                {companies.slice(0, 6).map((c, index) => (
                   <Link
                     key={c.id}
                     href={`/dsa/companies/${c.normalizedName}`}
-                    className="p-2 sm:p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-violet-500/30 flex items-center justify-between transition-all group"
+                    className={cn(
+                      "p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-violet-500/30 flex items-center justify-between transition-all group",
+                      index >= 4 && "hidden sm:flex"
+                    )}
                   >
-                    <span className="text-xs font-bold text-slate-200 group-hover:text-violet-300">
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-200 group-hover:text-violet-300">
                       {formatCompanyName(c.name)}
                     </span>
-                    <span className="text-[11px] text-slate-400 bg-slate-800/60 px-2 py-0.5 rounded font-mono">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 bg-slate-800/60 px-1.5 sm:px-2 py-0.5 rounded font-mono">
                       {c.problemCount} Qs
                     </span>
                   </Link>
@@ -152,7 +156,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+            <div className="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between text-[11px] sm:text-xs text-slate-400">
               <span className="truncate">659 Companies Tracked</span>
               <Link
                 href="/dsa/companies"

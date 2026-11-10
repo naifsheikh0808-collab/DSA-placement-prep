@@ -91,3 +91,21 @@ body {
 .lp-menu-in {
   animation: lp-menu-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Remove Recharts SVG focus outlines and mobile tap highlights */
+.recharts-wrapper,
+.recharts-wrapper *:focus,
+.recharts-wrapper *:focus-visible,
+.recharts-surface,
+.recharts-surface *:focus,
+.recharts-surface *:focus-visible,
+.recharts-bar-rectangle,
+.recharts-rectangle,
+.recharts-layer,
+.recharts-bar,
+svg.recharts-surface {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none;
+}

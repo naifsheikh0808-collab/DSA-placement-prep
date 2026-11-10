@@ -340,6 +340,8 @@ export function MarketIntelligenceCard() {
             <BarChart
               data={chartData}
               margin={{ top: 8, right: 10, left: -22, bottom: 0 }}
+              style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
+              className="outline-none focus:outline-none select-none"
               onMouseMove={(state) => {
                 if (state && state.activeTooltipIndex !== undefined) {
                   const idx =
@@ -395,7 +397,7 @@ export function MarketIntelligenceCard() {
 
               <Tooltip
                 active={showTooltip ? undefined : false}
-                cursor={{ fill: "rgba(139, 92, 246, 0.08)", radius: 6 }}
+                cursor={{ fill: "rgba(139, 92, 246, 0.08)", radius: 6, stroke: "none", strokeWidth: 0 }}
                 content={({ active, payload }) => {
                   if (!showTooltip) return null;
                   if (active && payload && payload.length) {
@@ -439,16 +441,18 @@ export function MarketIntelligenceCard() {
 
               {mode === "global" ? (
                 <>
-                  <Bar dataKey="easy" name="Easy" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="medium" name="Medium" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="hard" name="Hard" stackId="a" fill="#f43f5e" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="easy" name="Easy" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} stroke="none" strokeWidth={0} />
+                  <Bar dataKey="medium" name="Medium" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} stroke="none" strokeWidth={0} />
+                  <Bar dataKey="hard" name="Hard" stackId="a" fill="#f43f5e" radius={[5, 5, 0, 0]} stroke="none" strokeWidth={0} />
                 </>
               ) : (
-                <Bar dataKey="count" radius={[5, 5, 0, 0]}>
+                <Bar dataKey="count" radius={[5, 5, 0, 0]} stroke="none" strokeWidth={0}>
                   {chartData.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={activeBarIndex === index ? "url(#activeBarGradient)" : "url(#primaryBarGradient)"}
+                      stroke="none"
+                      strokeWidth={0}
                     />
                   ))}
                 </Bar>
