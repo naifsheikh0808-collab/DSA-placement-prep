@@ -326,7 +326,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "fast-slow-pointers",
     "name": "Fast & Slow Pointers",
     "slug": "fast-slow-pointers",
@@ -484,7 +484,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "sliding-window",
     "name": "Sliding Window",
     "slug": "sliding-window",
@@ -768,7 +768,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "kadanes-algorithm",
     "name": "Kadane's Algorithm",
     "slug": "kadanes-algorithm",
@@ -890,7 +890,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "prefix-sum",
     "name": "Prefix Sum",
     "slug": "prefix-sum",
@@ -1048,7 +1048,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "merge-intervals",
     "name": "Merge Intervals",
     "slug": "merge-intervals",
@@ -1278,7 +1278,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "in-place-linked-list-reversal",
     "name": "In-place Linked List Reversal",
     "slug": "in-place-linked-list-reversal",
@@ -1400,7 +1400,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "stack",
     "name": "Stack",
     "slug": "stack",
@@ -1684,7 +1684,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "hash-maps",
     "name": "Hash Maps / Hash Sets",
     "slug": "hash-maps",
@@ -1896,7 +1896,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "binary-search",
     "name": "Binary Search",
     "slug": "binary-search",
@@ -2324,7 +2324,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "heap-priority-queue",
     "name": "Heap / Priority Queue",
     "slug": "heap-priority-queue",
@@ -2662,7 +2662,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "backtracking",
     "name": "Backtracking",
     "slug": "backtracking",
@@ -2952,7 +2952,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "tree-pattern",
     "name": "Trees",
     "slug": "tree-pattern",
@@ -3542,7 +3542,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "graphs",
     "name": "Graph DFS/BFS",
     "slug": "graphs",
@@ -3898,13 +3898,171 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
+    "id": "greedy",
+    "name": "Greedy Algorithms",
+    "slug": "greedy",
+    "tier": "core",
+    "description": "Make locally optimal choices at each step to reach a global optimum. Common in activity selection, gas stations, jump games, and task schedulers.",
+    "orderIndex": 15,
+    "color": "#eab308",
+    "questionCount": 8,
+    "companyCoverage": 50,
+    "difficulty": "core",
+    "questions": [
+      {
+        "id": "grd-7",
+        "externalId": "455",
+        "title": "Assign Cookies",
+        "slug": "assign-cookies",
+        "difficulty": "Easy",
+        "canonicalUrl": "https://leetcode.com/problems/assign-cookies",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/assign-cookies"
+        ],
+        "companyCount": 9,
+        "frequency": 22.5,
+        "orderIndex": 1,
+        "levelTag": "beginner",
+        "subPattern": "Greedy Matching"
+      },
+      {
+        "id": "grd-8",
+        "externalId": "860",
+        "title": "Lemonade Change",
+        "slug": "lemonade-change",
+        "difficulty": "Easy",
+        "canonicalUrl": "https://leetcode.com/problems/lemonade-change",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/lemonade-change"
+        ],
+        "companyCount": 8,
+        "frequency": 20,
+        "orderIndex": 2,
+        "levelTag": "beginner",
+        "subPattern": "Greedy Simulation"
+      },
+      {
+        "id": "grd-1",
+        "externalId": "55",
+        "title": "Jump Game",
+        "slug": "jump-game",
+        "difficulty": "Medium",
+        "canonicalUrl": "https://leetcode.com/problems/jump-game",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/jump-game"
+        ],
+        "companyCount": 82,
+        "frequency": 0.92,
+        "orderIndex": 3,
+        "levelTag": "core",
+        "subPattern": "Reachability"
+      },
+      {
+        "id": "grd-2",
+        "externalId": "45",
+        "title": "Jump Game II",
+        "slug": "jump-game-ii",
+        "difficulty": "Medium",
+        "canonicalUrl": "https://leetcode.com/problems/jump-game-ii",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/jump-game-ii"
+        ],
+        "companyCount": 60,
+        "frequency": 0.84,
+        "orderIndex": 4,
+        "levelTag": "core",
+        "subPattern": "Min Jumps BFS-Greedy"
+      },
+      {
+        "id": "grd-4",
+        "externalId": "763",
+        "title": "Partition Labels",
+        "slug": "partition-labels",
+        "difficulty": "Medium",
+        "canonicalUrl": "https://leetcode.com/problems/partition-labels",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/partition-labels"
+        ],
+        "companyCount": 42,
+        "frequency": 0.72,
+        "orderIndex": 5,
+        "levelTag": "core",
+        "subPattern": "Last-Index Interval"
+      },
+      {
+        "id": "grd-5",
+        "externalId": "435",
+        "title": "Non-overlapping Intervals",
+        "slug": "non-overlapping-intervals",
+        "difficulty": "Medium",
+        "canonicalUrl": "https://leetcode.com/problems/non-overlapping-intervals",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/non-overlapping-intervals"
+        ],
+        "companyCount": 48,
+        "frequency": 0.76,
+        "orderIndex": 6,
+        "levelTag": "core",
+        "subPattern": "Interval Scheduling"
+      },
+      {
+        "id": "grd-3",
+        "externalId": "134",
+        "title": "Gas Station",
+        "slug": "gas-station",
+        "difficulty": "Medium",
+        "canonicalUrl": "https://leetcode.com/problems/gas-station",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/gas-station"
+        ],
+        "companyCount": 55,
+        "frequency": 0.8,
+        "orderIndex": 7,
+        "levelTag": "advanced",
+        "subPattern": "Circular Deficit Reset"
+      },
+      {
+        "id": "grd-6",
+        "externalId": "621",
+        "title": "Task Scheduler",
+        "slug": "task-scheduler",
+        "difficulty": "Medium",
+        "canonicalUrl": "https://leetcode.com/problems/task-scheduler",
+        "platform": "leetcode",
+        "solved": false,
+        "links": [
+          "https://leetcode.com/problems/task-scheduler"
+        ],
+        "companyCount": 68,
+        "frequency": 0.86,
+        "orderIndex": 8,
+        "levelTag": "challenge",
+        "subPattern": "Frequency Scheduling"
+      }
+    ]
+  },
+{
     "id": "dynamic-programming",
     "name": "Dynamic Programming",
     "slug": "dynamic-programming",
-    "tier": "core",
+    "tier": "advanced",
     "description": "Stop re-calculating the same work. Break big problems into smaller steps and save your answers to solve them effortlessly.",
-    "orderIndex": 15,
+    "orderIndex": 16,
     "color": "#dc2626",
     "questionCount": 10,
     "companyCoverage": 100,
@@ -4092,13 +4250,13 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "monotonic-stack-queue",
     "name": "Monotonic Stack & Queue",
     "slug": "monotonic-stack-queue",
     "tier": "advanced",
     "description": "Maintain elements in strictly increasing or decreasing order to solve next greater element, stock spans, and sliding window extrema in O(n).",
-    "orderIndex": 16,
+    "orderIndex": 17,
     "color": "#f97316",
     "questionCount": 6,
     "companyCoverage": 48,
@@ -4214,13 +4372,13 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "trie",
     "name": "Trie (Prefix Tree)",
     "slug": "trie",
     "tier": "advanced",
     "description": "Tree-based data structure optimized for fast prefix lookup, dictionary search, autocomplete, and bitwise XOR queries in O(length).",
-    "orderIndex": 17,
+    "orderIndex": 18,
     "color": "#06b6d4",
     "questionCount": 6,
     "companyCoverage": 44,
@@ -4336,13 +4494,13 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "topological-sort",
     "name": "Topological Sort",
     "slug": "topological-sort",
     "tier": "advanced",
     "description": "Linear ordering of vertices in a Directed Acyclic Graph (DAG) using Kahn's BFS in-degree algorithm or DFS post-order traversal.",
-    "orderIndex": 18,
+    "orderIndex": 19,
     "color": "#8b5cf6",
     "questionCount": 5,
     "companyCoverage": 46,
@@ -4440,13 +4598,13 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "union-find",
     "name": "Union-Find / Disjoint Set (DSU)",
     "slug": "union-find",
     "tier": "advanced",
     "description": "Near O(1) dynamic connectivity queries using path compression and union by rank. Key for connected components, Kruskal's MST, and cycle detection.",
-    "orderIndex": 19,
+    "orderIndex": 20,
     "color": "#10b981",
     "questionCount": 5,
     "companyCoverage": 42,
@@ -4544,13 +4702,13 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "bit-manipulation",
     "name": "Bit Manipulation & Math",
     "slug": "bit-manipulation",
     "tier": "advanced",
     "description": "Constant-time bitwise operations (AND, OR, XOR, shifts) for subset generation, parity checking, arithmetic without operators, and bitmask DP.",
-    "orderIndex": 20,
+    "orderIndex": 21,
     "color": "#ec4899",
     "questionCount": 6,
     "companyCoverage": 38,
@@ -4666,165 +4824,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
-    "id": "greedy",
-    "name": "Greedy Algorithms",
-    "slug": "greedy",
-    "tier": "advanced",
-    "description": "Make locally optimal choices at each step to reach a global optimum. Common in activity selection, gas stations, jump games, and task schedulers.",
-    "orderIndex": 21,
-    "color": "#eab308",
-    "questionCount": 8,
-    "companyCoverage": 50,
-    "difficulty": "core",
-    "questions": [
-      {
-        "id": "grd-7",
-        "externalId": "455",
-        "title": "Assign Cookies",
-        "slug": "assign-cookies",
-        "difficulty": "Easy",
-        "canonicalUrl": "https://leetcode.com/problems/assign-cookies",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/assign-cookies"
-        ],
-        "companyCount": 9,
-        "frequency": 22.5,
-        "orderIndex": 1,
-        "levelTag": "beginner",
-        "subPattern": "Greedy Matching"
-      },
-      {
-        "id": "grd-8",
-        "externalId": "860",
-        "title": "Lemonade Change",
-        "slug": "lemonade-change",
-        "difficulty": "Easy",
-        "canonicalUrl": "https://leetcode.com/problems/lemonade-change",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/lemonade-change"
-        ],
-        "companyCount": 8,
-        "frequency": 20,
-        "orderIndex": 2,
-        "levelTag": "beginner",
-        "subPattern": "Greedy Simulation"
-      },
-      {
-        "id": "grd-1",
-        "externalId": "55",
-        "title": "Jump Game",
-        "slug": "jump-game",
-        "difficulty": "Medium",
-        "canonicalUrl": "https://leetcode.com/problems/jump-game",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/jump-game"
-        ],
-        "companyCount": 82,
-        "frequency": 0.92,
-        "orderIndex": 3,
-        "levelTag": "core",
-        "subPattern": "Reachability"
-      },
-      {
-        "id": "grd-2",
-        "externalId": "45",
-        "title": "Jump Game II",
-        "slug": "jump-game-ii",
-        "difficulty": "Medium",
-        "canonicalUrl": "https://leetcode.com/problems/jump-game-ii",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/jump-game-ii"
-        ],
-        "companyCount": 60,
-        "frequency": 0.84,
-        "orderIndex": 4,
-        "levelTag": "core",
-        "subPattern": "Min Jumps BFS-Greedy"
-      },
-      {
-        "id": "grd-4",
-        "externalId": "763",
-        "title": "Partition Labels",
-        "slug": "partition-labels",
-        "difficulty": "Medium",
-        "canonicalUrl": "https://leetcode.com/problems/partition-labels",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/partition-labels"
-        ],
-        "companyCount": 42,
-        "frequency": 0.72,
-        "orderIndex": 5,
-        "levelTag": "core",
-        "subPattern": "Last-Index Interval"
-      },
-      {
-        "id": "grd-5",
-        "externalId": "435",
-        "title": "Non-overlapping Intervals",
-        "slug": "non-overlapping-intervals",
-        "difficulty": "Medium",
-        "canonicalUrl": "https://leetcode.com/problems/non-overlapping-intervals",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/non-overlapping-intervals"
-        ],
-        "companyCount": 48,
-        "frequency": 0.76,
-        "orderIndex": 6,
-        "levelTag": "core",
-        "subPattern": "Interval Scheduling"
-      },
-      {
-        "id": "grd-3",
-        "externalId": "134",
-        "title": "Gas Station",
-        "slug": "gas-station",
-        "difficulty": "Medium",
-        "canonicalUrl": "https://leetcode.com/problems/gas-station",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/gas-station"
-        ],
-        "companyCount": 55,
-        "frequency": 0.8,
-        "orderIndex": 7,
-        "levelTag": "advanced",
-        "subPattern": "Circular Deficit Reset"
-      },
-      {
-        "id": "grd-6",
-        "externalId": "621",
-        "title": "Task Scheduler",
-        "slug": "task-scheduler",
-        "difficulty": "Medium",
-        "canonicalUrl": "https://leetcode.com/problems/task-scheduler",
-        "platform": "leetcode",
-        "solved": false,
-        "links": [
-          "https://leetcode.com/problems/task-scheduler"
-        ],
-        "companyCount": 68,
-        "frequency": 0.86,
-        "orderIndex": 8,
-        "levelTag": "challenge",
-        "subPattern": "Frequency Scheduling"
-      }
-    ]
-  },
-  {
+{
     "id": "matrix-traversal",
     "name": "Matrix Traversal & Simulation",
     "slug": "matrix-traversal",
@@ -4946,7 +4946,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "design-hybrid-structures",
     "name": "Design & Hybrid Structures",
     "slug": "design-hybrid-structures",
@@ -5068,7 +5068,7 @@ export const PATTERNS: Pattern[] = [
       }
     ]
   },
-  {
+{
     "id": "segment-tree",
     "name": "Segment & Fenwick Trees",
     "slug": "segment-tree",

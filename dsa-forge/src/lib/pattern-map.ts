@@ -67,9 +67,10 @@ export const CURATED_PATTERN_ALIASES: Record<string, string[]> = {
     "BST",
   ],
   "graphs": ["Graph DFS/BFS", "Graph (DFS/BFS)", "GRAPHS", "Graph", "Graphs"],
-  "dynamic-programming": ["Dynamic Programming", "DP"],
+  "greedy": ["Greedy Algorithms", "Greedy"],
 
   // ─── Tier 2: Advanced & Specialized Frameworks (9 Patterns) ───────────
+  "dynamic-programming": ["Dynamic Programming", "DP"],
   "monotonic-stack-queue": [
     "Monotonic Stack & Queue",
     "Monotonic Stack",
@@ -89,7 +90,6 @@ export const CURATED_PATTERN_ALIASES: Record<string, string[]> = {
     "Bit Manipulation",
     "Bitmask",
   ],
-  "greedy": ["Greedy Algorithms", "Greedy"],
   "matrix-traversal": [
     "Matrix Traversal & Simulation",
     "Matrix Traversal",
