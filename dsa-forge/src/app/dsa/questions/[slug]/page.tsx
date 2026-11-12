@@ -140,8 +140,8 @@ function QuestionContent({ slug }: { slug: string }) {
           <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-[auto_1fr] gap-4 md:gap-5 items-start min-h-0">
 
             {/* ── 1. Status & Notes Unified Card ── */}
-            <Card hover={false} className="order-1 md:order-none md:col-span-2 md:col-start-1 md:row-start-1">
-              <CardContent className="p-4 sm:p-5 space-y-3.5 sm:space-y-4">
+            <Card hover={false} className="order-1 md:order-none md:col-span-2 md:col-start-1 md:row-start-1 p-4 sm:p-5">
+              <CardContent className="p-0 space-y-3.5 sm:space-y-4">
                 {/* Status Section */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -154,7 +154,12 @@ function QuestionContent({ slug }: { slug: string }) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+                  <div
+                    className={cn(
+                      "grid grid-cols-2 gap-1.5 sm:gap-2",
+                      isAiOpen ? "xl:flex xl:flex-wrap" : "sm:flex sm:flex-wrap"
+                    )}
+                  >
                     {(
                       Object.entries(STATUS_CONFIG) as [
                         ProgressStatus,
@@ -182,7 +187,7 @@ function QuestionContent({ slug }: { slug: string }) {
                           type="button"
                           onClick={() => updateStatus(problem.id, status, notes)}
                           className={cn(
-                            "flex items-center justify-center gap-1.5 px-2 py-2 sm:px-3 rounded-xl border text-[11px] sm:text-xs font-medium sm:font-semibold transition-all cursor-pointer active:scale-98 select-none min-w-0",
+                            "flex-auto min-w-fit flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-[11px] sm:text-xs font-medium sm:font-semibold transition-all cursor-pointer active:scale-98 select-none",
                             active
                               ? activeStyle
                               : "border-zinc-800/80 bg-zinc-900/30 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300 hover:bg-zinc-800/20"
