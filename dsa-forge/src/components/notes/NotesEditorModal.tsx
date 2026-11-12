@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   X,
   Bold,
@@ -148,23 +148,14 @@ export function NotesEditorModal({
   initialNotes,
   onSave,
 }: NotesEditorModalProps) {
-  const [isSaved, setIsSaved] = useState(true);
-  const [wordCount, setWordCount] = useState(0);
   const editorRef = useRef<HTMLDivElement>(null);
+  const wordCountRef = useRef<HTMLSpanElement>(null);
+  const saveStatusRef = useRef<HTMLSpanElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wasOpenRef = useRef(false);
   const lastSavedMdRef = useRef(initialNotes);
 
-  // Calculate word count from text content
-  const updateStats = useCallback(() => {
-    if (editorRef.current) {
-      const text = editorRef.current.innerText || "";
-      const trimmed = text.trim();
-      setWordCount(trimmed ? trimmed.split(/\s+/).length : 0);
-    }
-  }, []);
-
-  // Initialize editor content ONLY when modal transitions from closed to open
+  // Initialize editor content ONLY once when modal transitions from closed to open
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
       wasOpenRef.current = true;
@@ -172,8 +163,18 @@ export function NotesEditorModal({
       if (editorRef.current) {
         const html = markdownToHtml(initialNotes || "");
         editorRef.current.innerHTML = html;
-        updateStats();
-        setIsSaved(true);
+
+        // Initialize word count directly on DOM
+        if (wordCountRef.current) {
+          const text = editorRef.current.innerText || "";
+          const trimmed = text.trim();
+          const count = trimmed ? trimmed.split(/\s+/).length : 0;
+          wordCountRef.current.textContent = `${count} words`;
+        }
+        if (saveStatusRef.current) {
+          saveStatusRef.current.textContent = "Saved";
+          saveStatusRef.current.className = "text-[11px] font-medium text-emerald-400/90 hidden sm:inline";
+        }
 
         // Focus editor
         setTimeout(() => {
@@ -185,7 +186,7 @@ export function NotesEditorModal({
     } else if (!isOpen) {
       wasOpenRef.current = false;
     }
-  }, [isOpen, initialNotes, updateStats]);
+  }, [isOpen, initialNotes]);
 
   // Handle saving and closing safely
   const handleSaveAndClose = useCallback(() => {
@@ -203,16 +204,27 @@ export function NotesEditorModal({
     } catch (err) {
       console.error("[NotesEditorModal] Error saving notes:", err);
     } finally {
-      setIsSaved(true);
       onClose();
     }
   }, [onSave, onClose]);
 
-  // Handle typing & content change
+  // Handle typing & content change without triggering ANY React re-renders (zero thread blocking)
   const handleInput = () => {
-    setIsSaved(false);
-    updateStats();
+    // 1. Direct DOM update for word count (0ms, 0 React renders)
+    if (wordCountRef.current && editorRef.current) {
+      const text = editorRef.current.innerText || "";
+      const trimmed = text.trim();
+      const count = trimmed ? trimmed.split(/\s+/).length : 0;
+      wordCountRef.current.textContent = `${count} words`;
+    }
 
+    // 2. Direct DOM update for status indicator (0ms, 0 React renders)
+    if (saveStatusRef.current) {
+      saveStatusRef.current.textContent = "Saving...";
+      saveStatusRef.current.className = "text-[11px] font-medium text-amber-400/90 hidden sm:inline";
+    }
+
+    // 3. Debounced quiet background sync
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
@@ -224,13 +236,16 @@ export function NotesEditorModal({
             lastSavedMdRef.current = md;
             onSave(md);
           }
-          setIsSaved(true);
         }
       } catch (err) {
         console.error("[NotesEditorModal] Auto-save error:", err);
-        setIsSaved(true);
+      } finally {
+        if (saveStatusRef.current) {
+          saveStatusRef.current.textContent = "Saved";
+          saveStatusRef.current.className = "text-[11px] font-medium text-emerald-400/90 hidden sm:inline";
+        }
       }
-    }, 1200);
+    }, 2000);
   };
 
   // Keyboard shortcuts (Escape, Ctrl+Enter)
@@ -293,8 +308,11 @@ export function NotesEditorModal({
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-[11px] font-medium text-emerald-400/90 hidden sm:inline">
-              {isSaved ? "Saved" : "Saving..."}
+            <span
+              ref={saveStatusRef}
+              className="text-[11px] font-medium text-emerald-400/90 hidden sm:inline"
+            >
+              Saved
             </span>
             <button
               onClick={handleSaveAndClose}
@@ -430,7 +448,7 @@ export function NotesEditorModal({
 
         {/* ── Footer ── */}
         <div className="px-4 sm:px-5 py-2.5 border-t border-white/[0.08] bg-black/30 flex items-center justify-between text-xs text-zinc-500">
-          <span>{wordCount} words</span>
+          <span ref={wordCountRef}>0 words</span>
 
           <button
             type="button"
