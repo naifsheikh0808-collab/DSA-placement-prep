@@ -17,8 +17,9 @@ interface MarkdownNotesRendererProps {
  * - Inline code: `code`
  * - Big-O notation: O(1), O(n), O(n log n), etc.
  */
-function renderInlineTokens(text: string): React.ReactNode {
+function renderInlineTokens(text: string, depth = 0): React.ReactNode {
   if (!text) return null;
+  if (depth > 5) return text;
 
   // Regex matches:
   // 1. `inline code`
@@ -26,9 +27,9 @@ function renderInlineTokens(text: string): React.ReactNode {
   // 3. __underline__
   // 4. **bold**
   // 5. *italic*
-  // 6. O(...) complexity
+  // 6. O(...) complexity (non-backtracking)
   const tokenRegex =
-    /(`[^`]+`|<u>[\s\S]*?<\/u>|__[^_]+__|\*\*[^*]+\*\*|\*[^*]+\*|\bO\([^\n\r()]+(?:\([^\n\r()]+\)[^\n\r()]*)*\))/g;
+    /(`[^`]+`|<u>[\s\S]*?<\/u>|__[^_]+__|\*\*[^*]+\*\*|\*[^*]+\*|\bO\([^()\n\r]+(?:\([^()\n\r]+\)[^()\n\r]*)?\))/g;
 
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -61,19 +62,19 @@ function renderInlineTokens(text: string): React.ReactNode {
           key={key}
           className="underline underline-offset-2 decoration-violet-400 text-slate-100 font-medium decoration-1.5"
         >
-          {renderInlineTokens(inner)}
+          {renderInlineTokens(inner, depth + 1)}
         </span>
       );
     } else if (val.startsWith("**") && val.endsWith("**")) {
       parts.push(
         <strong key={key} className="text-white font-bold tracking-tight">
-          {renderInlineTokens(val.slice(2, -2))}
+          {renderInlineTokens(val.slice(2, -2), depth + 1)}
         </strong>
       );
     } else if (val.startsWith("*") && val.endsWith("*") && val.length > 2) {
       parts.push(
         <em key={key} className="text-violet-200/95 italic">
-          {renderInlineTokens(val.slice(1, -1))}
+          {renderInlineTokens(val.slice(1, -1), depth + 1)}
         </em>
       );
     } else if (/^\bO\(.+\)$/.test(val)) {
@@ -112,6 +113,7 @@ function parseBlocks(markdown: string): Block[] {
   let i = 0;
 
   while (i < lines.length) {
+    const startI = i;
     const line = lines[i];
 
     // 1. Fenced Code Block
@@ -128,18 +130,19 @@ function parseBlocks(markdown: string): Block[] {
       continue;
     }
 
-    // 2. Headings (#, ##, ###)
-    if (line.trim().startsWith("#")) {
-      const match = line.trim().match(/^(#{1,3})\s+(.*)$/);
-      if (match) {
-        const level = match[1].length;
+    // 2. Headings (#, ##, ###) - safely consume empty or populated headings
+    const headingMatch = line.trim().match(/^(#{1,3})(?:\s+(.*))?$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const text = (headingMatch[2] || "").trim();
+      if (text) {
         blocks.push({
           type: level === 1 ? "h1" : level === 2 ? "h2" : "h3",
-          text: match[2],
+          text,
         });
-        i++;
-        continue;
       }
+      i++;
+      continue;
     }
 
     // 3. Blockquote (> ...)
@@ -187,7 +190,7 @@ function parseBlocks(markdown: string): Block[] {
       i < lines.length &&
       lines[i].trim() !== "" &&
       !lines[i].trim().startsWith("```") &&
-      !lines[i].trim().startsWith("#") &&
+      !/^#{1,3}(?:\s|$)/.test(lines[i].trim()) &&
       !lines[i].trim().startsWith(">") &&
       !/^\s*[-*•]\s+/.test(lines[i]) &&
       !/^\s*\d+\.\s+/.test(lines[i])
@@ -197,6 +200,12 @@ function parseBlocks(markdown: string): Block[] {
     }
     if (paraLines.length > 0) {
       blocks.push({ type: "p", text: paraLines.join(" ") });
+    }
+
+    // Absolute failsafe: guarantee forward progress on any malformed input
+    if (i === startI) {
+      blocks.push({ type: "p", text: lines[i] });
+      i++;
     }
   }
 

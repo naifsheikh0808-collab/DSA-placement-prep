@@ -101,24 +101,48 @@ function htmlToMarkdown(html: string): string {
   // Normalize empty break lines
   text = text.replace(/<(p|div)>\s*<br\s*[\/]?>\s*<\/\1>/gi, "\n\n");
 
-  // Headings
-  text = text.replace(/<h1[^>]*>(.*?)<\/h1>/gi, "\n# $1\n");
-  text = text.replace(/<h2[^>]*>(.*?)<\/h2>/gi, "\n## $1\n");
-  text = text.replace(/<h3[^>]*>(.*?)<\/h3>/gi, "\n## $1\n");
+  // Inline tags first (ignore empty tags)
+  text = text.replace(/<(b|strong)[^>]*>([\s\S]*?)<\/\1>/gi, (_, __, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `**${clean}**` : "";
+  });
+  text = text.replace(/<(i|em)[^>]*>([\s\S]*?)<\/\1>/gi, (_, __, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `*${clean}*` : "";
+  });
+  text = text.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, (_, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `<u>${clean}</u>` : "";
+  });
+  text = text.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `\`${clean}\`` : "";
+  });
 
-  // Lists
-  text = text.replace(/<li[^>]*>(.*?)<\/li>/gi, "\n- $1");
+  // Headings (only emit heading if it has non-empty content)
+  text = text.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `\n# ${clean}\n` : "\n";
+  });
+  text = text.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `\n## ${clean}\n` : "\n";
+  });
+  text = text.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `\n## ${clean}\n` : "\n";
+  });
+
+  // Lists (only emit bullet if non-empty)
+  text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, inner) => {
+    const clean = inner.replace(/<br\s*[\/]?>/gi, "").trim();
+    return clean ? `\n- ${clean}` : "\n";
+  });
   text = text.replace(/<\/?(ul|ol)[^>]*>/gi, "\n");
 
   // Paragraphs & Divs
-  text = text.replace(/<(p|div)[^>]*>(.*?)<\/\1>/gi, "\n$2\n");
+  text = text.replace(/<(p|div)[^>]*>([\s\S]*?)<\/\1>/gi, "\n$2\n");
   text = text.replace(/<br\s*[\/]?>/gi, "\n");
-
-  // Inline tags
-  text = text.replace(/<(b|strong)[^>]*>(.*?)<\/\1>/gi, "**$2**");
-  text = text.replace(/<(i|em)[^>]*>(.*?)<\/\1>/gi, "*$2*");
-  text = text.replace(/<u[^>]*>(.*?)<\/u>/gi, "<u>$1</u>");
-  text = text.replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`");
 
   // Remove any remaining unwanted HTML tags except <u>
   text = text.replace(/<(?!\/?u\b)[^>]+>/g, "");
@@ -277,6 +301,25 @@ export function NotesEditorModal({
     }
   };
 
+  // Toggle heading level or revert to normal paragraph if already active
+  const toggleHeading = (tag: "H1" | "H2") => {
+    if (typeof document === "undefined") return;
+    try {
+      const currentBlock = document.queryCommandValue("formatBlock");
+      if (currentBlock && currentBlock.toUpperCase() === tag) {
+        document.execCommand("formatBlock", false, "<p>");
+      } else {
+        document.execCommand("formatBlock", false, `<${tag.toLowerCase()}>`);
+      }
+    } catch {
+      document.execCommand("formatBlock", false, `<${tag.toLowerCase()}>`);
+    }
+    handleInput();
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-[250] flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
@@ -332,10 +375,10 @@ export function NotesEditorModal({
             type="button"
             onMouseDown={(e) => {
               e.preventDefault();
-              execCmd("formatBlock", "<h1>");
+              toggleHeading("H1");
             }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 font-semibold"
-            title="Large Heading"
+            title="Large Heading (Click again for normal)"
           >
             <Heading1 className="w-4 h-4" />
           </button>
@@ -344,10 +387,10 @@ export function NotesEditorModal({
             type="button"
             onMouseDown={(e) => {
               e.preventDefault();
-              execCmd("formatBlock", "<h2>");
+              toggleHeading("H2");
             }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 font-semibold"
-            title="Medium Heading"
+            title="Medium Heading (Click again for normal)"
           >
             <Heading2 className="w-4 h-4" />
           </button>
