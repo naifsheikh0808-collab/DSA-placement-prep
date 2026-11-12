@@ -162,6 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // First time sign-in for this account:
             // Seamlessly migrate guest mode activity (solved problems, roadmap, preferences) into their new cloud account!
             const guestProgress = loadProgress();
+            const cleanGuestProgress = JSON.parse(JSON.stringify(guestProgress || {}));
             const guestPlan = loadPlan();
             const guestProfile = loadPlannerProfile();
 
@@ -169,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               displayName: currentUser.displayName ?? null,
               email: currentUser.email ?? null,
               photoURL: currentUser.photoURL ?? null,
-              progress: guestProgress || {},
+              progress: cleanGuestProgress,
               studyPlan: guestPlan || null,
               plannerProfile: guestProfile || null,
               createdAt: new Date().toISOString(),

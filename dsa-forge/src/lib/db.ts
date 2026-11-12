@@ -158,11 +158,17 @@ function canonicalizeProgress(
     const canonicalKey = resolveProblemId(key);
     const status = (entry.status ?? "todo") as ProgressStatus;
     const normalized: UserProgress = {
-      ...entry,
       problemId: canonicalKey,
       status,
       revisionCount: entry.revisionCount ?? 0,
+      lastAttemptedAt: entry.lastAttemptedAt ?? new Date().toISOString(),
     };
+    if (entry.notes !== undefined && entry.notes !== null) {
+      normalized.notes = entry.notes;
+    }
+    if (entry.solvedAt !== undefined && entry.solvedAt !== null) {
+      normalized.solvedAt = entry.solvedAt;
+    }
 
     const existing = out[canonicalKey];
     if (!existing) {
@@ -176,7 +182,7 @@ function canonicalizeProgress(
     const winner = keepNew ? normalized : existing;
     const loser = keepNew ? existing : normalized;
 
-    out[canonicalKey] = {
+    const merged: UserProgress = {
       ...loser,
       ...winner,
       status:
@@ -187,15 +193,29 @@ function canonicalizeProgress(
         existing.revisionCount ?? 0,
         normalized.revisionCount ?? 0
       ),
-      notes: winner.notes ?? loser.notes,
-      solvedAt: winner.solvedAt ?? loser.solvedAt,
       lastAttemptedAt:
         winner.lastAttemptedAt && loser.lastAttemptedAt
           ? winner.lastAttemptedAt > loser.lastAttemptedAt
             ? winner.lastAttemptedAt
             : loser.lastAttemptedAt
-          : winner.lastAttemptedAt ?? loser.lastAttemptedAt,
+          : winner.lastAttemptedAt ?? loser.lastAttemptedAt ?? new Date().toISOString(),
     };
+
+    const mergedNotes = winner.notes ?? loser.notes;
+    if (mergedNotes !== undefined && mergedNotes !== null) {
+      merged.notes = mergedNotes;
+    } else {
+      delete merged.notes;
+    }
+
+    const mergedSolvedAt = winner.solvedAt ?? loser.solvedAt;
+    if (mergedSolvedAt !== undefined && mergedSolvedAt !== null) {
+      merged.solvedAt = mergedSolvedAt;
+    } else {
+      delete merged.solvedAt;
+    }
+
+    out[canonicalKey] = merged;
   }
 
   return out;
@@ -247,15 +267,21 @@ export function saveProgress(progress: Record<string, UserProgress>, skipCloudSy
   window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
 
   if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && firestoreDb && isFirebaseConfigured) {
-    const userDocRef = doc(firestoreDb, "users", auth.currentUser.uid);
-    setDoc(
-      userDocRef,
-      {
-        progress: canonical,
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    ).catch((err) => console.warn("[Firestore] Progress sync error:", err));
+    try {
+      const userDocRef = doc(firestoreDb, "users", auth.currentUser.uid);
+      // Strip all undefined properties recursively so Firestore never throws
+      const cleanProgress = JSON.parse(JSON.stringify(canonical));
+      setDoc(
+        userDocRef,
+        {
+          progress: cleanProgress,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      ).catch((err) => console.warn("[Firestore] Progress sync error:", err));
+    } catch (err) {
+      console.warn("[Firestore] Progress sync exception caught:", err);
+    }
   }
 }
 
@@ -266,15 +292,19 @@ export function resetProgress(skipCloudSync = false): void {
   window.dispatchEvent(new Event(PROGRESS_UPDATED_EVENT));
 
   if (!skipCloudSync && typeof window !== "undefined" && auth?.currentUser && firestoreDb && isFirebaseConfigured) {
-    const userDocRef = doc(firestoreDb, "users", auth.currentUser.uid);
-    setDoc(
-      userDocRef,
-      {
-        progress: {},
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    ).catch((err) => console.warn("[Firestore] Progress reset error:", err));
+    try {
+      const userDocRef = doc(firestoreDb, "users", auth.currentUser.uid);
+      setDoc(
+        userDocRef,
+        {
+          progress: {},
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      ).catch((err) => console.warn("[Firestore] Progress reset error:", err));
+    } catch (err) {
+      console.warn("[Firestore] Progress reset exception caught:", err);
+    }
   }
 }
 
@@ -286,15 +316,31 @@ export function updateProblemStatus(
   const all = loadProgress();
   const canonicalId = resolveProblemId(problemId);
   const existing = all[canonicalId];
+
   const updated: UserProgress = {
     problemId: canonicalId,
     status,
     revisionCount: existing?.revisionCount ?? 0,
-    notes: notes ?? existing?.notes,
     lastAttemptedAt: new Date().toISOString(),
-    solvedAt: status === "solved" ? (existing?.solvedAt ?? new Date().toISOString()) : existing?.solvedAt,
   };
-  if (status === "revise") updated.revisionCount = (existing?.revisionCount ?? 0) + 1;
+
+  const resolvedNotes = notes !== undefined ? notes : existing?.notes;
+  if (resolvedNotes !== undefined && resolvedNotes !== null) {
+    updated.notes = resolvedNotes;
+  }
+
+  const resolvedSolvedAt =
+    status === "solved"
+      ? existing?.solvedAt ?? new Date().toISOString()
+      : existing?.solvedAt;
+  if (resolvedSolvedAt !== undefined && resolvedSolvedAt !== null) {
+    updated.solvedAt = resolvedSolvedAt;
+  }
+
+  if (status === "revise") {
+    updated.revisionCount = (existing?.revisionCount ?? 0) + 1;
+  }
+
   all[canonicalId] = updated;
   saveProgress(all);
   return updated;

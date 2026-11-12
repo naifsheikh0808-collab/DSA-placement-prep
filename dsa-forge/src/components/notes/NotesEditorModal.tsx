@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   X,
   Bold,
@@ -24,6 +24,122 @@ interface NotesEditorModalProps {
   onSave: (notes: string) => void;
 }
 
+/**
+ * Converts Markdown string to HTML for the WYSIWYG contentEditable editor.
+ */
+function markdownToHtml(md: string): string {
+  if (!md || !md.trim()) return "";
+  const trimmedMd = md.trim();
+
+  // If already HTML format, return directly
+  if (/^<(p|div|h1|h2|ul|ol)\b/i.test(trimmedMd)) {
+    return trimmedMd;
+  }
+
+  const lines = trimmedMd.split("\n");
+  const result: string[] = [];
+  let inUl = false;
+  let inOl = false;
+
+  const formatInline = (str: string) =>
+    str
+      .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+      .replace(/__(.+?)__/g, "<u>$1</u>")
+      .replace(/<u>(.*?)<\/u>/gi, "<u>$1</u>")
+      .replace(/\*([^*]+?)\*/g, "<i>$1</i>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith("### ")) {
+      if (inUl) { result.push("</ul>"); inUl = false; }
+      if (inOl) { result.push("</ol>"); inOl = false; }
+      result.push(`<h2>${formatInline(trimmed.slice(4))}</h2>`);
+    } else if (trimmed.startsWith("## ")) {
+      if (inUl) { result.push("</ul>"); inUl = false; }
+      if (inOl) { result.push("</ol>"); inOl = false; }
+      result.push(`<h2>${formatInline(trimmed.slice(3))}</h2>`);
+    } else if (trimmed.startsWith("# ")) {
+      if (inUl) { result.push("</ul>"); inUl = false; }
+      if (inOl) { result.push("</ol>"); inOl = false; }
+      result.push(`<h1>${formatInline(trimmed.slice(2))}</h1>`);
+    } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      if (inOl) { result.push("</ol>"); inOl = false; }
+      if (!inUl) { result.push("<ul>"); inUl = true; }
+      result.push(`<li>${formatInline(trimmed.slice(2))}</li>`);
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      if (inUl) { result.push("</ul>"); inUl = false; }
+      if (!inOl) { result.push("<ol>"); inOl = true; }
+      const content = trimmed.replace(/^\d+\.\s/, "");
+      result.push(`<li>${formatInline(content)}</li>`);
+    } else if (trimmed === "") {
+      if (inUl) { result.push("</ul>"); inUl = false; }
+      if (inOl) { result.push("</ol>"); inOl = false; }
+      result.push("<p><br></p>");
+    } else {
+      if (inUl) { result.push("</ul>"); inUl = false; }
+      if (inOl) { result.push("</ol>"); inOl = false; }
+      result.push(`<p>${formatInline(line)}</p>`);
+    }
+  }
+
+  if (inUl) result.push("</ul>");
+  if (inOl) result.push("</ol>");
+
+  return result.join("");
+}
+
+/**
+ * Converts WYSIWYG HTML back to clean, compact Markdown string for storage.
+ */
+function htmlToMarkdown(html: string): string {
+  if (!html || !html.trim()) return "";
+  let text = html;
+
+  // Normalize empty break lines
+  text = text.replace(/<(p|div)>\s*<br\s*[\/]?>\s*<\/\1>/gi, "\n\n");
+
+  // Headings
+  text = text.replace(/<h1[^>]*>(.*?)<\/h1>/gi, "\n# $1\n");
+  text = text.replace(/<h2[^>]*>(.*?)<\/h2>/gi, "\n## $1\n");
+  text = text.replace(/<h3[^>]*>(.*?)<\/h3>/gi, "\n## $1\n");
+
+  // Lists
+  text = text.replace(/<li[^>]*>(.*?)<\/li>/gi, "\n- $1");
+  text = text.replace(/<\/?(ul|ol)[^>]*>/gi, "\n");
+
+  // Paragraphs & Divs
+  text = text.replace(/<(p|div)[^>]*>(.*?)<\/\1>/gi, "\n$2\n");
+  text = text.replace(/<br\s*[\/]?>/gi, "\n");
+
+  // Inline tags
+  text = text.replace(/<(b|strong)[^>]*>(.*?)<\/\1>/gi, "**$2**");
+  text = text.replace(/<(i|em)[^>]*>(.*?)<\/\1>/gi, "*$2*");
+  text = text.replace(/<u[^>]*>(.*?)<\/u>/gi, "<u>$1</u>");
+  text = text.replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`");
+
+  // Remove any remaining unwanted HTML tags except <u>
+  text = text.replace(/<(?!\/?u\b)[^>]+>/g, "");
+
+  // Decode common HTML entities
+  text = text
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"');
+
+  // Normalize multi-newlines
+  return text
+    .split("\n")
+    .map((l) => l.trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export function NotesEditorModal({
   isOpen,
   onClose,
@@ -32,126 +148,103 @@ export function NotesEditorModal({
   initialNotes,
   onSave,
 }: NotesEditorModalProps) {
-  const [notes, setNotes] = useState(initialNotes);
   const [isSaved, setIsSaved] = useState(true);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [wordCount, setWordCount] = useState(0);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync initial notes when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setNotes(initialNotes);
-      setIsSaved(true);
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-        }
-      }, 80);
+  // Calculate word count from text content
+  const updateStats = useCallback(() => {
+    if (editorRef.current) {
+      const text = editorRef.current.innerText || "";
+      const trimmed = text.trim();
+      setWordCount(trimmed ? trimmed.split(/\s+/).length : 0);
     }
-  }, [isOpen, initialNotes]);
+  }, []);
 
-  // Keyboard shortcuts
+  // Initialize editor content when modal opens
+  useEffect(() => {
+    if (isOpen && editorRef.current) {
+      const html = markdownToHtml(initialNotes || "");
+      editorRef.current.innerHTML = html;
+      updateStats();
+      setIsSaved(true);
+
+      // Focus editor
+      setTimeout(() => {
+        if (editorRef.current) {
+          editorRef.current.focus();
+        }
+      }, 50);
+    }
+  }, [isOpen, initialNotes, updateStats]);
+
+  // Handle saving and closing safely
+  const handleSaveAndClose = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    try {
+      if (editorRef.current) {
+        const md = htmlToMarkdown(editorRef.current.innerHTML);
+        onSave(md);
+      }
+    } catch (err) {
+      console.error("[NotesEditorModal] Error saving notes:", err);
+    } finally {
+      onClose();
+    }
+  }, [onSave, onClose]);
+
+  // Handle typing & content change
+  const handleInput = () => {
+    setIsSaved(false);
+    updateStats();
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        if (editorRef.current) {
+          const md = htmlToMarkdown(editorRef.current.innerHTML);
+          onSave(md);
+          setIsSaved(true);
+        }
+      } catch (err) {
+        console.error("[NotesEditorModal] Auto-save error:", err);
+      }
+    }, 600);
+  };
+
+  // Keyboard shortcuts (Escape, Ctrl+Enter)
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.preventDefault();
         handleSaveAndClose();
       } else if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
         handleSaveAndClose();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-        e.preventDefault();
-        applyFormat("**", "**", "bold text");
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") {
-        e.preventDefault();
-        applyFormat("*", "*", "italic text");
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "u") {
-        e.preventDefault();
-        applyFormat("<u>", "</u>", "underlined text");
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, notes]);
+  }, [isOpen, handleSaveAndClose]);
 
   if (!isOpen) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setNotes(val);
-    setIsSaved(false);
-    onSave(val);
-    setTimeout(() => setIsSaved(true), 500);
-  };
-
-  const handleSaveAndClose = () => {
-    onSave(notes);
-    onClose();
-  };
-
-  // Helper to wrap selected text in textarea
-  const applyFormat = (prefix: string, suffix = "", defaultText = "") => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = notes.substring(start, end) || defaultText;
-
-    const replacement = `${prefix}${selectedText}${suffix}`;
-    const newNotes = notes.substring(0, start) + replacement + notes.substring(end);
-
-    setNotes(newNotes);
-    setIsSaved(false);
-    onSave(newNotes);
-    setTimeout(() => setIsSaved(true), 500);
-
-    setTimeout(() => {
-      textarea.focus();
-      const newCursorPos = start + prefix.length + selectedText.length;
-      textarea.setSelectionRange(start + prefix.length, newCursorPos);
-    }, 10);
-  };
-
-  // Helper to apply line-level prefixes (Heading, Bullets, Ordered lists)
-  const applyLinePrefix = (prefix: string, defaultText = "") => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-
-    const lastNewline = notes.lastIndexOf("\n", start - 1);
-    const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
-
-    if (start === end && start === lineStart) {
-      const replacement = prefix + (defaultText ? defaultText : "");
-      const newNotes = notes.substring(0, lineStart) + replacement + notes.substring(lineStart);
-      setNotes(newNotes);
-      setIsSaved(false);
-      onSave(newNotes);
-      setTimeout(() => setIsSaved(true), 500);
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(lineStart + prefix.length, lineStart + replacement.length);
-      }, 10);
-      return;
+  // Execute formatting command on text selection
+  const execCmd = (command: string, value: string | undefined = undefined) => {
+    if (typeof document !== "undefined") {
+      document.execCommand(command, false, value);
+      handleInput();
+      if (editorRef.current) {
+        editorRef.current.focus();
+      }
     }
-
-    const selected = notes.substring(start, end) || defaultText;
-    const replacement = `${prefix}${selected}`;
-    const newNotes = notes.substring(0, start) + replacement + notes.substring(end);
-
-    setNotes(newNotes);
-    setIsSaved(false);
-    onSave(newNotes);
-    setTimeout(() => setIsSaved(true), 500);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, start + replacement.length);
-    }, 10);
   };
-
-  const wordCount = notes.trim() ? notes.trim().split(/\s+/).length : 0;
 
   return (
     <div
@@ -175,9 +268,7 @@ export function NotesEditorModal({
               <BookOpen className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-bold text-white truncate">
-                Notes
-              </h2>
+              <h2 className="text-sm font-bold text-white truncate">Notes</h2>
               <p className="text-[11px] text-zinc-400 truncate max-w-[220px] sm:max-w-md">
                 {problemExternalId ? `#${problemExternalId} ` : ""}
                 {problemTitle}
@@ -200,12 +291,15 @@ export function NotesEditorModal({
           </div>
         </div>
 
-        {/* ── Essential Formatting Toolbar (Zero Clutter) ── */}
+        {/* ── Visual WYSIWYG Formatting Toolbar (Zero Asterisks) ── */}
         <div className="px-3 sm:px-4 py-2 border-b border-white/[0.06] bg-white/[0.015] flex items-center gap-1 overflow-x-auto no-scrollbar">
           {/* Headings */}
           <button
             type="button"
-            onClick={() => applyLinePrefix("# ", "Heading")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              execCmd("formatBlock", "<h1>");
+            }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 font-semibold"
             title="Large Heading"
           >
@@ -214,7 +308,10 @@ export function NotesEditorModal({
 
           <button
             type="button"
-            onClick={() => applyLinePrefix("## ", "Subheading")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              execCmd("formatBlock", "<h2>");
+            }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 font-semibold"
             title="Medium Heading"
           >
@@ -223,10 +320,13 @@ export function NotesEditorModal({
 
           <div className="h-4 w-px bg-white/10 mx-1" />
 
-          {/* Bold, Italic, Underline */}
+          {/* Bold, Italic, Underline - Instant Visual Application */}
           <button
             type="button"
-            onClick={() => applyFormat("**", "**", "bold text")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              execCmd("bold");
+            }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 font-bold"
             title="Bold (Ctrl+B)"
           >
@@ -235,7 +335,10 @@ export function NotesEditorModal({
 
           <button
             type="button"
-            onClick={() => applyFormat("*", "*", "italic text")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              execCmd("italic");
+            }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 italic"
             title="Italic (Ctrl+I)"
           >
@@ -244,7 +347,10 @@ export function NotesEditorModal({
 
           <button
             type="button"
-            onClick={() => applyFormat("<u>", "</u>", "underlined text")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              execCmd("underline");
+            }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1 underline underline-offset-2"
             title="Underline (Ctrl+U)"
           >
@@ -256,7 +362,10 @@ export function NotesEditorModal({
           {/* Lists */}
           <button
             type="button"
-            onClick={() => applyLinePrefix("- ", "List item")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              execCmd("insertUnorderedList");
+            }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1"
             title="Bullet List"
           >
@@ -265,7 +374,10 @@ export function NotesEditorModal({
 
           <button
             type="button"
-            onClick={() => applyLinePrefix("1. ", "Numbered item")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              execCmd("insertOrderedList");
+            }}
             className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1"
             title="Numbered List"
           >
@@ -273,14 +385,29 @@ export function NotesEditorModal({
           </button>
         </div>
 
-        {/* ── Large Comfortable Writing Area ── */}
+        {/* ── Visual WYSIWYG Writing Area ── */}
         <div className="flex-1 p-4 sm:p-5 flex flex-col overflow-hidden">
-          <textarea
-            ref={textareaRef}
-            value={notes}
-            onChange={handleChange}
-            placeholder="Write your notes here..."
-            className="w-full flex-1 bg-transparent text-sm sm:text-base text-zinc-100 placeholder:text-zinc-600 focus:outline-none resize-none font-sans leading-relaxed select-text"
+          <div
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            onInput={handleInput}
+            data-placeholder="Write your notes here..."
+            className={cn(
+              "w-full flex-1 bg-transparent text-sm sm:text-base text-zinc-100 focus:outline-none overflow-y-auto leading-relaxed select-text scrollbar-thin",
+              // Instant Visual Formatting Styles
+              "[&_h1]:text-lg [&_h1]:sm:text-xl [&_h1]:font-bold [&_h1]:text-white [&_h1]:mb-2 [&_h1]:mt-2",
+              "[&_h2]:text-base [&_h2]:sm:text-lg [&_h2]:font-semibold [&_h2]:text-white [&_h2]:mb-1.5 [&_h2]:mt-2",
+              "[&_b]:font-bold [&_b]:text-white [&_strong]:font-bold [&_strong]:text-white",
+              "[&_i]:italic [&_i]:text-violet-200 [&_em]:italic [&_em]:text-violet-200",
+              "[&_u]:underline [&_u]:underline-offset-2 [&_u]:decoration-violet-400",
+              "[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-1.5 [&_ul]:space-y-1",
+              "[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-1.5 [&_ol]:space-y-1",
+              "[&_p]:my-1",
+              "[&_code]:bg-violet-500/15 [&_code]:border [&_code]:border-violet-500/30 [&_code]:text-cyan-300 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono",
+              // Clean placeholder when empty
+              "empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-600 empty:before:pointer-events-none"
+            )}
             spellCheck={false}
           />
         </div>
