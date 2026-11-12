@@ -3,23 +3,106 @@ import Script from "next/script";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Suspense } from "react";
+import { AuthProvider } from "@/context/auth-context";
+import {
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_TITLE_DEFAULT,
+  SITE_URL,
+} from "@/lib/seo";
+
+const GOOGLE_SITE_VERIFICATION =
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+  process.env.GOOGLE_SITE_VERIFICATION;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "LeetPrime — Beyond LeetCode Pro | Company-Wise DSA & Recency Engine",
+    default: SITE_TITLE_DEFAULT,
     template: "%s | LeetPrime",
   },
-  description:
-    "LeetPrime includes the complete collection of 3,426 LeetCode Pro DSA problems organized company-wise across 659 tech giants. Supercharged with real-time interview recency (30d/3m/6m), 24 structured algorithmic patterns, interactive market radar, and Prime AI placement coaching.",
-  keywords: ["LeetPrime", "LeetCode Pro", "DSA", "interview prep", "LeetCode", "company wise dsa", "placement preparation", "coding interview", "data structures", "algorithms"],
-  openGraph: {
-    title: "LeetPrime — Beyond LeetCode Pro | Company-Wise DSA & Recency Engine",
-    description: "All LeetCode Pro company DSA questions supercharged with real-time recency, patterns & company tiers.",
-    type: "website",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: SITE_KEYWORDS,
+  alternates: {
+    canonical: "/",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    title: SITE_TITLE_DEFAULT,
+    description:
+      "All 3,426+ LeetCode Pro company DSA questions supercharged with real-time recency, 24 patterns & company tiers.",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: SITE_TITLE_DEFAULT,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE_DEFAULT,
+    description:
+      "All 3,426+ LeetCode Pro company DSA questions supercharged with real-time recency, 24 patterns & company tiers.",
+    images: ["/opengraph-image"],
+  },
+  ...(GOOGLE_SITE_VERIFICATION
+    ? {
+        verification: {
+          google: GOOGLE_SITE_VERIFICATION,
+        },
+      }
+    : {}),
 };
 
-import { AuthProvider } from "@/context/auth-context";
+const SITE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: SITE_NAME,
+      alternateName: ["LeetPrime Pro", "LeetPrime DSA"],
+      description: SITE_DESCRIPTION,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/dsa/questions?search={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: `${SITE_NAME} Pro`,
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+    },
+  ],
+};
 
 const GA_MEASUREMENT_ID =
   process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.GA_MEASUREMENT_ID;
@@ -55,6 +138,11 @@ export default function RootLayout({
             </Script>
           </>
         )}
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
+        />
 
         <AuthProvider>
           <div className="flex min-h-dvh">

@@ -1,287 +1,93 @@
-"use client";
-
-import { use, useState, Suspense } from "react";
-import Link from "next/link";
+import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Building2, ArrowLeft, ExternalLink, Calendar, Target, Search, ArrowUpDown, Filter } from "lucide-react";
-import { getCompanyBySlug, getCompanyProblems, getAllPatterns } from "@/lib/db";
-import {
-  getExtraDatasetPatterns,
-  matchesPatternValue,
-} from "@/lib/pattern-map";
-import { Badge, DifficultyBadge } from "@/components/ui/badge";
-import { useProgressStore } from "@/hooks/use-progress";
-import type { Difficulty, Timeframe } from "@/lib/types";
+import { getCompanyBySlug, getCompanyProblems } from "@/lib/db";
+import { buildAbsoluteUrl, buildPageMetadata } from "@/lib/seo";
+import { CompanyDetailClient } from "./CompanyDetailClient";
 
-type SortOption = "most_asked" | "priority" | "difficulty" | "title";
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
-function CompanyContent({ slug }: { slug: string }) {
+function formatCompanyDisplayName(name: string): string {
+  return name.replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
+  const company = getCompanyBySlug(slug);
+
+  if (!company) {
+    return buildPageMetadata({
+      title: "Company Not Found",
+      description: "The requested company could not be found on LeetPrime.",
+      path: `/dsa/companies/${encodeURIComponent(slug)}`,
+    });
+  }
+
+  const displayName = formatCompanyDisplayName(company.name);
+  const totalQuestions = getCompanyProblems(company.id).length;
+
+  return buildPageMetadata({
+    title: `${displayName} Interview DSA Questions (${totalQuestions}+ Problems)`,
+    description: `Practice ${totalQuestions} ${displayName} LeetCode DSA interview questions (${company.easyCount} Easy, ${company.mediumCount} Medium, ${company.hardCount} Hard) sorted by asking frequency, priority score, and 30d/3m/6m recency.`,
+    path: `/dsa/companies/${encodeURIComponent(company.normalizedName)}`,
+    keywords: [
+      `${displayName} LeetCode questions`,
+      `${displayName} DSA interview questions`,
+      `${displayName} coding interview prep`,
+      "company wise DSA",
+      "LeetPrime",
+    ],
+  });
+}
+
+async function CompanyServerContent({ params }: PageProps) {
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const company = getCompanyBySlug(slug);
 
   if (!company) {
     notFound();
   }
 
-  const { progress } = useProgressStore();
-
-  const rawProblems = getCompanyProblems(company.id);
-  const patterns = getAllPatterns();
-  const extraPatterns = getExtraDatasetPatterns();
-
-  const [search, setSearch] = useState("");
-  const [selectedPattern, setSelectedPattern] = useState("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("ALL");
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>("ALL");
-  const [sortBy, setSortBy] = useState<SortOption>("most_asked");
-
-  // Filter problems
-  const filtered = rawProblems.filter(({ problem }) => {
-    const matchesSearch = problem.title.toLowerCase().includes(search.toLowerCase());
-
-    const matchesPattern =
-      !selectedPattern || matchesPatternValue(problem, selectedPattern);
-
-    const matchesDiff =
-      selectedDifficulty === "ALL" || problem.difficulty.toLowerCase() === selectedDifficulty.toLowerCase();
-
-    const matchesTimeframe =
-      selectedTimeframe === "ALL" || problem.timeframes.includes(selectedTimeframe as Timeframe);
-
-    return matchesSearch && matchesPattern && matchesDiff && matchesTimeframe;
-  });
-
-  // Sort problems
-  if (sortBy === "most_asked") {
-    filtered.sort((a, b) => b.problem.companyCount - a.problem.companyCount);
-  } else if (sortBy === "priority") {
-    filtered.sort((a, b) => b.problem.priorityScore - a.problem.priorityScore);
-  } else if (sortBy === "difficulty") {
-    const diffOrder = { Easy: 1, Medium: 2, Hard: 3 };
-    filtered.sort((a, b) => diffOrder[a.problem.difficulty] - diffOrder[b.problem.difficulty]);
-  } else if (sortBy === "title") {
-    filtered.sort((a, b) => a.problem.title.localeCompare(b.problem.title));
-  }
+  const displayName = formatCompanyDisplayName(company.name);
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: buildAbsoluteUrl("/") },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Companies",
+        item: buildAbsoluteUrl("/dsa/companies"),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: displayName,
+        item: buildAbsoluteUrl(`/dsa/companies/${encodeURIComponent(company.normalizedName)}`),
+      },
+    ],
+  };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
-      <div>
-        <Link
-          href="/dsa/companies"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 mb-4 transition-colors font-semibold"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Target Companies
-        </Link>
-
-        {/* Company Header Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md">
-          <div className="flex items-start gap-4">
-            <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400">
-              <Building2 className="w-8 h-8" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{company.name}</h1>
-                <Badge variant="violet">Target Company</Badge>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-400">
-                {company.easyCount} Easy · {company.mediumCount} Medium · {company.hardCount} Hard
-              </p>
-            </div>
-          </div>
-          <div className="text-left sm:text-right border-t sm:border-t-0 border-white/10 pt-3 sm:pt-0">
-            <div className="text-2xl sm:text-3xl font-extrabold text-violet-400">{rawProblems.length}</div>
-            <div className="text-xs text-slate-400 font-medium">Interview Questions</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Requirement 3: Top Bar Sort & Filter Controls */}
-      <div className="p-4 rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md space-y-3">
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
-          <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
-            <Filter className="w-4 h-4 text-violet-400" /> Sort & Filter {company.name} Questions
-          </span>
-          <span className="text-xs text-slate-400">
-            Showing <strong className="text-white">{filtered.length}</strong> of {rawProblems.length} questions
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {/* Search */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Filter title..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#0c0e17] border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-violet-500/50"
-            />
-          </div>
-
-          {/* Sort Control */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 font-medium"
-          >
-            <option value="most_asked">Sort: Most Asked / Frequency</option>
-            <option value="priority">Sort: Priority Score</option>
-            <option value="difficulty">Sort: Difficulty (Easy → Hard)</option>
-            <option value="title">Sort: Title (A-Z)</option>
-          </select>
-
-          {/* Pattern Filter */}
-          <select
-            value={selectedPattern}
-            onChange={(e) => setSelectedPattern(e.target.value)}
-            className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 font-medium"
-          >
-            <option value="">Pattern: All Patterns</option>
-            <optgroup label="Pattern Roadmaps">
-              {patterns.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-            </optgroup>
-            {extraPatterns.length > 0 && (
-              <optgroup label="Other Categories">
-                {extraPatterns.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-          </select>
-
-          {/* Difficulty Filter */}
-          <select
-            value={selectedDifficulty}
-            onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 font-medium"
-          >
-            <option value="ALL">Difficulty: All</option>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
-
-          {/* Timeframe Filter */}
-          <select
-            value={selectedTimeframe}
-            onChange={(e) => setSelectedTimeframe(e.target.value)}
-            className="bg-[#0c0e17] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 font-medium"
-          >
-            <option value="ALL">Timeframe: All</option>
-            <option value="30d">0–30 Days</option>
-            <option value="3m">1–3 Months</option>
-            <option value="6m">3–6 Months</option>
-            <option value="6m+">&gt; 6 Months</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table Container */}
-      <div className="rounded-2xl bg-[#10131f]/70 border border-white/10 backdrop-blur-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#0c0e17]/80 border-b border-white/10 text-slate-400 uppercase tracking-wider font-bold">
-              <tr>
-                <th className="py-3.5 px-5 w-10">Status</th>
-                <th className="py-3.5 px-5">Problem Title</th>
-                <th className="py-3.5 px-5">Difficulty</th>
-                <th className="py-3.5 px-5">Pattern</th>
-                <th className="py-3.5 px-5">Recency</th>
-                <th className="py-3.5 px-5 text-right">Priority</th>
-                <th className="py-3.5 px-5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filtered.map(({ problem, companyData }) => (
-                <tr
-                  key={problem.id}
-                  className="hover:bg-white/[0.03] transition-colors group cursor-pointer"
-                  onClick={(e: React.MouseEvent) => {
-                    if ((e.target as HTMLElement).tagName === "A") return;
-                    window.location.href = `/dsa/questions/${problem.slug}`;
-                  }}
-                >
-                  {/* Status dot */}
-                  <td className="py-4 px-5">
-                    <span
-                      className={`inline-block w-2.5 h-2.5 rounded-full ${
-                        progress[problem.id]?.status === "solved"
-                          ? "bg-emerald-400 shadow-[0_0_8px_#34d399]"
-                          : progress[problem.id]?.status === "attempted"
-                          ? "bg-amber-400"
-                          : progress[problem.id]?.status === "revise"
-                          ? "bg-indigo-400"
-                          : "bg-slate-700"
-                      }`}
-                      title={`Status: ${progress[problem.id]?.status ?? "todo"}`}
-                    />
-                  </td>
-                  <td className="py-4 px-5 font-semibold text-white group-hover:text-violet-300 transition-colors">
-                    <Link
-                      href={`/dsa/questions/${problem.slug}`}
-                      className="text-violet-300 hover:underline hover:text-violet-200 transition-colors"
-                    >
-                      {problem.title}
-                    </Link>
-                  </td>
-                  <td className="py-4 px-5">
-                    <DifficultyBadge difficulty={problem.difficulty} />
-                  </td>
-                  <td className="py-4 px-5">
-                    <span className="text-slate-300 bg-white/[0.04] px-2.5 py-1 rounded-md border border-white/5 font-medium">
-                      {problem.primaryPattern || "General"}
-                    </span>
-                  </td>
-                  <td className="py-4 px-5">
-                    <span className="inline-flex items-center gap-1 text-slate-300 bg-slate-800/50 px-2.5 py-1 rounded-md border border-slate-700/60 font-medium">
-                      <Calendar className="w-3 h-3 text-violet-400" />
-                      {companyData.timeframe}
-                    </span>
-                  </td>
-                  <td className="py-4 px-5 text-right font-mono font-bold text-violet-400">
-                    {problem.priorityScore}
-                  </td>
-                  <td className="py-4 px-5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {problem.canonicalUrl && (
-                        <a
-                          href={problem.canonicalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 hover:bg-violet-500/20 hover:border-violet-500/50 transition-colors"
-                          title="Open Problem"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <CompanyDetailClient slug={slug} />
+    </>
   );
 }
 
-function CompanyWrapper({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  return <CompanyContent slug={slug} />;
-}
-
-export default function CompanyDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default function CompanyDetailPage({ params }: PageProps) {
   return (
     <Suspense fallback={<div className="p-8 text-slate-400">Loading company details...</div>}>
-      <CompanyWrapper params={params} />
+      <CompanyServerContent params={params} />
     </Suspense>
   );
 }
