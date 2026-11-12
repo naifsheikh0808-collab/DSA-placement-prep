@@ -152,6 +152,8 @@ export function NotesEditorModal({
   const [wordCount, setWordCount] = useState(0);
   const editorRef = useRef<HTMLDivElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const wasOpenRef = useRef(false);
+  const lastSavedMdRef = useRef(initialNotes);
 
   // Calculate word count from text content
   const updateStats = useCallback(() => {
@@ -162,20 +164,26 @@ export function NotesEditorModal({
     }
   }, []);
 
-  // Initialize editor content when modal opens
+  // Initialize editor content ONLY when modal transitions from closed to open
   useEffect(() => {
-    if (isOpen && editorRef.current) {
-      const html = markdownToHtml(initialNotes || "");
-      editorRef.current.innerHTML = html;
-      updateStats();
-      setIsSaved(true);
+    if (isOpen && !wasOpenRef.current) {
+      wasOpenRef.current = true;
+      lastSavedMdRef.current = initialNotes;
+      if (editorRef.current) {
+        const html = markdownToHtml(initialNotes || "");
+        editorRef.current.innerHTML = html;
+        updateStats();
+        setIsSaved(true);
 
-      // Focus editor
-      setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.focus();
-        }
-      }, 50);
+        // Focus editor
+        setTimeout(() => {
+          if (editorRef.current) {
+            editorRef.current.focus();
+          }
+        }, 50);
+      }
+    } else if (!isOpen) {
+      wasOpenRef.current = false;
     }
   }, [isOpen, initialNotes, updateStats]);
 
@@ -187,11 +195,15 @@ export function NotesEditorModal({
     try {
       if (editorRef.current) {
         const md = htmlToMarkdown(editorRef.current.innerHTML);
-        onSave(md);
+        if (md !== lastSavedMdRef.current) {
+          lastSavedMdRef.current = md;
+          onSave(md);
+        }
       }
     } catch (err) {
       console.error("[NotesEditorModal] Error saving notes:", err);
     } finally {
+      setIsSaved(true);
       onClose();
     }
   }, [onSave, onClose]);
@@ -208,13 +220,17 @@ export function NotesEditorModal({
       try {
         if (editorRef.current) {
           const md = htmlToMarkdown(editorRef.current.innerHTML);
-          onSave(md);
+          if (md !== lastSavedMdRef.current) {
+            lastSavedMdRef.current = md;
+            onSave(md);
+          }
           setIsSaved(true);
         }
       } catch (err) {
         console.error("[NotesEditorModal] Auto-save error:", err);
+        setIsSaved(true);
       }
-    }, 600);
+    }, 1200);
   };
 
   // Keyboard shortcuts (Escape, Ctrl+Enter)
@@ -392,7 +408,7 @@ export function NotesEditorModal({
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            data-placeholder="Write your notes here..."
+            data-placeholder="Add your approach, time complexity or insight..."
             className={cn(
               "w-full flex-1 bg-transparent text-sm sm:text-base text-zinc-100 focus:outline-none overflow-y-auto leading-relaxed select-text scrollbar-thin",
               // Instant Visual Formatting Styles

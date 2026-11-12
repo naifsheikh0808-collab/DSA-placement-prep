@@ -219,16 +219,15 @@ function QuestionContent({ slug }: { slug: string }) {
                     {/* Interactive Notes Card Preview Box */}
                     <div
                       onClick={() => setIsNotesModalOpen(true)}
-                      className="group relative w-full bg-zinc-900/40 hover:bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 rounded-xl p-3.5 sm:p-4 text-xs sm:text-sm transition-all cursor-pointer min-h-[84px] max-h-[140px] overflow-hidden"
+                      className="group relative w-full bg-zinc-900/40 hover:bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 rounded-xl p-3.5 sm:p-4 text-xs sm:text-sm transition-all cursor-pointer min-h-[96px] max-h-[155px] overflow-hidden"
                     >
                       {notes.trim().length > 0 ? (
                         <div className="relative">
                           <MarkdownNotesRenderer content={notes} isCompact={true} />
-                          <div className="absolute inset-x-0 -bottom-4 h-8 bg-gradient-to-t from-[#12131f] to-transparent pointer-events-none" />
                         </div>
                       ) : (
-                        <div className="h-full min-h-[56px] flex items-center justify-center text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                          <p className="text-xs sm:text-sm font-medium">Click to write notes...</p>
+                        <div className="h-full min-h-[68px] flex items-center justify-center text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                          <p className="text-xs sm:text-sm font-medium">add your approach, time complexity or insight</p>
                         </div>
                       )}
                     </div>
