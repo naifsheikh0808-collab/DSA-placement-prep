@@ -14,7 +14,6 @@ import {
   AlertCircle,
   Bot,
   Sparkles,
-  Maximize2,
 } from "lucide-react";
 import { getProblemBySlug } from "@/lib/db";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
@@ -158,7 +157,7 @@ function QuestionContent({ slug }: { slug: string }) {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
                       {(
                         Object.entries(STATUS_CONFIG) as [
                           ProgressStatus,
@@ -186,7 +185,7 @@ function QuestionContent({ slug }: { slug: string }) {
                             type="button"
                             onClick={() => updateStatus(problem.id, status, notes)}
                             className={cn(
-                              "flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer active:scale-98 select-none",
+                              "flex items-center justify-center gap-1.5 px-2 py-2 sm:px-3 rounded-xl border text-[11px] sm:text-xs font-medium sm:font-semibold transition-all cursor-pointer active:scale-98 select-none min-w-0",
                               active
                                 ? activeStyle
                                 : "border-zinc-800/80 bg-zinc-900/30 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300 hover:bg-zinc-800/20"
@@ -198,7 +197,7 @@ function QuestionContent({ slug }: { slug: string }) {
                                 active ? cfg.color : "text-zinc-500"
                               )}
                             />
-                            <span className="truncate">{cfg.label}</span>
+                            <span className="whitespace-nowrap">{cfg.label}</span>
                           </button>
                         );
                       })}
@@ -208,66 +207,28 @@ function QuestionContent({ slug }: { slug: string }) {
                   {/* Clean Divider between Status and Notes */}
                   <div className="border-t border-zinc-800/80" />
 
-                  {/* Notes Section with Markdown Preview & Focus Editor Trigger */}
+                  {/* Notes Section */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="w-4 h-4 text-violet-400" />
-                        <h2 className="text-xs sm:text-sm font-bold text-zinc-200 uppercase tracking-wider">
-                          Notes & Solution Log
-                        </h2>
-                        {notes.trim().length > 0 && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
-                            Markdown
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setIsNotesModalOpen(true)}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 px-2.5 py-1 rounded-lg hover:bg-violet-500/10 border border-violet-500/20 transition-all cursor-pointer"
-                      >
-                        <Maximize2 className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Focus Editor</span>
-                        <span className="sm:hidden">Edit</span>
-                      </button>
+                    <div className="flex items-center gap-2 mb-2">
+                      <BookOpen className="w-4 h-4 text-violet-400" />
+                      <h2 className="text-xs sm:text-sm font-bold text-zinc-200 uppercase tracking-wider">
+                        Notes
+                      </h2>
                     </div>
 
                     {/* Interactive Notes Card Preview Box */}
                     <div
                       onClick={() => setIsNotesModalOpen(true)}
-                      className="group relative w-full bg-zinc-900/60 hover:bg-zinc-900/80 border border-zinc-800 hover:border-violet-500/40 rounded-xl p-3 sm:p-4 text-xs sm:text-sm transition-all cursor-pointer min-h-[96px] max-h-[140px] overflow-hidden flex flex-col justify-between"
+                      className="group relative w-full bg-zinc-900/40 hover:bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 rounded-xl p-3.5 sm:p-4 text-xs sm:text-sm transition-all cursor-pointer min-h-[84px] max-h-[140px] overflow-hidden"
                     >
                       {notes.trim().length > 0 ? (
-                        <>
-                          <div className="overflow-hidden">
-                            <MarkdownNotesRenderer content={notes} isCompact={true} />
-                          </div>
-                          {/* Gradient fade to show there's more */}
-                          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#101322] to-transparent pointer-events-none" />
-                          <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500 group-hover:text-violet-400 transition-colors">
-                            <span>Click to expand or edit in rich Markdown editor...</span>
-                            <span className="flex items-center gap-1 font-semibold group-hover:translate-x-0.5 transition-transform">
-                              Open ↗
-                            </span>
-                          </div>
-                        </>
+                        <div className="relative">
+                          <MarkdownNotesRenderer content={notes} isCompact={true} />
+                          <div className="absolute inset-x-0 -bottom-4 h-8 bg-gradient-to-t from-[#12131f] to-transparent pointer-events-none" />
+                        </div>
                       ) : (
-                        <div className="py-2.5 flex flex-col items-center justify-center text-center space-y-1.5">
-                          <p className="text-zinc-400 text-xs sm:text-[13px] font-medium leading-relaxed">
-                            Click to open the <strong className="text-violet-300">Markdown Notes Editor</strong>.
-                          </p>
-                          <p className="text-zinc-600 text-[11px]">
-                            Log your approach, dry run, time complexity & edge cases with rich formatting.
-                          </p>
-                          <div className="flex items-center gap-1.5 pt-1 text-[10px] text-zinc-500 font-mono flex-wrap justify-center">
-                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">**Bold**</span>
-                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">*Italic*</span>
-                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">&lt;u&gt;Underline&lt;/u&gt;</span>
-                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5"># Heading</span>
-                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">• List</span>
-                          </div>
+                        <div className="h-full min-h-[56px] flex items-center justify-center text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                          <p className="text-xs sm:text-sm font-medium">Click to write notes...</p>
                         </div>
                       )}
                     </div>
