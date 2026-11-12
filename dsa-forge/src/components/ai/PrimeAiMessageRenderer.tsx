@@ -1,8 +1,255 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// ━━ Code Syntax Highlighter Engine ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const KEYWORDS = new Set([
+  // Declarations & Flow control
+  "class", "struct", "public", "private", "protected", "virtual", "override",
+  "interface", "implements", "extends", "return", "if", "else", "elif", "for", "while",
+  "do", "break", "continue", "switch", "case", "default", "try", "catch", "finally",
+  "throw", "throws", "new", "delete", "def", "lambda", "import", "from", "as",
+  "with", "yield", "pass", "async", "await", "const", "let", "var", "function",
+  "type", "typeof", "instanceof", "sizeof", "namespace", "using", "template",
+  "typename", "operator", "static", "constexpr", "inline", "extern", "mut",
+  "impl", "trait", "fn", "package", "select", "where", "join", "having",
+  "limit", "insert", "update", "create", "table", "drop", "alter", "in", "is",
+  "not", "and", "or", "global", "nonlocal", "super", "this", "debugger"
+]);
+
+const TYPES = new Set([
+  // Primitives, Containers & Data Structures
+  "int", "long", "short", "byte", "char", "float", "double", "bool", "boolean",
+  "void", "auto", "size_t", "uint32_t", "int64_t", "string", "vector", "pair",
+  "unordered_map", "unordered_set", "map", "set", "queue", "priority_queue",
+  "stack", "deque", "list", "bitset", "multiset", "multimap", "treenode",
+  "listnode", "node", "solution", "array", "dict", "tuple", "optional",
+  "any", "union", "promise", "record", "number", "symbol", "bigint"
+]);
+
+const LITERALS = new Set([
+  "true", "false", "null", "nullptr", "nil", "none", "undefined", "nan", "infinity"
+]);
+
+type SyntaxTokenType =
+  | "keyword"
+  | "type"
+  | "literal"
+  | "function"
+  | "string"
+  | "number"
+  | "comment"
+  | "directive"
+  | "bracket"
+  | "operator"
+  | "punctuation"
+  | "identifier"
+  | "plain";
+
+interface SyntaxToken {
+  type: SyntaxTokenType;
+  value: string;
+}
+
+function tokenizeCode(code: string, lang = "cpp"): SyntaxToken[] {
+  const l = (lang || "").toLowerCase();
+  const isPython = l === "python" || l === "py";
+  const isSql = l === "sql";
+
+  const tokens: SyntaxToken[] = [];
+  let i = 0;
+
+  while (i < code.length) {
+    // 1. Whitespace
+    const wsMatch = code.slice(i).match(/^\s+/);
+    if (wsMatch) {
+      tokens.push({ type: "plain", value: wsMatch[0] });
+      i += wsMatch[0].length;
+      continue;
+    }
+
+    // 2. Preprocessor directive in C/C++ (#include, #define, #pragma)
+    if (!isPython && code[i] === "#" && (i === 0 || code[i - 1] === "\n")) {
+      const lineEnd = code.indexOf("\n", i);
+      const directive = lineEnd === -1 ? code.slice(i) : code.slice(i, lineEnd);
+      tokens.push({ type: "directive", value: directive });
+      i += directive.length;
+      continue;
+    }
+
+    // 3. Comments
+    // Single-line //
+    if (code.startsWith("//", i)) {
+      const lineEnd = code.indexOf("\n", i);
+      const comment = lineEnd === -1 ? code.slice(i) : code.slice(i, lineEnd);
+      tokens.push({ type: "comment", value: comment });
+      i += comment.length;
+      continue;
+    }
+    // Single-line # for Python
+    if (isPython && code[i] === "#") {
+      const lineEnd = code.indexOf("\n", i);
+      const comment = lineEnd === -1 ? code.slice(i) : code.slice(i, lineEnd);
+      tokens.push({ type: "comment", value: comment });
+      i += comment.length;
+      continue;
+    }
+    // Single-line -- for SQL
+    if (isSql && code.startsWith("--", i)) {
+      const lineEnd = code.indexOf("\n", i);
+      const comment = lineEnd === -1 ? code.slice(i) : code.slice(i, lineEnd);
+      tokens.push({ type: "comment", value: comment });
+      i += comment.length;
+      continue;
+    }
+    // Multi-line /* ... */
+    if (code.startsWith("/*", i)) {
+      const end = code.indexOf("*/", i + 2);
+      const comment = end === -1 ? code.slice(i) : code.slice(i, end + 2);
+      tokens.push({ type: "comment", value: comment });
+      i += comment.length;
+      continue;
+    }
+    // Multi-line """ or ''' for Python
+    if (isPython && (code.startsWith('"""', i) || code.startsWith("'''", i))) {
+      const quote = code.slice(i, i + 3);
+      const end = code.indexOf(quote, i + 3);
+      const comment = end === -1 ? code.slice(i) : code.slice(i, end + 3);
+      tokens.push({ type: "comment", value: comment });
+      i += comment.length;
+      continue;
+    }
+
+    // 4. Strings ("...", '...', `...`)
+    if (code[i] === '"' || code[i] === "'" || code[i] === "`") {
+      const quote = code[i];
+      let j = i + 1;
+      let escaped = false;
+      while (j < code.length) {
+        if (!escaped && code[j] === quote) {
+          j++;
+          break;
+        }
+        if (code[j] === "\\" && !escaped) {
+          escaped = true;
+        } else {
+          escaped = false;
+        }
+        j++;
+      }
+      tokens.push({ type: "string", value: code.slice(i, j) });
+      i = j;
+      continue;
+    }
+
+    // 5. Numbers (hex, binary, float, int, scientific)
+    const numMatch = code
+      .slice(i)
+      .match(/^(?:0[xX][0-9a-fA-F]+|0[bB][01]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/);
+    if (numMatch) {
+      tokens.push({ type: "number", value: numMatch[0] });
+      i += numMatch[0].length;
+      continue;
+    }
+
+    // 6. Identifiers, Keywords, Types, Function calls
+    const wordMatch = code.slice(i).match(/^[a-zA-Z_]\w*/);
+    if (wordMatch) {
+      const word = wordMatch[0];
+      const lower = word.toLowerCase();
+      const rest = code.slice(i + word.length);
+      const isFunction = /^\s*\(/.test(rest);
+
+      if (KEYWORDS.has(lower)) {
+        tokens.push({ type: "keyword", value: word });
+      } else if (TYPES.has(lower)) {
+        tokens.push({ type: "type", value: word });
+      } else if (LITERALS.has(lower)) {
+        tokens.push({ type: "literal", value: word });
+      } else if (isFunction) {
+        tokens.push({ type: "function", value: word });
+      } else {
+        tokens.push({ type: "identifier", value: word });
+      }
+
+      i += word.length;
+      continue;
+    }
+
+    // 7. Multi-character operators
+    const multiOpMatch = code
+      .slice(i)
+      .match(/^(?:&&|\|\||==|!=|<=|>=|\+\+|--|\+=|-=|\*=|(?:\/=|::|->|<<|>>))/);
+    if (multiOpMatch) {
+      tokens.push({ type: "operator", value: multiOpMatch[0] });
+      i += multiOpMatch[0].length;
+      continue;
+    }
+
+    // 8. Single-character Brackets
+    if ("{}()[]".includes(code[i])) {
+      tokens.push({ type: "bracket", value: code[i] });
+      i++;
+      continue;
+    }
+
+    // 9. Single-character Operators
+    if ("=+-*/%<>!&|^~?:".includes(code[i])) {
+      tokens.push({ type: "operator", value: code[i] });
+      i++;
+      continue;
+    }
+
+    // 10. Punctuation
+    if (";,.".includes(code[i])) {
+      tokens.push({ type: "punctuation", value: code[i] });
+      i++;
+      continue;
+    }
+
+    // 11. Fallback character
+    tokens.push({ type: "plain", value: code[i] });
+    i++;
+  }
+
+  return tokens;
+}
+
+function getTokenClass(type: SyntaxTokenType, value: string): string {
+  switch (type) {
+    case "keyword":
+      return "text-purple-400 font-semibold";
+    case "type":
+      return "text-cyan-300 font-medium";
+    case "literal":
+      return "text-rose-400 font-medium";
+    case "function":
+      return "text-amber-300 font-medium";
+    case "string":
+      return "text-emerald-400 font-normal";
+    case "number":
+      return "text-orange-400 font-medium";
+    case "comment":
+      return "text-slate-400/80 italic";
+    case "directive":
+      return "text-pink-400 font-medium";
+    case "bracket":
+      if (value === "{" || value === "}") return "text-yellow-400/90 font-medium";
+      if (value === "(" || value === ")") return "text-violet-300/90 font-medium";
+      return "text-sky-300/90 font-medium";
+    case "operator":
+      return "text-sky-300";
+    case "punctuation":
+      return "text-slate-400";
+    case "identifier":
+      return "text-slate-100";
+    case "plain":
+    default:
+      return "text-slate-200";
+  }
+}
 
 // ━━ Complexity Regex & Classifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Matches expressions like O(1), O(n), O(n²), O(min(n, m)), O(n log n), O(V + E)
@@ -64,7 +311,7 @@ function ComplexityBadge({ value }: { value: string }) {
   );
 }
 
-// ━━ Code Block with Copy Button ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ Code Block with Copy Button & Visual Syntax Highlighting ━━━━━━━━━━━━━━━━
 function CodeBlock({ code, lang }: { code: string; lang: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -78,24 +325,26 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
 
   const displayLang = lang ? lang.toUpperCase() : "CODE";
 
+  const tokens = useMemo(() => tokenizeCode(code, lang), [code, lang]);
+
   return (
-    <div className="my-2.5 rounded-xl border border-white/10 bg-[#070610] overflow-hidden shadow-lg shadow-black/40">
+    <div className="my-2.5 rounded-xl border border-white/10 bg-[#080914] overflow-hidden shadow-xl shadow-black/50">
       {/* Code Header Bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-white/[0.03] border-b border-white/[0.07]">
+      <div className="flex items-center justify-between px-3.5 py-1.5 bg-white/[0.03] border-b border-white/[0.07]">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-rose-500/70" />
-            <span className="w-2 h-2 rounded-full bg-amber-500/70" />
-            <span className="w-2 h-2 rounded-full bg-emerald-500/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 shadow-[0_0_6px_rgba(244,63,94,0.3)]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 shadow-[0_0_6px_rgba(245,158,11,0.3)]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 shadow-[0_0_6px_rgba(16,185,129,0.3)]" />
           </div>
-          <span className="text-[10px] font-mono font-bold tracking-wider text-violet-300 ml-1">
+          <span className="text-[10px] font-mono font-bold tracking-wider text-violet-300 ml-1 px-1.5 py-0.5 rounded bg-violet-500/10 border border-violet-500/20">
             {displayLang}
           </span>
         </div>
         <button
           onClick={handleCopy}
           type="button"
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
         >
           {copied ? (
             <>
@@ -111,9 +360,15 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
         </button>
       </div>
 
-      {/* Code Content */}
-      <pre className="p-3 overflow-x-auto text-[11px] sm:text-xs font-mono text-emerald-300/90 leading-relaxed scrollbar-thin">
-        <code>{code}</code>
+      {/* Code Content with Color-Coded Editor Highlighting */}
+      <pre className="p-3.5 sm:p-4 overflow-x-auto text-[11.5px] sm:text-xs font-mono leading-relaxed select-text scrollbar-thin">
+        <code className="block tab-size-4">
+          {tokens.map((token, idx) => (
+            <span key={idx} className={getTokenClass(token.type, token.value)}>
+              {token.value}
+            </span>
+          ))}
+        </code>
       </pre>
     </div>
   );
