@@ -140,7 +140,7 @@ function QuestionContent({ slug }: { slug: string }) {
           <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-[auto_1fr] gap-4 md:gap-5 items-start min-h-0">
 
             {/* ── 1. Status & Notes Unified Card ── */}
-            <Card className="order-1 md:order-none md:col-span-2 md:col-start-1 md:row-start-1">
+            <Card hover={false} className="order-1 md:order-none md:col-span-2 md:col-start-1 md:row-start-1">
               <CardContent className="p-4 sm:p-5 space-y-3.5 sm:space-y-4">
                 {/* Status Section */}
                 <div>
@@ -216,7 +216,7 @@ function QuestionContent({ slug }: { slug: string }) {
                   {/* Interactive Notes Card Preview Box */}
                   <div
                     onClick={() => setIsNotesModalOpen(true)}
-                    className="group relative w-full bg-zinc-900/40 hover:bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 rounded-xl p-3.5 sm:p-4 text-xs sm:text-sm transition-all cursor-pointer min-h-[96px] max-h-[155px] overflow-hidden"
+                    className="group relative w-full bg-zinc-900/40 hover:bg-zinc-900/75 border border-zinc-800 hover:border-violet-500/40 hover:shadow-[0_0_16px_rgba(124,58,237,0.12)] rounded-xl p-3.5 sm:p-4 text-xs sm:text-sm transition-all cursor-pointer min-h-[96px] max-h-[155px] overflow-hidden"
                   >
                     {notes.trim().length > 0 ? (
                       <div className="relative">
@@ -233,12 +233,12 @@ function QuestionContent({ slug }: { slug: string }) {
             </Card>
 
             {/* ── 2. Sleek Timeframes & Priority Score Card (Order 3 on Mobile, Row 2 Left on Desktop) ── */}
-            <Card className="order-3 md:order-none md:col-span-2 md:col-start-1 md:row-start-2 self-start">
-              <CardContent className="p-3.5 sm:px-5 sm:py-3.5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-5 divide-y md:divide-y-0 md:divide-x divide-zinc-800/80 items-center">
+            <Card hover={false} className="order-3 md:order-none md:col-span-2 md:col-start-1 md:row-start-2 self-start p-3 sm:px-4 sm:py-3">
+              <CardContent className="p-0 space-y-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-zinc-800/70 items-center">
                   {/* Available Timeframes Section */}
-                  <div className="md:pr-5">
-                    <h2 className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2">
+                  <div className="sm:pr-4">
+                    <h2 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
                       Available Timeframes
                     </h2>
                     <div className="flex flex-wrap gap-1.5">
@@ -246,9 +246,9 @@ function QuestionContent({ slug }: { slug: string }) {
                         <Badge
                           key={t}
                           variant="outline"
-                          className="text-[11px] py-0.5 px-2 bg-zinc-900/50 border-zinc-700/60 text-zinc-200 whitespace-nowrap"
+                          className="text-[10.5px] sm:text-[11px] py-0.5 px-2 bg-zinc-900/50 border-zinc-700/60 text-zinc-200 whitespace-nowrap"
                         >
-                          <Clock className="w-3 h-3 mr-1 text-violet-400 shrink-0" />
+                          <Clock className="w-2.5 h-2.5 mr-1 text-violet-400 shrink-0" />
                           {timeframeLabel(t)}
                         </Badge>
                       ))}
@@ -256,16 +256,16 @@ function QuestionContent({ slug }: { slug: string }) {
                   </div>
 
                   {/* Priority Score Section */}
-                  <div className="pt-3 md:pt-0 md:pl-5">
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <h2 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                  <div className="pt-2.5 sm:pt-0 sm:pl-4">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <h2 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
                         Priority Score
                       </h2>
                       <div className="flex items-baseline font-extrabold text-white tracking-tight shrink-0">
-                        <span className="text-lg sm:text-xl leading-none">
+                        <span className="text-base sm:text-lg leading-none">
                           {Math.round(problem.priorityScore * 100)}
                         </span>
-                        <span className="text-[11px] text-zinc-500 font-medium ml-0.5">/100</span>
+                        <span className="text-[10px] text-zinc-500 font-medium ml-0.5">/100</span>
                       </div>
                     </div>
                     <div className="w-full bg-zinc-800/80 h-1.5 rounded-full overflow-hidden">
@@ -274,7 +274,7 @@ function QuestionContent({ slug }: { slug: string }) {
                         style={{ width: `${Math.min(100, Math.max(0, problem.priorityScore * 100))}%` }}
                       />
                     </div>
-                    <p className="text-[11px] text-zinc-500 mt-1.5 leading-snug">
+                    <p className="text-[10.5px] sm:text-[11px] text-zinc-500 mt-1 leading-snug">
                       Weighted by companies, frequency, pattern &amp; recency.
                     </p>
                   </div>
