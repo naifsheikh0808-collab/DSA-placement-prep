@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Bot,
   Sparkles,
+  Maximize2,
 } from "lucide-react";
 import { getProblemBySlug } from "@/lib/db";
 import { Badge, DifficultyBadge } from "@/components/ui/badge";
@@ -22,6 +23,8 @@ import { useProgressStore } from "@/hooks/use-progress";
 import { formatPct, platformLabel, timeframeLabel, cn } from "@/lib/utils";
 import type { ProgressStatus } from "@/lib/types";
 import { AiSidePanel } from "@/components/ai/AiSidePanel";
+import { MarkdownNotesRenderer } from "@/components/notes/MarkdownNotesRenderer";
+import { NotesEditorModal } from "@/components/notes/NotesEditorModal";
 
 const STATUS_CONFIG: Record<
   ProgressStatus,
@@ -40,6 +43,7 @@ function QuestionContent({ slug }: { slug: string }) {
   const { progress, updateStatus } = useProgressStore();
   const currentStatus = (progress[problem.id]?.status ?? "todo") as ProgressStatus;
   const [notes, setNotes] = useState(progress[problem.id]?.notes ?? "");
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
 
   const solveUrl = problem.canonicalUrl;
@@ -141,11 +145,20 @@ function QuestionContent({ slug }: { slug: string }) {
 
               {/* ── 1. Status & Notes Unified Card ── */}
               <Card>
-                <CardContent className="p-4 sm:p-5 space-y-4 sm:space-y-5">
-                  {/* Status Section */}
+                <CardContent className="p-4 sm:p-5 space-y-3.5 sm:space-y-4">
+                  {/* Status Section (Streamlined, ~50% more compact vertically) */}
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-200 mb-2.5">Your Status</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-xs sm:text-sm font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                        Your Status
+                      </h2>
+                      <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline">
+                        Current: <strong className="text-zinc-200">{STATUS_CONFIG[currentStatus].label}</strong>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {(
                         Object.entries(STATUS_CONFIG) as [
                           ProgressStatus,
@@ -154,19 +167,38 @@ function QuestionContent({ slug }: { slug: string }) {
                       ).map(([status, cfg]) => {
                         const Icon = cfg.icon;
                         const active = currentStatus === status;
+
+                        // Distinct, well-defined active states
+                        let activeStyle = "";
+                        if (status === "todo") {
+                          activeStyle = "border-zinc-500/60 bg-zinc-800/60 text-zinc-200 shadow-sm shadow-zinc-900/40";
+                        } else if (status === "attempted") {
+                          activeStyle = "border-amber-500/50 bg-amber-500/15 text-amber-200 shadow-md shadow-amber-950/30";
+                        } else if (status === "solved") {
+                          activeStyle = "border-emerald-500/50 bg-emerald-500/15 text-emerald-200 shadow-md shadow-emerald-950/30";
+                        } else if (status === "revise") {
+                          activeStyle = "border-blue-500/50 bg-blue-500/15 text-blue-200 shadow-md shadow-blue-950/30";
+                        }
+
                         return (
                           <button
                             key={status}
+                            type="button"
                             onClick={() => updateStatus(problem.id, status, notes)}
                             className={cn(
-                              "flex flex-col items-center gap-1 sm:gap-1.5 p-2.5 sm:p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
+                              "flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer active:scale-98 select-none",
                               active
-                                ? "border-violet-500/50 bg-violet-500/15 text-violet-200 shadow-md shadow-violet-950/30"
-                                : "border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300 hover:bg-zinc-800/30"
+                                ? activeStyle
+                                : "border-zinc-800/80 bg-zinc-900/30 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300 hover:bg-zinc-800/20"
                             )}
                           >
-                            <Icon className={cn("w-4 h-4", active ? cfg.color : "")} />
-                            <span className="truncate max-w-full">{cfg.label}</span>
+                            <Icon
+                              className={cn(
+                                "w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-colors",
+                                active ? cfg.color : "text-zinc-500"
+                              )}
+                            />
+                            <span className="truncate">{cfg.label}</span>
                           </button>
                         );
                       })}
@@ -176,20 +208,69 @@ function QuestionContent({ slug }: { slug: string }) {
                   {/* Clean Divider between Status and Notes */}
                   <div className="border-t border-zinc-800/80" />
 
-                  {/* Notes Section */}
+                  {/* Notes Section with Markdown Preview & Focus Editor Trigger */}
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2.5">
-                      <BookOpen className="w-4 h-4 text-violet-400" />
-                      Notes
-                    </h2>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      onBlur={() => updateStatus(problem.id, currentStatus, notes)}
-                      placeholder="Add your approach, time complexity, or insights..."
-                      rows={4}
-                      className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/30 transition-all resize-none font-mono"
-                    />
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="w-4 h-4 text-violet-400" />
+                        <h2 className="text-xs sm:text-sm font-bold text-zinc-200 uppercase tracking-wider">
+                          Notes & Solution Log
+                        </h2>
+                        {notes.trim().length > 0 && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
+                            Markdown
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsNotesModalOpen(true)}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 px-2.5 py-1 rounded-lg hover:bg-violet-500/10 border border-violet-500/20 transition-all cursor-pointer"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Focus Editor</span>
+                        <span className="sm:hidden">Edit</span>
+                      </button>
+                    </div>
+
+                    {/* Interactive Notes Card Preview Box */}
+                    <div
+                      onClick={() => setIsNotesModalOpen(true)}
+                      className="group relative w-full bg-zinc-900/60 hover:bg-zinc-900/80 border border-zinc-800 hover:border-violet-500/40 rounded-xl p-3 sm:p-4 text-xs sm:text-sm transition-all cursor-pointer min-h-[96px] max-h-[140px] overflow-hidden flex flex-col justify-between"
+                    >
+                      {notes.trim().length > 0 ? (
+                        <>
+                          <div className="overflow-hidden">
+                            <MarkdownNotesRenderer content={notes} isCompact={true} />
+                          </div>
+                          {/* Gradient fade to show there's more */}
+                          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#101322] to-transparent pointer-events-none" />
+                          <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500 group-hover:text-violet-400 transition-colors">
+                            <span>Click to expand or edit in rich Markdown editor...</span>
+                            <span className="flex items-center gap-1 font-semibold group-hover:translate-x-0.5 transition-transform">
+                              Open ↗
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="py-2.5 flex flex-col items-center justify-center text-center space-y-1.5">
+                          <p className="text-zinc-400 text-xs sm:text-[13px] font-medium leading-relaxed">
+                            Click to open the <strong className="text-violet-300">Markdown Notes Editor</strong>.
+                          </p>
+                          <p className="text-zinc-600 text-[11px]">
+                            Log your approach, dry run, time complexity & edge cases with rich formatting.
+                          </p>
+                          <div className="flex items-center gap-1.5 pt-1 text-[10px] text-zinc-500 font-mono flex-wrap justify-center">
+                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">**Bold**</span>
+                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">*Italic*</span>
+                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">&lt;u&gt;Underline&lt;/u&gt;</span>
+                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5"># Heading</span>
+                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">• List</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -366,6 +447,19 @@ function QuestionContent({ slug }: { slug: string }) {
           />
         </button>
       )}
+
+      {/* ── Notes Focus Modal Popup ── */}
+      <NotesEditorModal
+        isOpen={isNotesModalOpen}
+        onClose={() => setIsNotesModalOpen(false)}
+        problemTitle={problem.title}
+        problemExternalId={problem.externalId}
+        initialNotes={notes}
+        onSave={(newNotes) => {
+          setNotes(newNotes);
+          updateStatus(problem.id, currentStatus, newNotes);
+        }}
+      />
     </div>
   );
 }
